@@ -1,0 +1,27 @@
+{
+  "name": "@antigravity-gemini-web/runtime",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "node --test dist/**/*.test.js",
+    "dev:mock": "node dist/demo.js"
+  },
+  "dependencies": {
+    "@antigravity-gemini-web/contracts": "*",
+    "@antigravity-gemini-web/native-antigravity": "*",
+    "@antigravity-gemini-web/gemini-browser": "*",
+    "@antigravity-gemini-web/model-bridge": "*",
+    "zod": "^3.23.8"
+  }
+}

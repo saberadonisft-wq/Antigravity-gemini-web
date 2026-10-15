@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true
+  },
+  "references": [
+    { "path": "../contracts" },
+    { "path": "../native-antigravity" },
+    { "path": "../gemini-browser" },
+    { "path": "../model-bridge" }
+  ],
+  "include": ["src/**/*"]
+}
+
