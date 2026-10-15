@@ -1,0 +1,19 @@
+{
+  "ownedProcessOnly": true,
+  "results": [
+    {
+      "action": "save",
+      "nativeDialog": true,
+      "fileWritten": true,
+      "typedOutcome": "succeeded",
+      "pathKeptInMain": true
+    },
+    {
+      "action": "cancel",
+      "nativeDialog": true,
+      "fileWritten": false,
+      "typedOutcome": "failed",
+      "pathKeptInMain": true
+    }
+  ]
+}

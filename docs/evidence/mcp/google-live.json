@@ -1,0 +1,57 @@
+{
+  "observedAt": "2026-10-15T04:37:06.245Z",
+  "mode": "google_live",
+  "handshake": true,
+  "tools": [
+    "gemini_status",
+    "gemini_open_browser",
+    "gemini_submit",
+    "gemini_result",
+    "gemini_cancel"
+  ],
+  "liveTurn": "PASS",
+  "cleanup": true,
+  "initialStatus": {
+    "browserState": "closed",
+    "accountState": "unknown",
+    "activeRequestId": null,
+    "transport": "stdio",
+    "route": "mcp_browser_tool",
+    "nativeInference": "unverified",
+    "reverseHostTools": "not_connected",
+    "checkedAt": "2026-10-15T04:37:06.492Z"
+  },
+  "openStatus": {
+    "browserState": "ready",
+    "accountState": "signed_in",
+    "activeRequestId": null,
+    "transport": "stdio",
+    "route": "mcp_browser_tool",
+    "nativeInference": "unverified",
+    "reverseHostTools": "not_connected",
+    "checkedAt": "2026-10-15T04:37:07.913Z"
+  },
+  "turns": [
+    {
+      "scenario": "plain_text",
+      "status": "completed",
+      "responseChars": 24,
+      "verdict": "PASS",
+      "responseHash": "7ad32c42f53a52d7b595391c1ba33a95840772de4bf62110f61f01d2724f0bb8"
+    },
+    {
+      "scenario": "markdown",
+      "status": "completed",
+      "responseChars": 31,
+      "verdict": "PASS",
+      "responseHash": "bf8e9e6440ba250142ee4f294676d79facb0ddfc805c2f3575b253ef975da7f7"
+    },
+    {
+      "scenario": "code",
+      "status": "completed",
+      "responseChars": 52,
+      "verdict": "PASS",
+      "responseHash": "a25740dafa04b7898191195d81c638ca2cb1efb575c85ba84315bf052c3982bf"
+    }
+  ]
+}

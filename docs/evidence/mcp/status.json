@@ -1,0 +1,26 @@
+{
+  "observedAt": "2026-10-15T11:47:15.310Z",
+  "mode": "status_only",
+  "handshake": true,
+  "tools": [
+    "gemini_status",
+    "gemini_open_browser",
+    "gemini_submit",
+    "gemini_result",
+    "gemini_cancel"
+  ],
+  "liveTurn": "NOT_TESTED",
+  "cleanup": true,
+  "initialStatus": {
+    "browserState": "ready",
+    "accountState": "signed_in",
+    "activeRequestId": "native_75a1b63c79039710f23737edb9224babb6cc6e5a83cf85b91fe85e62050cfd0d",
+    "transport": "stdio",
+    "route": "mcp_browser_tool",
+    "nativeInference": "unverified",
+    "reverseHostTools": "not_connected",
+    "checkedAt": "2026-10-15T11:47:15.796Z",
+    "maxPromptChars": 262144,
+    "freshConversationSupported": true
+  }
+}

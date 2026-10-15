@@ -1,0 +1,15 @@
+{
+  "observedAt": "2026-10-15T04:49:23.221Z",
+  "customApps": "NOT_OBSERVED",
+  "cleanup": true,
+  "surface": {
+    "exactOrigin": true,
+    "path": "/customize/connectors",
+    "ready": true,
+    "customSection": false,
+    "mcpField": false,
+    "addCustomControl": false,
+    "googleAppsObserved": true,
+    "language": "en"
+  }
+}

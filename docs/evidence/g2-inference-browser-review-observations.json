@@ -1,0 +1,61 @@
+{
+  "review_date": "2026-10-14",
+  "scope": "Synthetic drivers, CDP client, DOM, logs, Python child and owned localhost fixtures; no real Gemini chat or native inference acceptance",
+  "browser_observations": {
+    "attached_browser_cleanup": {
+      "owned_child": false,
+      "sent_commands": ["Browser.close"]
+    },
+    "partial_timeout": {
+      "driver_completed": false,
+      "adapter_status": "completed",
+      "model_reported_without_evidence": "Gemini 1.5 Pro"
+    },
+    "cancel_stop_false": {
+      "cancel_reported": true,
+      "poll_status": "cancelled"
+    },
+    "cancel_stop_throw": {
+      "cancel_reported": true,
+      "poll_status": "cancelled"
+    },
+    "inflight_cancel": {
+      "pending_poll_status": "completed",
+      "next_poll_status": "cancelled"
+    },
+    "duplicate_turn": {
+      "send_calls": 2,
+      "accepted_turn_id": "same-turn"
+    },
+    "overlapping_turns": {
+      "both_accepted": true,
+      "send_calls": 2,
+      "same_text_bound_to_both_turns": true
+    },
+    "wrong_surface": {
+      "url": "https://example.invalid/support",
+      "has_composer": true,
+      "account_state": "signed_in",
+      "adapter_browser_state": "ready",
+      "invented_model": "Gemini 1.5 Pro"
+    }
+  },
+  "probe_observations": {
+    "raw_ls_secret_marker_logged": true,
+    "mock_shutdown_blocked_until_client_released": true,
+    "mock_shutdown_finished_after_client_released": true,
+    "health_request_misclassified": {
+      "path": "/generate-health",
+      "verdict": "PROVED",
+      "inference_route_verified": true,
+      "native_chat_sent": false,
+      "token_stream_decoded": false
+    },
+    "existing_native_scenarios": {
+      "count": 4,
+      "all_ports_null": true,
+      "all_rpc_attempted_false": true,
+      "all_verdicts": "TIMEOUT_OR_NO_PORT"
+    }
+  }
+}

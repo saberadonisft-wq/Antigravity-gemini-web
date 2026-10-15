@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-15",
+  "scope": "user_native_chat_read_only_diagnostic",
+  "case": "short_greeting",
+  "browserResult": {
+    "status": "failed",
+    "errorCode": "TIMEOUT",
+    "completedAt": "2026-10-15T11:46:54.007Z",
+    "responseChars": 0,
+    "configuredPollBudgetMs": 120000
+  },
+  "proxyCountersAfterFailure": {
+    "nativeRequests": 1,
+    "browserRequests": 1,
+    "completed": 0,
+    "failed": 1,
+    "active": 0
+  },
+  "diagnosticActions": {
+    "resentPrompt": false,
+    "changedWebModel": false,
+    "cancelledUserTurn": false
+  },
+  "rootCause": "UNRESOLVED",
+  "baselineLimits": [
+    "fresh_browser_conversation_for_each_generation",
+    "full_native_context_resubmitted",
+    "response_returned_only_after_completion",
+    "web_model_and_effort_not_selected_by_native_generation_config"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-15",
+  "route": "native_ide_agent_to_browser_mcp_to_google_to_ide_agent",
+  "verdict": "PASS",
+  "reportedBy": "user_provided_native_ide_agent_tool_trace",
+  "requestId": "req_20261015_mcp_ok_9f2a7b1c",
+  "reportedResult": {
+    "status": "completed",
+    "text": "MCP_OK",
+    "completedAt": "2026-10-15T05:36:36.388Z"
+  },
+  "independentLocalVerification": {
+    "receiptFound": true,
+    "receiptPhase": "terminal",
+    "browserState": "ready",
+    "accountState": "signed_in",
+    "lastResponseMatchesMcpOk": true,
+    "observerOwnedBrowser": false,
+    "newPromptSent": false
+  },
+  "nativeInferenceReplacement": "UNVERIFIED",
+  "geminiReverseCustomConnector": "NOT_TESTED",
+  "nativeHostReadPatchTestLoop": "NOT_TESTED"
+}

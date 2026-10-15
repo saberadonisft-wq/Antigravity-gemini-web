@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "checkedAt": "2026-10-15T06:49:24.354Z",
+  "status": "verified_local_with_known_fixture_flake",
+  "commands": {
+    "build": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "test": "PASS"
+  },
+  "tests": {
+    "total": 166,
+    "failed": 0,
+    "skipped": 0,
+    "contracts": 8,
+    "browser": 22,
+    "mcp": 18,
+    "modelBridge": 4,
+    "nativeAdapter": 1,
+    "runtime": 80,
+    "launcher": 33
+  },
+  "gateway": {
+    "newTests": 10,
+    "sdk": "@modelcontextprotocol/sdk@1.32.1",
+    "express": "5.3.0",
+    "oauthClient": "official_sdk",
+    "transport": "http_loopback_emulating_tls_proxy_headers",
+    "consent": "explicit_owner_code_fixture",
+    "toolExecutor": "labelled_fixture_results_only",
+    "singleClaim": "PASS",
+    "timeoutAndNoRetry": "PASS",
+    "registrationStoreReadWriteCapBytes": 131072,
+    "timeoutFixtureCombinedMs": 15067.9771
+  },
+  "boundaries": {
+    "publicHttpsTls": "NOT_TESTED",
+    "googleCustomConnector": "NOT_TESTED",
+    "nativeHostToolLoop": "NOT_TESTED",
+    "nativeModelReplacement": "UNVERIFIED",
+    "googlePromptsSentThisChange": 0,
+    "ideMcpConfigurationChangedThisChange": false
+  },
+  "sourceSha256": {
+    "gateway-state.ts": "631b886aca280a15538fb6164d7940d5cad48f019b23d84330cc4e2a028543ac",
+    "gateway-oauth.ts": "6defd37833afba036ce53aaaae93957cf1fc355e7698c2d72152a40f8c36e6ef",
+    "gateway-http.ts": "95ee9b161c6b320b503f3ab1285c204f19304bd025c507d07524792c3c15668c",
+    "gateway-cli.ts": "317e05639e6eb54af12c585e0c20369c5ae9b0131e963330ba99e798f953d481",
+    "gateway.test.ts": "7be08b9e6c01974eb690bb1d94fecfa3987be9165f25cd966cdcae156fe62f39"
+  },
+  "logs": [
+    ".tmp/g4-followup-build.log",
+    ".tmp/g4-followup-typecheck.log",
+    ".tmp/g4-followup-lint.log",
+    ".tmp/g4-followup-test.log"
+  ],
+  "deploymentPreference": "local_only",
+  "transientFailures": [
+    {
+      "suite": "runtime",
+      "test": "owned-browser.fixture.test.ts intentional crash descendant cleanup",
+      "observedRootPassed": 165,
+      "total": 166,
+      "gatewayPassed": 18,
+      "isolatedRerun": "PASS",
+      "fullRerun": "166/166 PASS",
+      "remediated": false,
+      "log": ".tmp/gateway-root-cleanup-failure.log"
+    }
+  ],
+  "remainingGatewayTestProcesses": 0
+}

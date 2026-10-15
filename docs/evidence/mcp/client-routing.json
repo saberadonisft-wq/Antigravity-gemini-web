@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "checkedAt": "2026-10-15T07:48:51.911Z",
+  "status": "native_ide_mcp_discovery_restored",
+  "cause": "agy under VS Code owned the same kernel scopes before native IDE startup",
+  "policy": "antigravity_ide",
+  "checks": {
+    "build": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "test": "168/168 PASS",
+    "mcp": "20/20 PASS",
+    "newRegressionTests": 2,
+    "globalAndWorkspaceSchema": "PASS",
+    "registrationIdempotence": "PASS"
+  },
+  "ui": {
+    "surface": "Antigravity IDE Settings > Customizations",
+    "hostToolsEnabled": 4,
+    "browserToolsEnabled": 5,
+    "ownershipErrorsObservedAfterRefresh": false
+  },
+  "recovery": {
+    "oldOwnerParent": "agy.exe under Code.exe",
+    "stoppedOnlyVerifiedProjectBridgePids": [
+      12748,
+      22928
+    ],
+    "hostLedgerExisted": false,
+    "browserReceiptCount": 5,
+    "browserReceiptPhases": [
+      "terminal"
+    ],
+    "profileDeleted": false,
+    "currentHostPid": 24200
+  },
+  "boundaries": {
+    "googlePromptSent": false,
+    "authenticationAutomated": false,
+    "ideChatSent": false,
+    "fullAgyUiReload": "NOT_TESTED",
+    "publicDeployment": "NOT_REQUESTED_LOCAL_ONLY",
+    "nativeToolLoop": "NOT_TESTED",
+    "nativeInference": "UNVERIFIED"
+  },
+  "sourceSha256": {
+    "packages/mcp-server/src/client-filter.ts": "51bc7189062cb8fc271dfa9c6477bdb78a2aa6d1c3236f1df7058b393b7a722c",
+    "packages/mcp-server/src/client-filter.test.ts": "24c6b95ad908439a3408b2a220a521b7f266db0a7c97948c3deb1b0984fff626",
+    "packages/mcp-server/src/host-cli.ts": "7e52bd34a804c1b59abbdeb902a9abee271e8958d64f8596e9b1e082d07d4f61",
+    "packages/mcp-server/src/cli.ts": "335057d662a1e5b2cab064574bb2bedbafc878e404c4e4c45bbe450bc9d480de",
+    "tools/register-mcp.mjs": "78faabc229847e02d5a2e456b72dc916577deb054759258a5ed011643f118524",
+    ".agents/mcp_config.json": "694a6849e8aaf72ff9bca4425f41a7d27fe417cfb9e7761a749f1163d241747c"
+  }
+}

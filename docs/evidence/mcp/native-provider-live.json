@@ -1,0 +1,425 @@
+{
+  "capturedAt": "2026-10-15T11:43:37.338Z",
+  "scope": "local_native_provider",
+  "ide": {
+    "ideVersion": "2.5.5",
+    "vscodeVersion": "1.107.0",
+    "commit": "ecfbad74d93962fc8ca485d93ab9b4f3d4cb6cf8",
+    "profile": "isolated",
+    "model": "Gemini Web (Local)",
+    "modelSymbol": "MODEL_PLACEHOLDER_M650",
+    "vendorFilesModified": false,
+    "mainIdeEndpointModified": false
+  },
+  "checks": {
+    "build": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS (tsc --noEmit)",
+    "tests": {
+      "pass": 188,
+      "fail": 0,
+      "skipped": 0,
+      "contracts": 8,
+      "browser": 24,
+      "mcp": 25,
+      "modelBridge": 4,
+      "native": 14,
+      "runtime": 80,
+      "launcher": 33
+    },
+    "python": "NOT_RERUN",
+    "desktopSmoke": "NOT_RERUN"
+  },
+  "liveAcceptance": [
+    {
+      "case": "native_chat",
+      "status": "PASS",
+      "expectedExactText": "AG_NATIVE_WEB_OK_20261015",
+      "observedInNativeAgentResponse": true
+    },
+    {
+      "case": "native_view_file_roundtrip",
+      "status": "PASS",
+      "fixtureBytes": 50,
+      "fixtureSha256": "c4b2f5bbb85bf5d66d3f16be134055d49eb2f063ad521984dc7e0d83c4fe1afa",
+      "contentNotIncludedInPrompt": true,
+      "nativeToolUiObserved": true,
+      "finalTextMatchesFixture": true
+    },
+    {
+      "case": "post_dedup_deadline_native_chat",
+      "status": "PASS",
+      "expectedExactText": "AG_NATIVE_FINAL_BUILD_OK_20261015",
+      "observedInNativeAgentResponse": true,
+      "precededFunctionPolicyHardening": true
+    },
+    {
+      "case": "native_edit_and_run_command",
+      "status": "NOT_TESTED",
+      "resultFileObserved": false,
+      "requiresNativeToolReceipt": true,
+      "userDecision": "self_test_later"
+    }
+  ],
+  "beforeRestart": {
+    "capturedAt": "2026-10-15T10:11:41.7030191Z",
+    "pid": 20156,
+    "counters": {
+      "catalog": 8,
+      "control": 54,
+      "nativeRequests": 4,
+      "browserRequests": 3,
+      "completed": 3,
+      "failed": 0,
+      "active": 0
+    }
+  },
+  "limits": [
+    "native_cancel_deny_crash_compaction_not_live_tested",
+    "no_incremental_token_streaming",
+    "no_images_or_attachments",
+    "actual_web_model_family_not_pinned",
+    "google_reverse_connector_not_connected",
+    "unsupported_acl_analytics_routes_return_404",
+    "non_web_generation_including_title_helper_returns_409"
+  ],
+  "sourceHashes": [
+    {
+      "path": "packages/native-antigravity/src/native-cli.ts",
+      "sha256": "7d5d2b64fb16f7291fc52a1f9df9019711708bf14736cd6ff70fdd6607153d46"
+    },
+    {
+      "path": "packages/native-antigravity/src/native-proxy.ts",
+      "sha256": "c50c2087aff24a510765f552d6fc9e2ebea42a14ee158143782059a212c31b09"
+    },
+    {
+      "path": "packages/native-antigravity/src/native-protocol.ts",
+      "sha256": "2aff272ab0dc2353c9b6f805c174839316921a18df3cdfd61ca5770d08ab210e"
+    },
+    {
+      "path": "packages/native-antigravity/src/browser-backend.ts",
+      "sha256": "ef7ad774bf3a753fdc747a750201fe0d584920b22bafdf56c4a9027c85d7c0e1"
+    },
+    {
+      "path": "packages/native-antigravity/src/installation.ts",
+      "sha256": "454d3388483eefe0ba0860181bbf0a5b7377574bcd9cb40829dcdc79595b0e0b"
+    },
+    {
+      "path": "packages/native-antigravity/src/native-route.test.ts",
+      "sha256": "0dd5521eee37f0b2cd6c79161e73452b04d616718661c2246ec4b5c74f4bed4a"
+    },
+    {
+      "path": "packages/gemini-browser/src/index.ts",
+      "sha256": "4feebf571ce22470a7e9f84a6bb27de7437bae0c88463578f620b33ecb3056b8"
+    },
+    {
+      "path": "packages/gemini-browser/src/gemini-selectors.ts",
+      "sha256": "fcc9e9e5c5eeb0712d3d90e5fbcd7d9e9ea98e4e628e3afa30e0351c409145da"
+    },
+    {
+      "path": "packages/gemini-browser/src/gemini-browser-driver.ts",
+      "sha256": "9b7f2964188f1e07c391b4c607a3b32d2baefb87cf7adae8163537a541025273"
+    },
+    {
+      "path": "packages/mcp-server/src/service.ts",
+      "sha256": "2e94f44458d7d68fad8dce1b93140dfa019bb96a93b3a16f25dab4c6f8f9b97a"
+    },
+    {
+      "path": "packages/mcp-server/src/shared-stdio.ts",
+      "sha256": "33c6841877cc46f9a4704f30a7f7f74632b7391975fc3237ae978009aae13f8a"
+    },
+    {
+      "path": "packages/gemini-browser/src/fixture-cleanup.ts",
+      "sha256": "8c0fb2269d568a274cfe56b0510b32bbcc0b20bc5992c924c0dc310b3296a525"
+    },
+    {
+      "path": "packages/gemini-browser/src/owned-process-cleanup.test.ts",
+      "sha256": "3b9c8f594474316edb3910a9b0bca6f27c1c9b7bcd729230fd08ebf5d469d8b9"
+    }
+  ],
+  "preHardeningRuntime": {
+    "capturedAt": "2026-10-15T10:14:27.4061224Z",
+    "pid": 28380,
+    "counters": {
+      "catalog": 2,
+      "control": 12,
+      "nativeRequests": 1,
+      "browserRequests": 1,
+      "completed": 1,
+      "failed": 0,
+      "active": 0
+    },
+    "observations": [
+      {
+        "method": "POST",
+        "route": "/v1internal:listExperiments",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:streamGenerateContent",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:recordTrajectoryAnalytics",
+        "status": 404
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:recordCodeAssistMetrics",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:listExperiments",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:loadCodeAssist",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchUserInfo",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:listExperiments",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:loadCodeAssist",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAvailableModels",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchUserInfo",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAdminControls",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAvailableModels",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:retrieveUserQuotaSummary",
+        "status": 200
+      }
+    ]
+  },
+  "fixtureCleanup": {
+    "budgetMs": 10000,
+    "intermediateFailureObserved": true,
+    "persistentLockStillFails": true,
+    "exactLockOwnerAtFailure": "UNRESOLVED",
+    "finalRootSuite": "PASS",
+    "remainingOwnedTempProfiles": [
+      "gemini-fresh-test-MXNDLo",
+      "gemini-driver-test-profile-gLrIr1"
+    ],
+    "deletionAutomaticApproval": "blocked by policy"
+  },
+  "finalBuildRuntime": {
+    "capturedAt": "2026-10-15T11:43:37.337Z",
+    "pid": 2480,
+    "counters": {
+      "catalog": 6,
+      "control": 34,
+      "nativeRequests": 0,
+      "browserRequests": 0,
+      "completed": 0,
+      "failed": 0,
+      "active": 0
+    },
+    "observations": [
+      {
+        "method": "POST",
+        "route": "/v1internal:loadCodeAssist",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:loadCodeAssist",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchUserInfo",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchUserInfo",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAvailableModels",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:listExperiments",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:listExperiments",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:onboardUser",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:loadCodeAssist",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchUserInfo",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAdminControls",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAvailableModels",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:loadCodeAssist",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:retrieveUserQuotaSummary",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchUserInfo",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAvailableModels",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:loadCodeAssist",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchUserInfo",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAdminControls",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:loadCodeAssist",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAvailableModels",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:retrieveUserQuotaSummary",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:loadCodeAssist",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchUserInfo",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAdminControls",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:retrieveUserQuotaSummary",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAvailableModels",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:listExperiments",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:listExperiments",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:loadCodeAssist",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchUserInfo",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:retrieveUserQuotaSummary",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAdminControls",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "route": "/v1internal:fetchAvailableModels",
+        "status": 200
+      }
+    ],
+    "profileWindowObserved": true,
+    "webModelSelectedInNativeUi": true,
+    "postFunctionPolicyChatNotRun": true
+  }
+}
