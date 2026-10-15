@@ -1,0 +1,5 @@
+Hello from G0 fixture probe!
+Timestamp: 2026-10-14T11:58:00+07:00
+Purpose: Read-only tool verification for Antigravity-Gemini-Web feasibility study.
+Verification token: FEASIBILITY_PROBE_TOKEN_9A8B7C
+

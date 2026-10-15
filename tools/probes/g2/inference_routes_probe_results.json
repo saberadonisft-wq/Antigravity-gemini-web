@@ -1,0 +1,93 @@
+[
+  {
+    "scenario": "1_Baseline_Default_CCPA",
+    "target_binary": "D:\\Antigravity IDE\\resources\\app\\extensions\\antigravity\\bin\\language_server_windows_x64.exe",
+    "flags": [],
+    "mock_port": 52690,
+    "spawn_ok": true,
+    "target_pid": 132,
+    "ports": {
+      "http": null,
+      "https": null,
+      "extension": null
+    },
+    "mock_requests_received": [],
+    "rpc_attempted": false,
+    "rpc_status": null,
+    "rpc_error": null,
+    "elapsed_seconds": 11.012,
+    "outbound_inference_observed": false,
+    "inference_route_verified": false,
+    "verdict": "TIMEOUT_OR_NO_PORT"
+  },
+  {
+    "scenario": "2_Override_CloudCodeEndpoint_Http",
+    "target_binary": "D:\\Antigravity IDE\\resources\\app\\extensions\\antigravity\\bin\\language_server_windows_x64.exe",
+    "flags": [
+      "-cloud_code_endpoint=http://127.0.0.1:58202"
+    ],
+    "mock_port": 58202,
+    "spawn_ok": true,
+    "target_pid": 19924,
+    "ports": {
+      "http": null,
+      "https": null,
+      "extension": null
+    },
+    "mock_requests_received": [],
+    "rpc_attempted": false,
+    "rpc_status": null,
+    "rpc_error": null,
+    "elapsed_seconds": 11.021,
+    "outbound_inference_observed": false,
+    "inference_route_verified": false,
+    "verdict": "TIMEOUT_OR_NO_PORT"
+  },
+  {
+    "scenario": "3_Override_ModelApiClientType_Gemini",
+    "target_binary": "D:\\Antigravity IDE\\resources\\app\\extensions\\antigravity\\bin\\language_server_windows_x64.exe",
+    "flags": [
+      "-model_api_client_type=gemini",
+      "-generative_service_addr=127.0.0.1:65305"
+    ],
+    "mock_port": 65305,
+    "spawn_ok": true,
+    "target_pid": 18904,
+    "ports": {
+      "http": null,
+      "https": null,
+      "extension": null
+    },
+    "mock_requests_received": [],
+    "rpc_attempted": false,
+    "rpc_status": null,
+    "rpc_error": null,
+    "elapsed_seconds": 11.021,
+    "outbound_inference_observed": false,
+    "inference_route_verified": false,
+    "verdict": "TIMEOUT_OR_NO_PORT"
+  },
+  {
+    "scenario": "4_Override_InferenceApiServerUrl",
+    "target_binary": "D:\\Antigravity IDE\\resources\\app\\extensions\\antigravity\\bin\\language_server_windows_x64.exe",
+    "flags": [
+      "-inference_api_server_url=http://127.0.0.1:65306"
+    ],
+    "mock_port": 65306,
+    "spawn_ok": true,
+    "target_pid": 21416,
+    "ports": {
+      "http": null,
+      "https": null,
+      "extension": null
+    },
+    "mock_requests_received": [],
+    "rpc_attempted": false,
+    "rpc_status": null,
+    "rpc_error": null,
+    "elapsed_seconds": 11.027,
+    "outbound_inference_observed": false,
+    "inference_route_verified": false,
+    "verdict": "TIMEOUT_OR_NO_PORT"
+  }
+]
