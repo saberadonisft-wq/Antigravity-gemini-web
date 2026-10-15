@@ -1,0 +1,26 @@
+{
+  "name": "@antigravity-gemini-web/gemini-browser",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    "./testing": {
+      "import": "./dist/testing.js",
+      "types": "./dist/testing.d.ts"
+    },
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "node --test --test-timeout=60000 dist/**/*.test.js"
+  },
+  "dependencies": {
+    "@antigravity-gemini-web/contracts": "*"
+  }
+}
