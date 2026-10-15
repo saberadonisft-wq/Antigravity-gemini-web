@@ -1,0 +1,9 @@
+# Deployment template only; replace BOTH hostname occurrences to match AG_MCP_PUBLIC_URL.
+# Run on the IDE/gateway machine with a valid public route/certificate for this domain.
+mcp.example.com {
+    reverse_proxy 127.0.0.1:9235 {
+        header_up Host mcp.example.com
+        header_up X-Forwarded-Proto https
+        lb_retries 0
+    }
+}

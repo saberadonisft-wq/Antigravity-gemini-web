@@ -1,0 +1,28 @@
+{
+  "mcpServers": {
+    "gemini-ide-host": {
+      "command": "node",
+      "args": [
+        "D:/Antigravity-gemini-web/packages/mcp-server/dist/host-cli.js"
+      ],
+      "cwd": "D:/Antigravity-gemini-web",
+      "env": {
+        "AG_MCP_HOST_HTTP_PORT": "9234",
+        "AG_MCP_TARGET_CLIENT": "antigravity_ide"
+      },
+      "disabled": false
+    },
+    "gemini-web-browser": {
+      "command": "node",
+      "args": [
+        "D:/Antigravity-gemini-web/packages/mcp-server/dist/cli.js"
+      ],
+      "cwd": "D:/Antigravity-gemini-web",
+      "env": {
+        "AG_MCP_DEBUG_PORT": "9223",
+        "AG_MCP_TARGET_CLIENT": "antigravity_ide"
+      },
+      "disabled": false
+    }
+  }
+}
