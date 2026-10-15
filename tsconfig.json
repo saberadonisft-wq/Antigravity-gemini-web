@@ -1,0 +1,13 @@
+{
+  "files": [],
+  "references": [
+    { "path": "./packages/contracts" },
+    { "path": "./packages/runtime" },
+    { "path": "./packages/native-antigravity" },
+    { "path": "./packages/gemini-browser" },
+    { "path": "./packages/model-bridge" },
+    { "path": "./apps/launcher" },
+    { "path": "./packages/mcp-server" }
+  ]
+}
+

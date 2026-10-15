@@ -1,0 +1,43 @@
+{
+  "name": "antigravity-gemini-web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Nghiên cứu và tích hợp Gemini Web trong chat native Antigravity IDE",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run --workspaces build",
+    "typecheck": "npm run --workspaces typecheck",
+    "lint": "npm run --workspaces lint",
+    "test": "npm run --workspaces test",
+    "dev:mock": "npm run --workspace=@antigravity-gemini-web/runtime dev:mock",
+    "launcher": "npm run --workspace=@antigravity-gemini-web/launcher start",
+    "mcp": "node packages/mcp-server/dist/host-cli.js",
+    "mcp:browser": "node packages/mcp-server/dist/cli.js",
+    "mcp:register": "node tools/register-mcp.mjs",
+    "mcp:custom-apps": "node tools/probes/mcp-custom-apps.mjs",
+    "mcp:gateway": "node packages/mcp-server/dist/gateway-cli.js",
+    "mcp:gateway:pair": "node packages/mcp-server/dist/gateway-cli.js --pair",
+    "test:mcp": "npm run --workspace=@antigravity-gemini-web/mcp-server test",
+    "mcp:status": "node tools/probes/mcp-smoke.mjs",
+    "mcp:shared-status": "node tools/probes/mcp-shared-smoke.mjs",
+    "mcp:live": "node tools/probes/mcp-smoke.mjs --live",
+    "native:check": "node packages/native-antigravity/dist/native-cli.js check",
+    "native:setup": "node packages/native-antigravity/dist/native-cli.js setup",
+    "native:start": "node packages/native-antigravity/dist/native-cli.js start",
+    "native:launch": "node packages/native-antigravity/dist/native-cli.js launch",
+    "native:browser": "node packages/native-antigravity/dist/native-cli.js browser",
+    "native:status": "node packages/native-antigravity/dist/native-cli.js status",
+    "native:stop": "node packages/native-antigravity/dist/native-cli.js stop",
+    "native:restore": "node packages/native-antigravity/dist/native-cli.js restore",
+    "launcher:demo": "npm run --workspace=@antigravity-gemini-web/launcher start -- --demo",
+    "test:desktop": "npm run --workspace=@antigravity-gemini-web/launcher smoke:desktop",
+    "test:desktop-cache": "npm run --workspace=@antigravity-gemini-web/launcher smoke:cache"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^22.13.1"
+  }
+}
