@@ -5,7 +5,7 @@ export { RequestId } from "./receipt-store.js";
 import { createHash, randomUUID } from "node:crypto";
 import { validateNativeSnapshot, assertBrowserAccountIdentity } from "@antigravity-gemini-web/gemini-browser";
 import { ModelRestoreJournal, WebModelSelection, type ModelRestoreRecord } from "./model-restore.js";
-import { NativeReceiptOwnerSchema, type NativeReceiptOwner, type NativeSnapshotAttachment } from "@antigravity-gemini-web/contracts";
+import { NativeReceiptOwnerSchema, ChatImportSurfaceObservationSchema, type NativeReceiptOwner, type NativeSnapshotAttachment } from "@antigravity-gemini-web/contracts";
 import type { GeminiBrowserAdapter, PromptTurnResponse, BrowserProgress, BrowserConversationLease, BrowserModelSelection } from "@antigravity-gemini-web/gemini-browser";
 import { z } from "zod";
 import { ModelSelectionDiagnosticSchema, BrowserSubmissionDiagnosticSchema, type BrowserSubmissionDiagnostic } from "@antigravity-gemini-web/contracts";
@@ -42,6 +42,7 @@ export class GeminiMcpService {
   private closing?: Promise<void>;
   private cancelPending?: Promise<unknown>;
   private openingBrowser = false;
+  private inspectingImport = false;
   private epoch = randomUUID();
   private conversations = new Map<string, Retained>();
   private settledAt = new WeakMap<Turn, number>();
@@ -71,7 +72,8 @@ export class GeminiMcpService {
       browserActionRequired:status.error?.code === "BROWSER_USER_ACTION_REQUIRED" && status.error.detail === "google_traffic_verification" ? "google_traffic_verification" : undefined,
       accountIdentity: status.accountIdentity,
       activeRequestId: this.busy ?? null, transport: "stdio", route: "mcp_browser_tool",
-      browserOperationActive:this.openingBrowser || !!this.cancelPending || !!this.modelRestore.pending(),parallelAccountIsolationSupported:true,
+      browserOperationActive:this.openingBrowser || this.inspectingImport || !!this.cancelPending || !!this.modelRestore.pending(),parallelAccountIsolationSupported:true,
+      chatImportSurfaceInspectionSupported:typeof this.browser.inspectImportSurface === "function",
       modelRestorePending:!!this.modelRestore.pending(),temporaryModelSelectionSupported:typeof this.browser.captureModelSelection === "function" && typeof this.browser.selectModel === "function",
       nativeInference: "unverified", reverseHostTools: "not_connected", checkedAt: status.checkedAt,
       maxPromptChars: MAX_BROWSER_PROMPT_CHARS, freshConversationSupported: typeof this.browser.openFreshConversation === "function",
@@ -89,9 +91,17 @@ export class GeminiMcpService {
       cachedResults: this.turns.size, requestIdentities: this.receipts.count(), maxRequestIdentities: null, receiptStore: "sqlite_wal_v2",
     };
   }
+  async inspectImportSurface(expectedFingerprint: string) {
+    this.available(); z.string().regex(/^[a-f0-9]{64}$/).parse(expectedFingerprint);
+    if (this.busy || this.cancelPending || this.openingBrowser || this.inspectingImport || this.modelRestore.pending()) throw new BridgeError("BUSY", "Import inspection requires an idle browser.");
+    if (!this.browser.inspectImportSurface) throw new BridgeError("UNSUPPORTED_OPERATION", "This browser cannot inspect an existing import surface.");
+    this.inspectingImport = true;
+    try { const result = await this.browser.inspectImportSurface(expectedFingerprint); this.available(); return ChatImportSurfaceObservationSchema.parse(result); }
+    finally { this.inspectingImport = false; }
+  }
   async openBrowser() {
     this.available();
-    if (this.busy || this.cancelPending || this.openingBrowser) throw new BridgeError("BUSY", "Another browser operation is active.");
+    if (this.busy || this.cancelPending || this.openingBrowser || this.inspectingImport) throw new BridgeError("BUSY", "Another browser operation is active.");
     this.openingBrowser = true;
     try {
       const result = await this.browser.openBrowser();
@@ -135,7 +145,7 @@ export class GeminiMcpService {
       if (!this.turns.has(requestId)) throw new BridgeError("OUTCOME_UNKNOWN", "Cached result expired or belongs to an earlier process. Inspect Gemini history; it will not be replayed.");
       return this.result(requestId, 0);
     }
-    if (this.busy || this.cancelPending || this.openingBrowser) throw new BridgeError("BUSY", "Another request owns the browser. Fetch its result or cancel it first.");
+    if (this.busy || this.cancelPending || this.openingBrowser || this.inspectingImport) throw new BridgeError("BUSY", "Another request owns the browser. Fetch its result or cancel it first.");
     if (this.modelRestore.pending()) throw new BridgeError("MODEL_RESTORE_PENDING", "Restore the saved primary model by opening the browser before submitting another prompt.");
     const binding = options?.conversation;
     for (const budget of [options?.stallTimeoutMs, options?.maxDurationMs]) if (budget !== undefined && (!Number.isSafeInteger(budget) || budget < 1 || budget > 1800000)) throw new BridgeError("INVALID_DEADLINE", "Browser progress budget is invalid.");
@@ -307,7 +317,7 @@ export class GeminiMcpService {
     this.available(); RequestId.parse(key);
     const conversation = this.conversations.get(key);
     if (!conversation) return { released: false };
-    if (this.busy || this.cancelPending || this.openingBrowser) throw new BridgeError("BUSY", "Conversation release requires an idle browser.");
+    if (this.busy || this.cancelPending || this.openingBrowser || this.inspectingImport) throw new BridgeError("BUSY", "Conversation release requires an idle browser.");
     const pending = Promise.resolve().then(async () => { const preserved = conversation.lease ? await this.retireLease(conversation.lease, preserve) : false; this.conversations.delete(key); return { released: true, preserved }; });
     this.cancelPending = pending;
     try { return await pending; } finally { if (this.cancelPending === pending) this.cancelPending = undefined; }

@@ -5,6 +5,7 @@ import { nativeBrowserTransport, nativeSnapshotTransport, MAX_WEB_MESSAGE_CHARS,
 import { ensureNativeBrowserReady } from "./browser-readiness.js";
 import { ModelSelectionDiagnosticSchema, BrowserSubmissionDiagnosticSchema, NativeTransportTraceSchema, WebModelSelectionSchema, type NativeTransportTrace, type NativeReceiptOwner,type AccountRecord } from "@antigravity-gemini-web/contracts";
 import { parseMcpNodeSemiSpace, mcpNodeMemoryArgs, McpNodeMemoryStatusSchema, type McpNodeSemiSpace } from "@antigravity-gemini-web/contracts";
+import { ChatImportSurfaceObservationSchema, type ChatImportSurfaceObservation } from "@antigravity-gemini-web/contracts";
 
 export interface NativeBrowserProgress { revision: number; text: string; codeBlocks?: string[]; stage?: string }
 export interface NativeCancellationObservation { confirmed: boolean; reason?: string }
@@ -34,6 +35,7 @@ export interface NativeBrowserBackend {
   close(): Promise<void>;
   openBrowser?(accountId?: string): Promise<JsonObject>;
   inspectIdentity?(signal: AbortSignal): Promise<JsonObject>;
+  inspectImportSurface?(signal: AbortSignal): Promise<ChatImportSurfaceObservation>;
   inspectReceipt?(requestId:string,signal:AbortSignal):Promise<JsonObject>;
   bindAccount?(accountId: string,expectedAccount?:AccountRecord): NativeBrowserBackend;
   verifyAccount?(accountId: string, signal: AbortSignal): Promise<JsonObject>;
@@ -107,6 +109,13 @@ export class McpNativeBrowserBackend implements NativeBrowserBackend {
   async inspectIdentity(signal: AbortSignal) {
     await this.connect(); signal.throwIfAborted();
     return ensureNativeBrowserReady((name, args, bounded) => this.call(name, args, bounded), signal);
+  }
+  async inspectImportSurface(signal: AbortSignal) {
+    await this.connect(); signal.throwIfAborted();
+    if (!this.expectedIdentityFingerprint) throw new NativeRouteError("ACCOUNT_IDENTITY_UNVERIFIED", "A registered account is required for import inspection.", 412);
+    const status = await this.call("gemini_status", {}, signal);
+    if (status.chatImportSurfaceInspectionSupported !== true) throw new NativeRouteError("ACCOUNT_RUNTIME_STALE", "Update the browser worker before inspecting imports.", 412);
+    return ChatImportSurfaceObservationSchema.parse(await this.call("gemini_inspect_import", { expected_account_fingerprint: this.expectedIdentityFingerprint }, signal));
   }
   async inspectReceipt(requestId:string,signal:AbortSignal) {
     await this.connect();signal.throwIfAborted();

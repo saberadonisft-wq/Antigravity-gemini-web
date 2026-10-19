@@ -1,6 +1,6 @@
 # Kiểm tra archive trước khi nhập lịch sử chat
 
-P7a/P7b, ngày 19/10/2026, Native source 38 / browser worker 24. Có **kiểm tra ZIP cục bộ** qua CLI hoặc màn hình Nhập lịch sử của launcher. Cả hai chỉ kiểm tra file trên máy. Upload và theo dõi kết quả trên Gemini vẫn đang phát triển.
+P7a/P7b/P7c, ngày 19/10/2026, Native source 39 / browser worker 25. Có **kiểm tra ZIP cục bộ** qua CLI hoặc màn hình Nhập lịch sử của launcher, và lệnh quan sát trang import đang mở. Các bước này không upload. Upload và theo dõi kết quả trên Gemini vẫn đang phát triển.
 
 ## Dùng launcher thử nghiệm
 
@@ -44,6 +44,16 @@ Giới hạn kiểm tra: 5.000.000.000 byte/file, một triệu entry và ngân 
 Inspector không kiểm CRC/decompress từng entry, không xác nhận schema hội thoại theo provider, không đếm số cuộc chat và không chứng nhận Google sẽ chấp nhận archive. File mã hóa chỉ được thống kê; chưa có luồng nhập mật khẩu hay chứng nhận tương thích.
 
 ## Gemini hỗ trợ gì
+
+### Quan sát trang import theo account (P7c)
+
+Khi owner source 39 đã bật `AG_NATIVE_IMPORTS_EXPERIMENTAL=1`, tự mở trang import trong đúng profile đã đăng ký identity, rồi chạy `npm run native:imports:check -- ACCOUNT_ID`. Account ID có trong `npm run native:accounts`. Lệnh CLI đọc qua Native owner và browser MCP owner, không tạo browser controller khác.
+
+Probe chỉ đọc các tab hiện có trong đúng profile; không mở/navigate/activate/đóng tab, bấm Add, ghi file input, dán memory hoặc Send. Nó xác minh profile CDP, nhận dạng trang bằng heading/control nhìn thấy, kiểm identity khớp và trả metadata. Tab hội thoại canonical và DOM có composer/model response bị loại. Kết quả không chứa email, URL, nội dung chat hoặc đường dẫn. Số tab và thời gian quan sát có giới hạn; control ẩn, trùng, account khác hoặc nhiều trang import hợp lệ không được coi là bằng chứng duy nhất.
+
+`controls_observed` chỉ có nghĩa controls nhìn thấy và identity khớp trong lần quan sát này; `surfaceId` là hash tạm của target, không phải receipt hoặc quyền upload. Các trạng thái khác gồm `not_observed`, `ambiguous`, `identity_changed`, `identity_unverified`, `browser_unavailable`, `user_action_required`. `not_observed` không chứng minh account thiếu quyền. Recognition tiếng Anh đã có fixture; pattern tiếng Việt vẫn cần đối chiếu UI thật. Chưa có nút probe trong launcher hay capability cache dùng để cấp quyền truyền dữ liệu. Browser cũ không advertise hỗ trợ sẽ bị từ chối.
+
+### Hướng dẫn nền tảng
 
 Tài liệu Google hiện hướng dẫn import chat từ export ChatGPT/Claude dưới dạng ZIP, giới hạn ghi là 5 GB và tối đa năm ZIP/ngày. Tính năng yêu cầu tài khoản cá nhân đủ điều kiện; chưa khả dụng cho work/school/supervised hoặc một số khu vực. Reupload có thể ghi đè các cuộc chat đã nhập; import gián đoạn có thể chỉ hoàn tất một phần. Dữ liệu đã nhập nằm trong Activity và chịu cơ chế sử dụng dữ liệu của Gemini, gồm cải thiện dịch vụ/huấn luyện. [Hướng dẫn chính thức, đối chiếu 19/10/2026](https://support.google.com/gemini/answer/16868299?hl=en).
 

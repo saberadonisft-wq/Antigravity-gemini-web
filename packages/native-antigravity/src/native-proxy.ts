@@ -16,13 +16,13 @@ import { NativeManagementRequestSchema } from "@antigravity-gemini-web/contracts
 import { buildManagementSnapshot } from "./management-snapshot.js";
 import { NativeKnowledgeRegistry,type KnowledgeResolution } from "./knowledge-registry.js";
 import { NativeChatImportJobs } from "./chat-import-jobs.js";
-import { ChatImportRequestSchema } from "@antigravity-gemini-web/contracts";
+import { ChatImportRequestSchema, ChatImportCapabilitySchema } from "@antigravity-gemini-web/contracts";
 import { KnowledgeRequestSchema } from "@antigravity-gemini-web/contracts";
 
 const PROD = "https://cloudcode-pa.googleapis.com";
 const DAILY = "https://daily-cloudcode-pa.googleapis.com";
 export const NATIVE_PROXY_PORT = 9236;
-export const NATIVE_RUNTIME_REVISION = 38;
+export const NATIVE_RUNTIME_REVISION = 39;
 /**
  * The picker identifier is deliberately distinct from WEB_MODEL (the internal
  * bridge route) and from MODEL_PLACEHOLDER_M* (the IDE enum).  Antigravity
@@ -333,6 +333,25 @@ export async function startNativeProxy(options: NativeProxyOptions) {
         const idle = !counters.active && !router?.activeCount && !accountControlActive && !stopping && ![...turns.values()].some(turn => turn.waiters > 0);
         if (command.action === "status" && !enabled && !chatImports) { json(response, 200, { service: "gemini-native-chat-import", version: 1, ownerId: managementOwnerId, revision: 0, accountRevision: options.accountRegistry?.snapshot().revision ?? 0, experimentalEnabled: false, canInspect: false, inspectionActive: false, jobs: [], googleSubmission: "not_submitted" }); return; }
         if (!enabled) throw new NativeRouteError("IMPORT_EXPERIMENT_DISABLED", "Local import inspection is disabled in this native owner.", 412);
+        if (command.action === "probe") {
+          if (command.expectedOwnerId !== managementOwnerId) throw new NativeRouteError("STALE_AUTHORITY", "Refresh the Native owner before inspecting imports.", 409);
+          if (!idle) throw new NativeRouteError("BUSY", "Wait for Native operations to finish before inspecting imports.", 409);
+          const registry = options.accountRegistry!.snapshot(), account = registry.accounts.find(value => value.accountId === command.accountId);
+          if (registry.revision !== command.expectedAccountRevision || !account?.enabled || !account.identityFingerprint || account.identityEpoch !== command.identityEpoch) throw new NativeRouteError("STALE_ACCOUNT_SELECTION", "Refresh and select the registered account identity.", 409);
+          if (!options.backend.bindAccount) throw new NativeRouteError("UNSUPPORTED_OPERATION", "Account-bound browser inspection is unavailable.", 412);
+          const backend = options.backend.bindAccount(account.accountId, account);
+          if (!backend.inspectImportSurface) throw new NativeRouteError("UNSUPPORTED_OPERATION", "This browser worker cannot inspect imports.", 412);
+          const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 20000);
+          const disconnected = () => { if (!response.writableEnded) controller.abort(); };
+          controllers.add(controller); response.once("close", disconnected); accountControlActive = true;
+          try {
+            const observation = await backend.inspectImportSurface(controller.signal);
+            controller.signal.throwIfAborted(); backend.assertAuthority?.();
+            if (options.accountRegistry!.snapshot().revision !== registry.revision) throw new NativeRouteError("STALE_ACCOUNT_SELECTION", "Account configuration changed during import inspection.", 409);
+            json(response, 200, ChatImportCapabilitySchema.parse({ service: "gemini-native-chat-import-capability", version: 1, ownerId: managementOwnerId, accountRevision: registry.revision, accountId: account.accountId, identityEpoch: account.identityEpoch, observation }));
+          } finally { clearTimeout(timer); response.off("close", disconnected); controllers.delete(controller); accountControlActive = false; }
+          return;
+        }
         const store = importJobs();
         if (command.action === "inspect") { json(response, 200, store.inspect(command, command.file, enabled, idle)); return; }
         if (command.action !== "status") store.execute(command);

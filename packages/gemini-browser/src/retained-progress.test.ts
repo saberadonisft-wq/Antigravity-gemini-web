@@ -129,7 +129,9 @@ test("Manual edits invalidate a retained target, and a changed Web model blocks 
   const joining = new GeminiBrowserDriver({ targetUrl: fixture.url, userDataDir: directory, debugPort: port, fixtureMode: true, allowedOrigins: [fixture.url] });
   try {
     assert.equal(await joining.launchOrAttach(5000), true); assert.equal(joining.isOwnedProcess, false);
-    assert.equal(joining.isAttachedTarget, true); await joining.close();
+    assert.equal(joining.isAttachedTarget, true);
+    joining.cdp!.close(); // Deterministically reproduce the lost page-ACK socket.
+    await joining.close();
     assert.equal(live.driver.isProcessAlive, true, "Attached cleanup cannot close the original debug browser.");
     const targets = await live.driver.cdp!.send<{ targetInfos: Array<{ type: string }> }>("Target.getTargets");
     assert.equal(targets.targetInfos.filter(target => target.type === "page").length, 1);

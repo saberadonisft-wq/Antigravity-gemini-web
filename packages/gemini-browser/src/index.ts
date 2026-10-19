@@ -6,6 +6,8 @@ import { GeminiBrowserDriver, assertBrowserAccountIdentity, type BrowserDriverOp
 import { CdpClient, type CdpTarget } from "./cdp-client.js";
 import { isAllowedSurfaceUrl } from "./gemini-selectors.js";
 import { createHash } from "node:crypto";
+import { inspectExistingImportSurface } from "./import-surface.js";
+import type { ChatImportSurfaceObservation } from "@antigravity-gemini-web/contracts";
 import type { BrowserConversationLease, BrowserModelSelection, BrowserPollOptions } from "./progress.js";
 export * from "./progress.js";
 export * from "./model-controls.js";
@@ -72,6 +74,7 @@ export interface GeminiBrowserAdapter {
   openExistingConversation?(url: string): Promise<BrowserConversationLease>;
   selectModel?(selection: BrowserModelSelection): Promise<BrowserModelSelection>;
   captureModelSelection?(): Promise<BrowserModelSelection>;
+  inspectImportSurface?(expectedFingerprint: string): Promise<ChatImportSurfaceObservation>;
   supportsRetainedConversations?: boolean;
   supportsProgressStreaming?: boolean;
   supportsAccountIdentityVerification?: boolean;
@@ -129,6 +132,15 @@ export class LiveGeminiBrowserAdapter implements GeminiBrowserAdapter {
   /** A native provider round owns a fresh tab; the previous tab/draft is never navigated or copied. */
   async selectModel(selection: BrowserModelSelection) { return this.driver.selectModel(selection); }
   async captureModelSelection() { return this.driver.captureModelSelection(); }
+
+  async inspectImportSurface(expectedFingerprint: string) {
+    const epoch = this.epoch;
+    const check = () => {
+      if (epoch !== this.epoch || this.cleanupRequired) throw Error("Browser lifecycle changed during import inspection.");
+      if ([...this.activeTurns.values()].some(turn => turn.generationUnsettled || ["reserved", "in_progress", "cancel_requested"].includes(turn.state))) throw Error("Browser generation is active.");
+    };
+    return inspectExistingImportSurface(this.driver, expectedFingerprint, check);
+  }
 
   async openFreshConversation(): Promise<BrowserConversationLease> { return this.openConversation(); }
   async openExistingConversation(url: string): Promise<BrowserConversationLease> {

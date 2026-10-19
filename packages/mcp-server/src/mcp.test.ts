@@ -32,6 +32,17 @@ function output(result: unknown): Record<string, any> {
   return JSON.parse(value.content[0].text);
 }
 
+test("Import observation holds browser admission, creates no receipt and cannot publish after shutdown",async t=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),"gemini-mcp-test-")),browser=controlledBrowser();let finish!:(value:any)=>void;
+  const observation={status:"not_observed" as const,observedAt:new Date().toISOString(),identityVerified:false,chatUploadControlObserved:false,memoryControlsObserved:false,evidence:"visible_controls_only" as const,googleSubmission:"not_submitted" as const};
+  browser.adapter.inspectImportSurface=async()=>new Promise(resolve=>{finish=resolve;});
+  const service=new GeminiMcpService(browser.adapter,path.join(root,"receipts.json"));t.after(async()=>{await service.close();removeOwnedFixture(root);});
+  const first=service.inspectImportSurface("a".repeat(64));assert.equal((await service.status()).browserOperationActive,true);
+  await assert.rejects(service.inspectImportSurface("a".repeat(64)),{code:"BUSY"});await assert.rejects(service.submit("blocked_import_probe","No Send"),{code:"BUSY"});await assert.rejects(service.openBrowser(),{code:"BUSY"});
+  finish(observation);assert.equal((await first).status,"not_observed");assert.equal((await service.inspectReceipt("blocked_import_probe")).found,false);assert.equal((await service.status()).browserOperationActive,false);
+  const late=service.inspectImportSurface("a".repeat(64));await service.close();finish(observation);await assert.rejects(late,{code:"SERVICE_UNAVAILABLE"});
+});
+
 test("Expired results are withdrawn on every read API while physical receipts and Send fences survive",async t=>{
   const root=fs.mkdtempSync(path.join(os.tmpdir(),"gemini-mcp-test-")),browser=controlledBrowser(),service=new GeminiMcpService(browser.adapter,path.join(root,"receipts.json"));
   browser.adapter.pollResponse=async turnId=>({turnId,status:"completed",text:"expired cache fixture",completedAt:new Date().toISOString()});
@@ -82,7 +93,7 @@ test("MCP initialize/discovery, durable dedup, polling and immutable result via 
   t.after(async () => { await service.close(); await client.close(); await server.close(); removeOwnedFixture(root); });
   const [a, b] = InMemoryTransport.createLinkedPair();
   await server.connect(a); await client.connect(b);
-  assert.deepEqual((await client.listTools()).tools.map(t => t.name).sort(), ["gemini_cancel", "gemini_open_browser", "gemini_receipt", "gemini_release_conversation", "gemini_result", "gemini_status", "gemini_submit"]);
+  assert.deepEqual((await client.listTools()).tools.map(t => t.name).sort(), ["gemini_cancel", "gemini_inspect_import", "gemini_open_browser", "gemini_receipt", "gemini_release_conversation", "gemini_result", "gemini_status", "gemini_submit"]);
   assert.equal(output(await client.callTool({ name: "gemini_status", arguments: {} })).nativeInference, "unverified");
   assert.equal(browser.stats.opens, 0);
   const prompt = "SECRET_TEST_PROMPT_does_not_belong_in_ledger";
@@ -155,12 +166,12 @@ test("Real stdio process initializes without Chrome, denies concurrent profile o
   const competitor = new Client({ name: "owned-competitor", version: "1" });
   const competitorTransport = new StdioClientTransport({ ...params, env: { ...params.env, AG_MCP_STATE_DIR: path.join(root, "another-state") } });
   try { await assert.rejects(competitor.connect(competitorTransport)); } finally { await competitor.close(); }
-  assert.equal((await client.listTools()).tools.length, 7);
+  assert.equal((await client.listTools()).tools.length, 8);
   const absent=output(await client.callTool({name:"gemini_receipt",arguments:{request_id:"unseen_receipt_001"}}));
   assert.equal(absent.found,false);assert.equal(absent.replayAllowed,false);
   assert.ok(!fs.existsSync(path.join(root,"state","receipts.json.sqlite")),"Metadata lookup alone must not initialize storage or open Chrome");
   await client.close();
   const reconnect = new Client({ name: "owned-reconnect", version: "1" });
-  try { await reconnect.connect(new StdioClientTransport(params)); assert.equal((await reconnect.listTools()).tools.length, 7); }
+  try { await reconnect.connect(new StdioClientTransport(params)); assert.equal((await reconnect.listTools()).tools.length, 8); }
   finally { await reconnect.close(); }
 });

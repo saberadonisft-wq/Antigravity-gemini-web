@@ -10,6 +10,7 @@ import { AccountRegistry } from "./account-registry.js";
 import { startNativeProxy, NATIVE_PROXY_PORT, NATIVE_RUNTIME_REVISION } from "./native-proxy.js";
 import { inspectIde, nativeHome, isolatedIdeProfile, configureIsolatedProfile, atomicPrivateFile, assertNoLinks } from "./installation.js";
 import { NativeRouteError } from "./native-protocol.js";
+import { ChatImportProbeRequestSchema, ChatImportCapabilitySchema } from "@antigravity-gemini-web/contracts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const endpoint = "http://127.0.0.1:" + NATIVE_PROXY_PORT;
@@ -38,12 +39,12 @@ async function health() {
   return value;
 }
 
-async function ownerControl(action: "browser" | "cancel" | "stop" | "resume" | "account" | "reconcile" | "router" | "manage" | "knowledge", body?: unknown) {
+async function ownerControl(action: "browser" | "cancel" | "stop" | "resume" | "account" | "reconcile" | "router" | "manage" | "knowledge" | "imports", body?: unknown) {
   const status = await health();
   assertNoLinks(descriptor);
   const owner = JSON.parse(fs.readFileSync(descriptor, "utf8"));
   if (owner.pid !== status.pid || owner.endpoint !== endpoint || typeof owner.controlToken !== "string") throw new NativeRouteError("OWNER_MISMATCH", "Proxy ownership could not be established.");
-  const controlTimeout = action === "browser" || action === "account" || action === "manage" || action === "knowledge" ? 30000 : action === "reconcile" ? 120000 : 5000;
+  const controlTimeout = action === "browser" || action === "account" || action === "manage" || action === "knowledge" || action === "imports" ? 30000 : action === "reconcile" ? 120000 : 5000;
   const response = await fetch(endpoint + "/__native/" + action, { method: "POST", headers: { "x-native-control-token": owner.controlToken, "content-type": "application/json" }, body: body === undefined ? undefined : JSON.stringify(body), signal: AbortSignal.timeout(controlTimeout) });
   const value = await response.json();
   if (!response.ok) throw new NativeRouteError(value?.error?.code ?? "CONTROL_REFUSED", value?.error?.message ?? "Proxy is active or could not verify its owner.");
@@ -67,6 +68,13 @@ try {
     const { inspectChatImportArchive, chatImportInspectionArguments } = await import("./chat-import.js");
     const selected = chatImportInspectionArguments(process.argv.slice(3));
     console.log(JSON.stringify(await inspectChatImportArchive(selected.file, selected.provider), null, 2));
+  } else if (command === "imports:check") {
+    if (process.argv.length !== 4) throw new NativeRouteError("INVALID_ARGUMENT", "Use imports:check ACCOUNT_ID after opening Import memory to Gemini in that account profile.");
+    const live = await health(); if (live.runtimeRevision < 39) throw new NativeRouteError("ACCOUNT_RUNTIME_STALE", "Update Native to revision 39 before inspecting imports.", 412);
+    const status = await ownerControl("manage", { action: "status" }), account = status.accounts.find((value: {accountId:string}) => value.accountId === process.argv[3]);
+    if (!account?.enabled || !account.identityRegistered) throw new NativeRouteError("ACCOUNT_IDENTITY_UNVERIFIED", "Select an enabled account with a registered identity.", 412);
+    const request = ChatImportProbeRequestSchema.parse({ action: "probe", expectedOwnerId: status.ownerId, expectedAccountRevision: status.revision, accountId: account.accountId, identityEpoch: account.identityEpoch });
+    console.log(JSON.stringify(ChatImportCapabilitySchema.parse(await ownerControl("imports", request)), null, 2));
   } else if (command === "check") {
     console.log(JSON.stringify({ ...inspectIde(), endpoint, isolatedIdeProfile, vendorFilesModified: false, nativeInference: "unverified_until_live_acceptance" }, null, 2));
   } else if (command === "setup" || command === "restore") {
@@ -308,7 +316,7 @@ try {
     await new Promise<void>((resolve, reject) => { child.once("spawn", resolve); child.once("error", reject); });
     child.unref();
     console.log(JSON.stringify({ launchRequested: true, endpoint, isolatedIdeProfile, selectModel: "Gemini Web (Local)", browserState: browser.browserState, browserAccountState: browser.accountState, accountLogin: "Complete Google sign-in in the isolated IDE if requested.", browserLogin: "The isolated Gemini browser is opened automatically; sign in there if requested. Credentials are never copied." }, null, 2));
-  } else throw new NativeRouteError("INVALID_COMMAND", "Use check, setup, start, launch, browser, status, accounts, accounts:status, account:add, account:use, account:disable, account:enable, account:check, account:verify, account:browser, routing, routing:set, routing:unbind, knowledge, knowledge:import, knowledge:register, knowledge:check, knowledge:refresh, knowledge:remove, knowledge:bind, knowledge:clear, imports:inspect, receipt, cancel, stop, resume or restore.");
+  } else throw new NativeRouteError("INVALID_COMMAND", "Use check, setup, start, launch, browser, status, accounts, accounts:status, account:add, account:use, account:disable, account:enable, account:check, account:verify, account:browser, routing, routing:set, routing:unbind, knowledge, knowledge:import, knowledge:register, knowledge:check, knowledge:refresh, knowledge:remove, knowledge:bind, knowledge:clear, imports:inspect, imports:check, receipt, cancel, stop, resume or restore.");
 } catch (error) {
   console.error(JSON.stringify({ code: error instanceof NativeRouteError ? error.code : "NATIVE_COMMAND_FAILED", message: error instanceof NativeRouteError ? error.message : "Native route command failed; no credentials or source payload are logged." }));
   process.exitCode = 1;

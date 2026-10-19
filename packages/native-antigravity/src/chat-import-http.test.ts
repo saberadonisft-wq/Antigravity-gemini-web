@@ -9,6 +9,24 @@ import { startNativeProxy } from "./native-proxy.js";
 import { sha256 } from "./native-protocol.js";
 import { ChatImportSnapshotSchema } from "@antigravity-gemini-web/contracts";
 import { writeSyntheticChatArchive } from "./testing/chat-import-archive.fixture.js";
+import { NativeBrowserBackendPool } from "./browser-backend-pool.js";
+import { ChatImportCapabilitySchema } from "@antigravity-gemini-web/contracts";
+
+test("Import capability HTTP pins the account, blocks concurrent control and discards a stale result without Send",{timeout:15000},async t=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),"ag-chat-import-http-test-")),registry=new AccountRegistry(path.join(root,"accounts.json"));
+  const accounts=["A","B"].map(name=>registry.add({displayName:name,profilePath:path.join(root,"profile"+name),statePath:path.join(root,"state"+name),identityFingerprint:sha256(name)}));
+  let finish!:(value:any)=>void,reads=0,sends=0;const pool=new NativeBrowserBackendPool(registry,"unused",()=>({generate:async()=>{sends++;return "unused";},close:async()=>{},inspectImportSurface:async()=>{reads++;return new Promise(resolve=>{finish=resolve;});}}));
+  const proxy=await startNativeProxy({port:0,stateDirectory:root,accountRegistry:registry,backend:pool,importsExperimental:true,controlToken:"fixture-import-token"});
+  t.after(async()=>{await proxy.close();const target=fs.realpathSync(root);assert.equal(path.dirname(target).toLowerCase(),fs.realpathSync(os.tmpdir()).toLowerCase());assert.match(path.basename(target),/^ag-chat-import-http-test-/);fs.rmSync(target,{recursive:true,force:true});});
+  const endpoint=`http://127.0.0.1:${proxy.port}`,call=(resource:string,body:unknown)=>fetch(endpoint+"/__native/"+resource,{method:"POST",headers:{"content-type":"application/json","x-native-control-token":"fixture-import-token"},body:JSON.stringify(body)});
+  const status=await(await call("manage",{action:"status"})).json(),request={action:"probe",expectedOwnerId:status.ownerId,expectedAccountRevision:status.revision,accountId:accounts[0]!.accountId,identityEpoch:accounts[0]!.identityEpoch};
+  assert.equal((await call("imports",{...request,expectedOwnerId:randomUUID()})).status,409);assert.equal(reads,0);
+  const observation={status:"not_observed",observedAt:new Date().toISOString(),identityVerified:false,chatUploadControlObserved:false,memoryControlsObserved:false,evidence:"visible_controls_only",googleSubmission:"not_submitted"};
+  const pending=call("imports",request);while(!reads)await new Promise(resolve=>setTimeout(resolve,5));
+  assert.equal((await call("manage",{action:"use",expectedOwnerId:status.ownerId,expectedRevision:status.revision,accountId:accounts[1]!.accountId})).status,409);
+  finish(observation);const accepted=ChatImportCapabilitySchema.parse(await(await pending).json());assert.equal(accepted.accountId,accounts[0]!.accountId);assert.equal(sends,0);
+  const stale=call("imports",request);while(reads<2)await new Promise(resolve=>setTimeout(resolve,5));registry.setActive(accounts[1]!.accountId);finish(observation);assert.equal((await stale).status,409);assert.equal(sends,0);
+});
 
 test("Import inspection is disabled by default and shutdown still closes it if the backend fails", { timeout: 15000 }, async t => {
   const root=fs.mkdtempSync(path.join(os.tmpdir(),"ag-chat-import-http-test-")),registry=new AccountRegistry(path.join(root,"accounts.json"));

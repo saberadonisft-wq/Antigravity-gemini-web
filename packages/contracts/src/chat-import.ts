@@ -5,6 +5,18 @@ export const CHAT_IMPORT_MAX_ARCHIVE_BYTES = 5_000_000_000;
 export const CHAT_IMPORT_MAX_ENTRIES = 1_000_000;
 export const ChatImportProviderSchema = z.enum(["chatgpt", "claude"]);
 export type ChatImportProvider = z.infer<typeof ChatImportProviderSchema>;
+export const ChatImportSurfaceObservationSchema = z.object({
+  status: z.enum(["controls_observed", "not_observed", "identity_unverified", "identity_changed", "browser_unavailable", "user_action_required", "ambiguous"]),
+  observedAt: z.string().datetime(), identityVerified: z.boolean(), surfaceId: z.string().regex(/^[a-f0-9]{64}$/).optional(),
+  chatUploadControlObserved: z.boolean(), memoryControlsObserved: z.boolean(),
+  evidence: z.literal("visible_controls_only"), googleSubmission: z.literal("not_submitted"),
+}).strict().superRefine((value, context) => {
+  const positive = value.status === "controls_observed";
+  if (positive && (!value.identityVerified || !value.surfaceId || !value.chatUploadControlObserved && !value.memoryControlsObserved) || !positive && (value.surfaceId || value.chatUploadControlObserved || value.memoryControlsObserved)) context.addIssue({ code: z.ZodIssueCode.custom, message: "Import surface evidence is inconsistent." });
+});
+export type ChatImportSurfaceObservation = z.infer<typeof ChatImportSurfaceObservationSchema>;
+export const ChatImportProbeRequestSchema = z.object({ action: z.literal("probe"), expectedOwnerId: z.string().uuid(), expectedAccountRevision: z.number().int().nonnegative(), accountId: AccountId, identityEpoch: z.number().int().nonnegative() }).strict();
+export const ChatImportCapabilitySchema = z.object({ service: z.literal("gemini-native-chat-import-capability"), version: z.literal(1), ownerId: z.string().uuid(), accountRevision: z.number().int().nonnegative(), accountId: AccountId, identityEpoch: z.number().int().nonnegative(), observation: ChatImportSurfaceObservationSchema }).strict();
 const ByteCount = z.string().regex(/^(?:0|[1-9][0-9]{0,23})$/);
 export const ChatImportInspectionSchema = z.object({
   version: z.literal(1), declaredProvider: ChatImportProviderSchema,
@@ -30,7 +42,7 @@ export type ChatImportIntent = z.infer<typeof ChatImportIntentSchema>;
 export const ChatImportUiCommandSchema = z.object({ action: z.enum(["cancel", "clear"]), expectedOwnerId: z.string().uuid(), jobId: z.string().uuid() }).strict();
 export type ChatImportUiCommand = z.infer<typeof ChatImportUiCommandSchema>;
 export const ChatImportRequestSchema = z.union([
-  z.object({ action: z.literal("status") }).strict(), ChatImportUiCommandSchema,
+  z.object({ action: z.literal("status") }).strict(), ChatImportUiCommandSchema, ChatImportProbeRequestSchema,
   ChatImportIntentSchema.extend({ action: z.literal("inspect"), file: z.string().min(1).max(4096) }).strict(),
 ]);
 export const ChatImportJobSchema = z.object({

@@ -28,6 +28,7 @@
     "native:accounts": "node packages/native-antigravity/dist/native-cli.js accounts",
     "native:knowledge": "node packages/native-antigravity/dist/native-cli.js knowledge",
     "native:imports:inspect": "node packages/native-antigravity/dist/native-cli.js imports:inspect",
+    "native:imports:check": "node packages/native-antigravity/dist/native-cli.js imports:check",
     "native:check": "node packages/native-antigravity/dist/native-cli.js check",
     "native:setup": "node packages/native-antigravity/dist/native-cli.js setup",
     "native:start": "node packages/native-antigravity/dist/native-cli.js start",

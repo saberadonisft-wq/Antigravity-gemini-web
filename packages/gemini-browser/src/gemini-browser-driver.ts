@@ -503,9 +503,9 @@ export class GeminiBrowserDriver {
 
     if (this.cdp) {
       if (!isOwned && this.createdInitialTarget) {
-        const result = await this.cdp.send<{ success: boolean }>("Target.closeTarget", { targetId: this.createdInitialTarget }, Math.max(1, Math.min(2000, deadline - performance.now())));
-        if (result.success !== true) throw Error("Owned initial page closure was not acknowledged.");
-        await CdpClient.confirmTargetClosed(this.debugPort, this.createdInitialTarget, Math.max(1, Math.min(2000, deadline - performance.now())));
+        // A page can disconnect before its own close acknowledgement arrives.
+        // Use the browser endpoint and confirm absence without relying on that page's socket.
+        await CdpClient.closeOwnedTarget(this.debugPort, this.createdInitialTarget, Math.max(1, Math.floor(deadline - performance.now())));
         this.createdInitialTarget = undefined;
       }
       if (isOwned) {

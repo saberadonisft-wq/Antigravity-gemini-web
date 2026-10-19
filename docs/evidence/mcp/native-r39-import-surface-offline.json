@@ -1,0 +1,110 @@
+{
+  "checkedAt": "2026-10-19T10:19:36.0514801+00:00",
+  "feature": "P7C_EXISTING_IMPORT_SURFACE_OBSERVATION",
+  "baselineCommit": "3f42313466972a58483a7e741a3e25e52471b46b",
+  "nativeRuntimeRevision": 39,
+  "browserWorkerFingerprint": 25,
+  "status": "PASS_LOCAL_FIXTURES_ONLY",
+  "validation": {
+    "electronPreview": "PASS",
+    "disconnectedPageSocketRegression": "PASS",
+    "lint": "PASS",
+    "packages": [
+      {
+        "pass": 14,
+        "package": "contracts"
+      },
+      {
+        "pass": 48,
+        "package": "gemini-browser"
+      },
+      {
+        "pass": 53,
+        "package": "mcp-server"
+      },
+      {
+        "pass": 4,
+        "package": "model-bridge"
+      },
+      {
+        "pass": 187,
+        "package": "native-antigravity"
+      },
+      {
+        "pass": 80,
+        "package": "runtime"
+      },
+      {
+        "pass": 54,
+        "package": "launcher"
+      }
+    ],
+    "newTests": 4,
+    "build": "PASS_FULL_WORKSPACE_PLUS_TARGETED_BROWSER_FIX",
+    "cancelled": 0,
+    "skipped": 0,
+    "workspaceTests": 440,
+    "fail": 0,
+    "typecheck": "PASS"
+  },
+  "scope": {
+    "nativeOwner": "REAL_FIXTURE_HTTP",
+    "realGooglePrompts": 0,
+    "realIdeExecutor": "NOT_TESTED",
+    "merge": false,
+    "push": false,
+    "deployment": false,
+    "osChooser": "SYNTHETIC_MAIN_GRANT",
+    "realGoogleUploads": 0,
+    "realAccountHandoff": "NOT_TESTED",
+    "chrome": "REAL_HEADLESS_LOCAL_HTML",
+    "startupRejectionReason": "blocked by policy",
+    "mcpAdmissionAndSdkStdio": "REAL_LOCAL_TESTS",
+    "accountPool": "REAL",
+    "mainOwnerStartup": "AUTO_REVIEW_REJECTED_BEFORE_EXECUTION",
+    "cliImportSurface": "COMPILED_NOT_LIVE_ACCEPTED",
+    "existingBrowserUntouched": true,
+    "browserAccountIdentities": "SYNTHETIC"
+  },
+  "dependencyLockSha256": "41c721a4a65619af5cbba325bbe3b70dbed90b78cd2f70a23ffe45f37a04f686",
+  "sourceSha256": {
+    "package.json": "0cb49be130776a9816caa3c7673292de2c6507ebd9cb82d25911bd0c0653b120",
+    "packages/contracts/src/chat-import.test.ts": "051e137def33052a480efa2d975461e1e3138420e386024a4e62adf68e9a3769",
+    "packages/contracts/src/chat-import.ts": "ba70f00b9ba902e756ee078d643a3a500171b6a0338b6e7bdd261628113fe79e",
+    "packages/gemini-browser/src/gemini-browser-driver.ts": "46660785e2d8a8fa7fa27df00cbdf68227e39df3c261469dd3fd08dab473f2fc",
+    "packages/gemini-browser/src/import-surface.test.ts": "af33f6e9e3919889bab19be08fb20249760af06edac4c1adf425773b21ea5d0a",
+    "packages/gemini-browser/src/import-surface.ts": "b2e5daa9f60b306175a6c91c50a8a4bf6e617bddbaff2ade6bd64894cfa9bbac",
+    "packages/gemini-browser/src/index.ts": "2f1a713f4d610078060d631add3eab2abf987d821a583070096044803567db7f",
+    "packages/gemini-browser/src/retained-progress.test.ts": "42ade787a90a46e1e816dba72af4bcedf7f8a15a3672a78b30a080289f3066a5",
+    "packages/mcp-server/src/cli.ts": "0f68835bd1beccbe513dc7427a679898af71d67be140ac43e7b3eb57d2be098d",
+    "packages/mcp-server/src/mcp.test.ts": "8b4d6686360cf4039b4b992e82ca9738eafc52919e1a258d24c41c134a9dfed9",
+    "packages/mcp-server/src/server.ts": "3b116204c1dcc24f03882070353a771032ce515576d68880d0ff4a58c40146ce",
+    "packages/mcp-server/src/service.ts": "9e21c0c6b6c9230cff2ddec4d5ff20f16f71a3b22240bc4b929b45d7b3413be1",
+    "packages/native-antigravity/src/browser-backend-pool.ts": "d2ed405e2f957ab3ef188c00bf6ff290e15f4f6b3533a74d08d40336ccfaad50",
+    "packages/native-antigravity/src/browser-backend.ts": "1fe99d9e1224e40309e0e62d53883d5d0f2362c433128873c66f019eee8cbed3",
+    "packages/native-antigravity/src/chat-import-http.test.ts": "2d67654737ff783c884af012e4564150777e13cbd047b168e48fbbd782cc15c8",
+    "packages/native-antigravity/src/native-cli.ts": "581623b771d0969d409f886f6d425daeb29a1d17f7af6204ab3dd9c9f79e583d",
+    "packages/native-antigravity/src/native-proxy.ts": "0ca90f39051408824d9bfe1ab318dd98f3703bbe1252df88e027856de0dc115e",
+    "tools/probes/native-ledger-live-inspect.mjs": "a6dcab396a95c4df137562908eacfd66f52d34a760764f79a190de3cd238f226"
+  },
+  "compiledSha256": {
+    "packages/contracts/dist/chat-import.js": "031045ae5c252d8327fa6499991fb55025a1be6ab4a007db878b6b47aebaeaf2",
+    "packages/gemini-browser/dist/index.js": "783129211505614324db67678f9cd017b198e31ab5a6a00d5170ddda8ed9adc0",
+    "packages/gemini-browser/dist/import-surface.js": "4e99228a849fd963e8065c62206ba27e05f4bb35d8bb61e94471e5206bfdfc62",
+    "packages/gemini-browser/dist/gemini-browser-driver.js": "d2d972e99be13a738f3311c0fd1860872ee9f98ec47af899cd0a3c2b4918faf6",
+    "packages/mcp-server/dist/cli.js": "c645f22348e251fac70e63fb4f1da06cba70095353547f17b2454d116bf28860",
+    "packages/mcp-server/dist/server.js": "fa4e5e4388c46f54ceb14d291945bce96321c8819be1cd433d2e0a85f21d8a7b",
+    "packages/mcp-server/dist/service.js": "36d6530d561304e1affe739d757d48ce19f3d6e2100cbb69a8bc81f22d6bffe4",
+    "packages/native-antigravity/dist/native-proxy.js": "fb7cd7867245e4ed526d9f47cc9741e54c8dbbc5e4530b68695878d5578fd501",
+    "packages/native-antigravity/dist/native-cli.js": "bb849b47084d7279d2c98156884d3082a708e2dbf01ef6732f6e7a88060c07ef",
+    "packages/native-antigravity/dist/browser-backend.js": "1f80ee56d39177d77c9afc71f4b9c0f0de6ffa31337b67d56efb813555b88361",
+    "packages/native-antigravity/dist/browser-backend-pool.js": "fe1a5b4ef09aaed1b752116fc14d22aa88eac233903870518537519accc0f639"
+  },
+  "artifactSha256": {
+    "docs/evidence/p7c-native-imports-r39/imports-800px.png": "f13d454012315aa4e224fc8c502613a19be8137c6e7484a61dc75247cc57a557",
+    "docs/evidence/p7c-native-imports-r39/imports-dark.png": "ec75ac52a6b876f37378cb5cc34251acebe3f57d395461dbe5ecb1232455d775",
+    "docs/evidence/p7c-native-imports-r39/imports-light.png": "382b4afe74aec06b4db63c2dfabc5ed0df8d0f8b55a1f67c560bfe011e390b07",
+    "docs/evidence/p7c-native-imports-r39/native-chat-import-desktop.json": "f036d1ed0d8a4cdf855b4dcaa8bcbe1624b699860a39195cc8cc041205275c76"
+  },
+  "finalTestLogSha256": "bb2dbb43b35c8f3516d9270338aa8e9a78c77bba028c7dcd684cde0236b48ccf"
+}

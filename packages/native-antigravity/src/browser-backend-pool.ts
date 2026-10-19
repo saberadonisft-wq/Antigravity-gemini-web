@@ -51,6 +51,7 @@ export class NativeBrowserBackendPool implements NativeBrowserBackend {
     return {
       prepare: async signal => { check(); await backend.prepare?.(signal); await this.drain(account.accountId);check(); },
       assertAuthority: () => check("unknown"),
+      inspectImportSurface:async signal=>{check();signal.throwIfAborted();if(!backend.inspectImportSurface)throw new NativeRouteError("UNSUPPORTED_OPERATION","Import surface inspection is unavailable.",503);const result=await backend.inspectImportSurface(signal);check();signal.throwIfAborted();return result;},
       inspectReceipt:async(id,signal)=>{check();if(!backend.inspectReceipt)throw new NativeRouteError("UNSUPPORTED_OPERATION","Physical receipt inspection is unavailable.",503);const result=await backend.inspectReceipt(id,signal);check();return result;},
       generate: async (id, prompt, signal, options) => {
         check();const key=options?.conversation?.key;

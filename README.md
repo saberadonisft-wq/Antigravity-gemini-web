@@ -2,7 +2,7 @@
 
 Dự án nghiên cứu và tích hợp Gemini Web làm nguồn suy luận trong chat native của Antigravity IDE, bảo toàn luồng executor và quyền công cụ của IDE.
 
-**Trạng thái source (19/10/2026):** Native **38 / browser worker 24** có tài khoản cách ly, receipt/fence bền vững, quản lý nguồn dự án, preview ZIP lịch sử theo tài khoản và tùy chọn semi-space Node mặc định tắt. [Chạy bản native](docs/NATIVE_SETUP.md), [cấu hình bộ nhớ](docs/NATIVE_NODE_MEMORY.md). Bằng chứng chat/view_file/stream/cancel trên Web và IDE thật thuộc các revision trước. Luồng context 3.8 → model chính đang chờ Google xác minh; hai tài khoản thật, executor đầy đủ và các gate P6–P8 chưa hoàn tất. Các đoạn revision cũ dưới đây được giữ làm lịch sử kiểm chứng.
+**Trạng thái source (19/10/2026):** Native **39 / browser worker 25** có tài khoản cách ly, receipt/fence bền vững, quản lý nguồn dự án, preview ZIP và kiểm tra trang import theo tài khoản, cùng tùy chọn semi-space Node mặc định tắt. [Chạy và test nhanh](docs/NATIVE_TEST_QUICKSTART.md), [thiết lập native](docs/NATIVE_SETUP.md), [cấu hình bộ nhớ](docs/NATIVE_NODE_MEMORY.md). Bằng chứng chat/view_file/stream/cancel trên Web và IDE thật thuộc các revision trước. Luồng context 3.8 → model chính đang chờ Google xác minh; hai tài khoản thật, executor đầy đủ và các gate P6–P8 chưa hoàn tất. Các đoạn revision cũ dưới đây được giữ làm lịch sử kiểm chứng.
 
 P7a/P7b có [kiểm tra ZIP trước khi import lịch sử](docs/NATIVE_CHAT_IMPORT.md): CLI offline và màn hình Nhập lịch sử thử nghiệm (`AG_NATIVE_IMPORTS_EXPERIMENTAL=1`). Preview gắn tài khoản/epoch, có tiến độ và hủy; chưa upload tới Google hoặc chứng nhận chuyển Gemini A → B.
 
