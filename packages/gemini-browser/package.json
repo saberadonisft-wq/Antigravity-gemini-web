@@ -21,6 +21,10 @@
     "test": "node --test --test-concurrency=1 --test-timeout=60000 dist/**/*.test.js"
   },
   "dependencies": {
-    "@antigravity-gemini-web/contracts": "*"
+    "@antigravity-gemini-web/contracts": "*",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.2"
   }
 }

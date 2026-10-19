@@ -4,6 +4,7 @@ import {
   OperationRecordSchema, SessionSummarySchema, ActivityEntrySchema, RuntimeEventSchema, createPageSchema,
   sanitizeDiagnostics, safeUiError,
   NativeManagementCommandSchema,NativeManagementSnapshotSchema,type NativeManagementClient,
+  NativeExtensionPairingIntentSchema,type NativeExtensionPairingClient,
   KnowledgeUiCommandSchema,KnowledgeImportIntentSchema,KnowledgeSnapshotSchema,type NativeKnowledgeClient,type KnowledgeImportIntent,type KnowledgeSnapshot,
   ChatImportIntentSchema,ChatImportUiCommandSchema,ChatImportSnapshotSchema,type NativeChatImportClient,type ChatImportIntent,type ChatImportSnapshot,
 } from "@antigravity-gemini-web/contracts";
@@ -16,6 +17,7 @@ export interface IpcSender {
 export interface IpcCallContext { sender: IpcSender; isMainFrame: boolean; origin: string; }
 export interface IpcBridgeOptions {
   nativeAccounts?:NativeManagementClient;
+  nativePairing?:NativeExtensionPairingClient;
   nativeKnowledge?:Pick<NativeKnowledgeClient,"getNativeKnowledge"|"executeNativeKnowledge">;
   onImportKnowledge?:(intent:KnowledgeImportIntent)=>Promise<KnowledgeSnapshot>;
   nativeChatImports?:Pick<NativeChatImportClient,"getNativeChatImports"|"executeNativeChatImport">;
@@ -44,7 +46,7 @@ export class IpcSecurityBridge {
   public static readonly ALLOWED_CHANNELS = new Set([
     "launcher:getSnapshot", "launcher:execute", "launcher:getOperation",
     "launcher:getSessions", "launcher:getActivity", "launcher:subscribe", "launcher:unsubscribe",
-    "launcher:getNativeAccounts", "launcher:executeNativeAccount",
+    "launcher:getNativeAccounts", "launcher:executeNativeAccount", "launcher:copyNativeExtensionPairingCode",
     "launcher:getNativeKnowledge", "launcher:executeNativeKnowledge", "launcher:importNativeKnowledge",
     "launcher:getNativeChatImports", "launcher:inspectNativeChatImport", "launcher:executeNativeChatImport",
   ]);
@@ -106,6 +108,12 @@ export class IpcSecurityBridge {
         if(!this.options.nativeAccounts)throw safeUiError({code:"UNSUPPORTED_OPERATION"});
         const parsed=NativeManagementCommandSchema.safeParse(args[0]);if(!parsed.success)throw safeUiError({code:"CONTRACT_MISMATCH"});
         return NativeManagementSnapshotSchema.parse(await this.options.nativeAccounts.executeNativeAccount(parsed.data));
+      }
+      case "launcher:copyNativeExtensionPairingCode": {
+        if(!this.options.nativePairing)throw safeUiError({code:"UNSUPPORTED_OPERATION"});
+        const intent=NativeExtensionPairingIntentSchema.safeParse(args[0]);if(!intent.success)throw safeUiError({code:"CONTRACT_MISMATCH"});
+        await this.options.nativePairing.copyNativeExtensionPairingCode(intent.data);
+        return {copied:true};
       }
       case "launcher:getSnapshot": return sanitizeDiagnostics(RuntimeSnapshotSchema.parse(await this.backend.getSnapshot()));
       case "launcher:execute": {

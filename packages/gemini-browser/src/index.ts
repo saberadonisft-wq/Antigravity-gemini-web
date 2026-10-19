@@ -16,6 +16,8 @@ export * from "./cdp-client.js";
 export * from "./gemini-selectors.js";
 export * from "./gemini-browser-driver.js";
 export * from "./fixture-server.js";
+export * from "./extension-connector.js";
+export * from "./extension-credentials.js";
 
 export interface BrowserStatus {
   browserState: BrowserState;
@@ -120,13 +122,15 @@ export class LiveGeminiBrowserAdapter implements GeminiBrowserAdapter {
   readonly supportsRetainedConversations = true;
   readonly supportsProgressStreaming = true;
   readonly supportsAccountIdentityVerification = true;
-  readonly supportsNativeSnapshotAttachment = true;
-  readonly supportsNativeSnapshotFileRetention = true;
+  readonly supportsNativeSnapshotAttachment: boolean;
+  readonly supportsNativeSnapshotFileRetention: boolean;
   private leasedTargetWs = new Set<string>();
   readonly supportsConversationUrlCheckpoint = true;
 
   constructor(options: BrowserDriverOptions = {}) {
     this.driver = new GeminiBrowserDriver(options);
+    this.supportsNativeSnapshotAttachment = !options.connectorProfileId;
+    this.supportsNativeSnapshotFileRetention = !options.connectorProfileId;
   }
 
   /** A native provider round owns a fresh tab; the previous tab/draft is never navigated or copied. */

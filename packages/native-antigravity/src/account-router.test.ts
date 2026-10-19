@@ -30,6 +30,17 @@ test("Manual routing preserves the Web model, reserves one account and refuses s
   f.registry.update(f.accounts[0].accountId,{identityFingerprint:undefined});assert.throws(()=>router.acquire(request("unverified")),{code:"ACCOUNT_IDENTITY_UNVERIFIED"});
 });
 
+test("Sticky account-per-chat routing needs no fixed Web model or experimental router flag",t=>{
+  const f=fixture(t),router=new NativeAccountRouter(f.registry,f.file);
+  const configured=router.configure(NativeRoutingSettingsSchema.parse({mode:"sticky"}),0);
+  assert.equal(configured.settings.modelSelection,undefined);assert.equal(configured.experimentalEnabled,false);assert.equal(configured.automaticRoutingEnabled,true);
+  const first=router.acquire(request("first"),task("existing-chat"));assert.equal(first.account.accountId,f.accounts[0].accountId);router.commit(first);router.release(first);
+  f.registry.setActive(f.accounts[1].accountId);
+  const pinned=router.acquire(request("second"),task("existing-chat"));assert.equal(pinned.account.accountId,f.accounts[0].accountId);router.release(pinned);
+  const nextChat=router.acquire(request("third"),task("new-chat"));assert.equal(nextChat.account.accountId,f.accounts[1].accountId);router.release(nextChat);
+  assert.throws(()=>router.configure(settings("priority"),router.snapshot().revision),{code:"ROUTING_EXPERIMENT_DISABLED"});
+});
+
 test("Priority routes independent chats onto free accounts and keeps one fixed model without concurrent turns in a chat",t=>{
   const f=fixture(t),router=new NativeAccountRouter(f.registry,f.file,true);router.configure(settings("priority"),0);
   const a=router.acquire(request("a"),task("a"));router.commit(a);

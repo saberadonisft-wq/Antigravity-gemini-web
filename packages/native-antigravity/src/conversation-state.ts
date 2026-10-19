@@ -81,6 +81,7 @@ export class NativeConversationState {
       this.persist();
     } else if (expired) this.persist();
   }
+  hasAccount(accountId:string){return [...this.states.values()].some(state=>state.accountId===accountId);}
   private persist() {
     if (!this.filename) return;
     const entries: PersistedEntry[] = [...this.states.values()].flatMap(state => state.retired || state.outcomeUnknown || state.pendingRevision || state.resumeUrl ? [{

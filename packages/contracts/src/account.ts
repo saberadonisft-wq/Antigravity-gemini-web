@@ -25,6 +25,7 @@ export type AccountCapability = z.infer<typeof AccountCapabilitySchema>;
 export const AccountRecordSchema = z.object({
   accountId: z.string().regex(/^[a-zA-Z0-9_-]{4,64}$/),
   displayName: z.string().min(1).max(128),
+  browserTransport: z.enum(["cdp", "extension"]).optional(),
   profilePath: z.string().min(1),
   statePath: z.string().min(1),
   debugPort: z.number().int().min(1024).max(65535),

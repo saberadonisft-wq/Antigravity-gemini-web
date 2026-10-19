@@ -28,6 +28,8 @@ export async function runNativeAccountsDesktop(window:BrowserWindow,runtime:Runt
   const errors:string[]=[];window.webContents.on("console-message",(_event,level,message)=>{if(level>=3)errors.push(message);});
   await wait("!!document.querySelector('[data-native-nav]')");await evaluate("document.querySelector('[data-native-nav]').click()");
   await wait("document.querySelectorAll('[data-native-account]').length===2");const initial=await read(),a=initial.accounts[0].accountId,b=initial.accounts[1].accountId;
+  await evaluate("(()=>{const select=document.querySelector('[data-native-action=routing]');select.value='sticky';select.dispatchEvent(new Event('change',{bubbles:true}));})()");await wait("document.querySelector('[data-native-action=routing]').value==='sticky'");assert.equal((await read()).routing.automaticEnabled,true);
+  await evaluate("(()=>{const select=document.querySelector('[data-native-action=routing]');select.value='manual';select.dispatchEvent(new Event('change',{bubbles:true}));})()");await wait("document.querySelector('[data-native-action=routing]').value==='manual'");assert.equal((await read()).routing.automaticEnabled,false);
   await click("verify",a);await wait(`document.querySelector('[data-native-account="${a}"] [data-native-account-state]').textContent.includes('vừa được kiểm tra')`);
   await click("use",b);await wait(`!!document.querySelector('[data-native-account="${b}"] .badge')`);assert.equal((await read()).selectedAccountId,b);
   await click("open",b);await wait("!document.querySelector('[data-native-action=refresh]').disabled");
@@ -37,6 +39,21 @@ export async function runNativeAccountsDesktop(window:BrowserWindow,runtime:Runt
   await click("disable",b);await wait(`!!document.querySelector('[data-native-account="${a}"] .badge')`);await click("enable",b);await wait(`!document.querySelector('[data-native-account="${b}"] [data-native-action=verify]').disabled`);
   await fill("native-account-name","Secondary fixture");await click("add");await wait("document.querySelectorAll('[data-native-account]').length===3");
   const added=(await read()).accounts.find(account=>account.displayName==="Secondary fixture")!;assert.equal(added.identityRegistered,false);
+  let chromeProfileAccount=false,pairingCodeCopied=false,accountRemoval=false;
+  if(initial.runtimeRevision>=41){
+    await fill("native-account-name","Chrome profile fixture");
+    await evaluate("(()=>{const select=document.querySelector('.native-account-add select');select.value='extension';select.dispatchEvent(new Event('change',{bubbles:true}));})()");
+    await click("add");await wait("document.querySelectorAll('[data-native-account]').length===4");
+    const extension=(await read()).accounts.find(account=>account.displayName==="Chrome profile fixture")!;
+    assert.equal(extension.browserTransport,"extension");assert.equal(extension.identityRegistered,false);
+    assert.ok((await evaluate(`document.querySelector('[data-native-account="${extension.accountId}"] [data-native-action=open]').textContent`) as string).includes("connector"));
+    await click("pair",extension.accountId);await wait("document.querySelector('[data-native-accounts]').textContent.includes('Đã sao chép mã ghép nối')||!!document.querySelector('[data-native-accounts] .native-account-error')");
+    const pairingFeedback=await evaluate("document.querySelector('[data-native-accounts]').textContent");if(!(pairingFeedback as string).includes("Đã sao chép mã ghép nối"))throw Error("Extension pairing UI failed: "+String(pairingFeedback));
+    const copyState=JSON.parse(fs.readFileSync(path.join(directory,"native-pairing-copy-count.json"),"utf8"));assert.equal(copyState.copies,1);pairingCodeCopied=true;
+    chromeProfileAccount=true;
+  }
+  await click("remove",added.accountId);await wait(`document.querySelector('[data-native-account="${added.accountId}"] [role="alertdialog"]')`);await click("confirm-remove",added.accountId);await wait("document.querySelectorAll('[data-native-account]').length===3");
+  assert.ok(!(await read()).accounts.some(account=>account.accountId===added.accountId));accountRemoval=true;
   await evaluate("document.querySelector('.native-account-recovery').open=true");await fill("native-resume-url","https://gemini.google.com/app/owned_fixture");await click("resume");await wait("document.querySelector('.native-account-recovery').textContent.includes('Đang chờ một lượt IDE mới')");assert.equal((await read()).resumeArmed,true);
   await click("clear_resume");await wait("document.querySelector('[data-native-action=clear_resume]').disabled");assert.equal((await read()).resumeArmed,false);
   const descriptor=JSON.parse(fs.readFileSync(path.join(directory,"native-owner.json"),"utf8"));
@@ -53,8 +70,8 @@ export async function runNativeAccountsDesktop(window:BrowserWindow,runtime:Runt
   await wait("document.getElementById('native-accounts-title').textContent==='Gemini Web accounts' && document.documentElement.getAttribute('data-theme')==='dark'");await new Promise(resolve=>setTimeout(resolve,180));await evaluate("document.getAnimations().forEach(animation=>animation.finish())");const darkContrast=await contrast();assert.ok(darkContrast>=4.5,"dark contrast="+darkContrast);await capture("accounts-dark-english.png");
   window.setContentSize(800,900);await new Promise(resolve=>setTimeout(resolve,80));
   assert.equal(await evaluate("document.documentElement.scrollWidth<=innerWidth+1 && document.querySelector('.app-content').scrollWidth<=document.querySelector('.app-content').clientWidth+1"),true);
-  assert.equal(await evaluate("[...document.querySelectorAll('.native-accounts button')].filter(button=>button.offsetParent!==null).every(button=>button.getBoundingClientRect().height>=44)"),true);
-  await evaluate("document.querySelector('[data-native-action=refresh]').focus()");window.webContents.sendInputEvent({type:"keyDown",keyCode:"Tab"});window.webContents.sendInputEvent({type:"keyUp",keyCode:"Tab"});await wait("document.activeElement.id==='native-account-name'");await capture("accounts-800px.png");
+  assert.equal(await evaluate("[...document.querySelectorAll('.native-accounts button,.native-accounts select')].filter(button=>button.offsetParent!==null).every(button=>button.getBoundingClientRect().height>=44)"),true);
+  await evaluate("document.querySelector('[data-native-action=refresh]').focus()");window.webContents.sendInputEvent({type:"keyDown",keyCode:"Tab"});window.webContents.sendInputEvent({type:"keyUp",keyCode:"Tab"});await wait("document.activeElement.id==='native-account-routing'");window.webContents.sendInputEvent({type:"keyDown",keyCode:"Tab"});window.webContents.sendInputEvent({type:"keyUp",keyCode:"Tab"});await wait("document.activeElement.id==='native-account-name'");await capture("accounts-800px.png");
   assert.deepEqual(errors,[]);
-  fs.writeFileSync(path.join(directory,"native-accounts-desktop.json"),JSON.stringify({checkedAt:new Date().toISOString(),status:"PASS_ELECTRON_NATIVE_ACCOUNT_CONTROLS",runtimeRevision:initial.runtimeRevision,desktop:"real_electron",ipc:"real_sandboxed_preload",owner:"real_loopback_http",browser:"SYNTHETIC",ideExecutor:"NOT_TESTED",accountSelection:true,identityEnrollment:true,trafficVerificationError:true,addEnableDisable:true,resumeWithoutReplay:true,busyControlsLocked:true,cancel:true,tokenInRenderer:false,englishDarkMode:true,widths:[1280,800],horizontalOverflow:false,minimumTarget44px:true,contrast:{light:lightContrast,dark:darkContrast},captureWarmupFrames:2,keyboard:true,rendererErrors:errors.length},null,2)+"\n");
+  fs.writeFileSync(path.join(directory,"native-accounts-desktop.json"),JSON.stringify({checkedAt:new Date().toISOString(),status:"PASS_ELECTRON_NATIVE_ACCOUNT_CONTROLS",runtimeRevision:initial.runtimeRevision,desktop:"real_electron",ipc:"real_sandboxed_preload",owner:"real_loopback_http",browser:"SYNTHETIC",ideExecutor:"NOT_TESTED",accountSelection:true,identityEnrollment:true,chromeProfileAccount,pairingCodeCopied,accountRemoval,trafficVerificationError:true,addEnableDisable:true,resumeWithoutReplay:true,busyControlsLocked:true,cancel:true,tokenInRenderer:false,englishDarkMode:true,widths:[1280,800],horizontalOverflow:false,minimumTarget44px:true,contrast:{light:lightContrast,dark:darkContrast},captureWarmupFrames:2,keyboard:true,rendererErrors:errors.length},null,2)+"\n");
 }

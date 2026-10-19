@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, protocol, net, dialog } from "electron";
+import { app, BrowserWindow, ipcMain, protocol, net, dialog, clipboard } from "electron";
 import path from "node:path";
 import fs from "node:fs";
 import os from "node:os";
@@ -84,11 +84,13 @@ if (!app.requestSingleInstanceLock()) {
     const nativeAccountSmoke=smoke&&process.env.AG_NATIVE_ACCOUNTS_SMOKE==="1";
     const nativeKnowledgeSmoke=nativeAccountSmoke&&process.env.AG_NATIVE_KNOWLEDGE_SMOKE==="1";
     const nativeImportsSmoke=nativeAccountSmoke&&process.env.AG_NATIVE_IMPORTS_SMOKE==="1";
+    let pairingCopyCount=0;
     const nativeRealChooser=nativeKnowledgeSmoke&&process.env.AG_NATIVE_KNOWLEDGE_REAL_CHOOSER==="1";
     const smokeOwnerFile=nativeAccountSmoke?path.join(smokeSandbox!,"native-owner.json"):undefined;
     const nativeAccounts=smokeOwnerFile?new NativeOwnerClient(smokeOwnerFile,JSON.parse(fs.readFileSync(smokeOwnerFile,"utf8")).endpoint):mode==="live"&&!smoke?new NativeOwnerClient():undefined;
     let nativeDialogOpen=false;
     bridge = new IpcSecurityBridge({ backend: runtime, nativeAccounts,nativeKnowledge:nativeAccounts,nativeChatImports:nativeAccounts,
+      nativePairing:nativeAccounts?{copyNativeExtensionPairingCode:async intent=>{const code=await nativeAccounts.createNativeExtensionPairingCode(intent);if(smoke){pairingCopyCount++;fs.writeFileSync(path.join(smokeSandbox!,"native-pairing-copy-count.json"),JSON.stringify({copies:pairingCopyCount}));}else clipboard.writeText(code);}}:undefined,
       onInspectChatImport:nativeAccounts?async intent=>{
         if(nativeDialogOpen)throw {code:"BUSY"};nativeDialogOpen=true;
         try{

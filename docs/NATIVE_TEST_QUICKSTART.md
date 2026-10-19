@@ -1,6 +1,6 @@
 # Chạy bản để tự test
 
-Source Native **40 / browser worker 25**. Đây là bản thử nghiệm; các test fixture không thay cho nghiệm thu tài khoản Google và executor IDE thật. Chỉ dùng một Native owner cho cùng bộ profile/state.
+Source Native **42 / browser worker 26**. Đây là bản thử nghiệm; các test fixture không thay cho nghiệm thu tài khoản Google và executor IDE thật. Chỉ dùng một Native owner cho cùng bộ profile/state. Muốn dùng các hồ sơ Chrome riêng, xem [hướng dẫn connector](CHROME_PROFILE_CONNECTOR.md); chưa cài extension hoặc ghép account thật thì chưa thể chọn các account đó để gửi lượt.
 
 ## Chạy
 
@@ -18,7 +18,7 @@ cd D:\Antigravity-gemini-web
 npm run launcher
 ```
 
-Chạy `npm run native:status` để kiểm tra owner đang chạy có `runtimeRevision: 40`. Nếu còn bản cũ, chờ hết lượt rồi dừng owner bằng `npm run native:stop` trước khi chạy lại. Không xóa profile, receipt hoặc fence để vượt lỗi. Worker cũ có cấu hình khác phải được dừng theo [runbook](NATIVE_RECOVERY_RUNBOOK.md); không dùng chung một profile giữa hai owner.
+Chạy `npm run native:status` để kiểm tra owner đang chạy có `runtimeRevision: 41`. Nếu còn bản cũ, chờ hết lượt rồi dừng owner bằng `npm run native:stop` trước khi chạy lại. Không xóa profile, receipt hoặc fence để vượt lỗi. Worker cũ có cấu hình khác phải được dừng theo [runbook](NATIVE_RECOVERY_RUNBOOK.md); không dùng chung một profile giữa hai owner.
 
 Đăng nhập/xác minh Google trong cửa sổ profile được mở. Giữ model chính bạn muốn dùng trên Web. Context đầu mặc định chọn `3.8 Flash`, rồi khôi phục model chính trước COMMIT; nếu account không có lựa chọn đó thì trả lỗi, không âm thầm thay model. Luồng hai model vẫn cần bạn nghiệm thu thật. Các lượt lỗi/unknown cũ không tự chạy lại.
 

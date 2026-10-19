@@ -6,7 +6,10 @@ import type { CdpClient } from "./cdp-client.js";
 const samePath = (a: string, b: string) => process.platform === "win32" ? path.resolve(a).toLowerCase() === path.resolve(b).toLowerCase() : path.resolve(a) === path.resolve(b);
 
 /** Verify the actual debug browser, including legacy Windows Chrome without automation flags. */
-export async function verifyBrowserProfile(cdp: CdpClient, directory: string, port: number, chromePath: string): Promise<boolean> {
+export async function verifyBrowserProfile(cdp: CdpClient, directory: string, port: number, chromePath: string, connectorProfileId?: string): Promise<boolean> {
+  if (connectorProfileId) {
+    try { const identity = await cdp.send<{ profileId: string; transport: string }>("Connector.profileIdentity", {}, 1500); return identity.transport === "chrome_extension" && identity.profileId === connectorProfileId; } catch { return false; }
+  }
   try {
     const { arguments: args } = await cdp.send<{ arguments: string[] }>("Browser.getBrowserCommandLine", {}, 1500);
     const profiles = args.filter(arg => arg.startsWith("--user-data-dir="));

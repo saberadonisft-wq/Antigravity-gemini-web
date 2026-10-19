@@ -9,6 +9,26 @@ import { GeminiDomFixtureServer } from "./fixture-server.js";
 import { LiveGeminiBrowserAdapter, GeminiBrowserDriver } from "./index.js";
 import { createHash } from "node:crypto";
 
+test("Composer readiness waits through the initial about:blank navigation but rejects other origins", async () => {
+  const driver = new GeminiBrowserDriver({ fixtureMode: true, allowedOrigins: ["http://127.0.0.1:4321"] });
+  let reads = 0;
+  const cdp = {
+    isConnected: true,
+    evaluate: async () => {
+      reads++;
+      return reads === 1
+        ? { url: "about:blank", allowed: false, ready: false, signature: "" }
+        : { url: "http://127.0.0.1:4321/app", allowed: true, ready: true, signature: "stable" };
+    },
+  };
+  Object.assign(driver, { cdp });
+  assert.equal(await driver.waitForComposerReady(), true);
+  assert.ok(reads >= 3, "composer must remain stable after navigation commits");
+
+  Object.assign(driver, { cdp: { ...cdp, evaluate: async () => ({ url: "https://accounts.google.com/", allowed: false, ready: false, signature: "" }) } });
+  assert.equal(await driver.waitForComposerReady(), false);
+});
+
 test("Google traffic verification is an explicit user action without allowing the challenge origin for prompts", async () => {
   const adapter = new LiveGeminiBrowserAdapter();
   let url = "https://www.google.com/sorry/index?continue=PRIVATE_SYNTHETIC_QUERY";

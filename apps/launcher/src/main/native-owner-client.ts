@@ -2,11 +2,13 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { NativeManagementCommandSchema,NativeManagementSnapshotSchema,safeUiError,type NativeManagementClient,type NativeManagementCommand,type NativeManagementSnapshot } from "@antigravity-gemini-web/contracts";
+import { NativeExtensionPairingIntentSchema,NativeExtensionPairingResultSchema,type NativeExtensionPairingIntent } from "@antigravity-gemini-web/contracts";
 import { KnowledgeUiCommandSchema,KnowledgeImportIntentSchema,KnowledgeSnapshotSchema,type KnowledgeUiCommand,type KnowledgeImportIntent } from "@antigravity-gemini-web/contracts";
 import { ChatImportSnapshotSchema, ChatImportIntentSchema, ChatImportUiCommandSchema, type ChatImportIntent, type ChatImportUiCommand } from "@antigravity-gemini-web/contracts";
 
 const defaultEndpoint="http://127.0.0.1:9236";
 const defaultDescriptor=path.join(os.homedir(),".gemini","antigravity-gemini-web-live","app_data","native-route","proxy-owner.json");
+const nativeAccountManagementRevision=42;
 function fail(code:string):never{throw safeUiError({code});}
 function noLinks(filename:string){
   const absolute=path.resolve(filename);let current=path.parse(absolute).root;
@@ -29,7 +31,7 @@ export class NativeOwnerClient implements NativeManagementClient {
     const url=new URL(endpoint);
     if(url.protocol!=="http:"||url.hostname!=="127.0.0.1"||!url.port||url.username||url.password||url.search||url.hash||url.pathname!=="/")fail("OWNER_MISMATCH");
   }
-  private async request<T>(resource:"manage"|"knowledge"|"imports",command:{action:string},parse:(value:unknown)=>T):Promise<T>{
+  private async request<T>(resource:"manage"|"knowledge"|"imports"|"pairing",command:{action:string},parse:(value:unknown)=>T):Promise<T>{
     let owner:{pid:number;endpoint:string;controlToken:string};let bytes:string;
     try{
       noLinks(this.descriptor);if(fs.statSync(this.descriptor).size>16384)fail("OWNER_MISMATCH");
@@ -42,8 +44,10 @@ export class NativeOwnerClient implements NativeManagementClient {
     const status=await boundedJson(health,65536) as Record<string,unknown>;
     if(!health.ok||!status||typeof status!=="object"||status.service!=="gemini-native-proxy"||status.version!==1||status.pid!==owner.pid)fail("OWNER_MISMATCH");
     if(status.accountManagementSupported!==true)fail("NATIVE_RUNTIME_UPDATE_REQUIRED");
+    if(resource==="manage"&&(typeof status.runtimeRevision!=="number"||status.runtimeRevision<nativeAccountManagementRevision))fail("NATIVE_RUNTIME_UPDATE_REQUIRED");
     if(resource==="knowledge"&&(typeof status.runtimeRevision!=="number"||status.runtimeRevision<35||typeof status.knowledgeExperimental!=="boolean"))fail("NATIVE_RUNTIME_UPDATE_REQUIRED");
     if(resource==="imports"&&(typeof status.runtimeRevision!=="number"||status.runtimeRevision<38||typeof status.importInspectionExperimental!=="boolean"))fail("NATIVE_RUNTIME_UPDATE_REQUIRED");
+    if(resource==="pairing"&&(typeof status.runtimeRevision!=="number"||status.runtimeRevision<41))fail("NATIVE_RUNTIME_UPDATE_REQUIRED");
     try{noLinks(this.descriptor);if(fs.readFileSync(this.descriptor,"utf8")!==bytes)fail("OWNER_MISMATCH");}catch{fail("OWNER_MISMATCH");}
     let response:Response;
     try{response=await fetch(this.endpoint+"/__native/"+resource,{method:"POST",headers:{"content-type":"application/json","x-native-control-token":owner.controlToken},body:JSON.stringify(command),signal:AbortSignal.timeout(command.action==="verify"||command.action==="open"||resource==="knowledge"&&command.action!=="status"?30000:5000),redirect:"error"});}
@@ -62,6 +66,7 @@ export class NativeOwnerClient implements NativeManagementClient {
     const command={...intent,action:"inspect",file};return this.request("imports",command,value=>ChatImportSnapshotSchema.parse(value));
   }
   executeNativeAccount(command:NativeManagementCommand){return this.request("manage",NativeManagementCommandSchema.parse(command),value=>NativeManagementSnapshotSchema.parse(value));}
+  createNativeExtensionPairingCode(raw:NativeExtensionPairingIntent){const intent=NativeExtensionPairingIntentSchema.parse(raw);return this.request("pairing",{action:"create",...intent},value=>NativeExtensionPairingResultSchema.parse(value).pairingCode);}
   getNativeKnowledge(){return this.request("knowledge",{action:"status"},value=>KnowledgeSnapshotSchema.parse(value));}
   executeNativeKnowledge(command:KnowledgeUiCommand){return this.request("knowledge",KnowledgeUiCommandSchema.parse(command),value=>KnowledgeSnapshotSchema.parse(value));}
   // Main-only: these paths come from an owned OS file dialog, never IPC arguments.

@@ -25,6 +25,11 @@ export interface CdpEvaluateResult<T = unknown> {
   };
 }
 
+let extensionAuth: { port: number; profileId: string; token: string } | undefined;
+/** Each MCP owner is scoped to one profile. Credentials never enter target URLs. */
+export function configureExtensionCdp(value?: { port: number; profileId: string; token: string }) { extensionAuth = value; }
+const connectorHeaders = (port: number) => extensionAuth?.port === port ? { authorization: "Bearer " + extensionAuth.token } : undefined;
+
 export class CdpClient {
   private ws: WebSocket | null = null;
   private messageId = 0;
@@ -55,7 +60,10 @@ export class CdpClient {
       try {
         this.ws = new WebSocket(this.wsUrl);
 
+        const endpoint = new URL(this.wsUrl);
+        const auth = extensionAuth && endpoint.hostname === "127.0.0.1" && Number(endpoint.port) === extensionAuth.port ? extensionAuth : undefined;
         this.ws.onopen = () => {
+          if (auth) { this.ws!.send(JSON.stringify({ type: "auth", role: "worker", profileId: auth.profileId, token: auth.token })); return; }
           if (!settled) {
             settled = true;
             clearTimeout(timer);
@@ -80,6 +88,7 @@ export class CdpClient {
         this.ws.onmessage = (evt) => {
           try {
             const data = JSON.parse(evt.data.toString());
+            if (auth && !settled && data.type === "ready" && data.profileId === auth.profileId) { settled = true; clearTimeout(timer); resolve(); return; }
             if (data.id && this.pending.has(data.id)) {
               const { resolve: pResolve, reject: pReject } = this.pending.get(data.id)!;
               this.pending.delete(data.id);
@@ -178,7 +187,7 @@ export class CdpClient {
 
   static async findTarget(debugPort: number, predicate: (t: CdpTarget) => boolean = () => true): Promise<CdpTarget | null> {
     try {
-      const resp = await fetch(`http://127.0.0.1:${debugPort}/json/list`, { signal: AbortSignal.timeout(2000) });
+      const resp = await fetch(`http://127.0.0.1:${debugPort}/json/list`, { signal: AbortSignal.timeout(2000), headers: connectorHeaders(debugPort) });
       if (!resp.ok) return null;
       const targets = (await resp.json()) as CdpTarget[];
       return targets.find(t => t.type === "page" && predicate(t)) ?? targets.find(predicate) ?? null;
@@ -190,7 +199,7 @@ export class CdpClient {
   static async confirmTargetClosed(debugPort: number, targetId: string, budgetMs = 2500): Promise<void> {
     const deadline = performance.now() + budgetMs;
     while (performance.now() < deadline) {
-      const response = await fetch(`http://127.0.0.1:${debugPort}/json/list`, { signal: AbortSignal.timeout(Math.max(1, Math.floor(Math.min(1000, deadline - performance.now())))) });
+      const response = await fetch(`http://127.0.0.1:${debugPort}/json/list`, { signal: AbortSignal.timeout(Math.max(1, Math.floor(Math.min(1000, deadline - performance.now())))), headers: connectorHeaders(debugPort) });
       if (!response.ok) throw Error("Browser closure could not be inspected.");
       const targets = await response.json() as CdpTarget[];
       if (Array.isArray(targets) && !targets.some(target => target.id === targetId)) return;
@@ -207,7 +216,7 @@ export class CdpClient {
       if (value < 1) throw Error("Owned target cleanup budget expired.");
       return value;
     };
-    const version = await fetch(`http://127.0.0.1:${debugPort}/json/version`, { signal: AbortSignal.timeout(Math.min(2000, remaining())) });
+    const version = await fetch(`http://127.0.0.1:${debugPort}/json/version`, { signal: AbortSignal.timeout(Math.min(2000, remaining())), headers: connectorHeaders(debugPort) });
     if (!version.ok) throw Error("Browser control endpoint is unavailable.");
     const endpoint = new URL((await version.json() as { webSocketDebuggerUrl: string }).webSocketDebuggerUrl);
     if (endpoint.protocol !== "ws:" || endpoint.hostname !== "127.0.0.1" || endpoint.port !== String(debugPort) || !endpoint.pathname.startsWith("/devtools/browser/") || endpoint.username || endpoint.password || endpoint.search || endpoint.hash) throw Error("Browser control endpoint is invalid.");

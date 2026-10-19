@@ -2,7 +2,7 @@ import { safeUiError,NativeManagementCommandSchema,type LauncherClient,type Nati
 
 type Intent<T> = T extends unknown?Omit<T,"expectedOwnerId"|"expectedRevision"|"expectedRoutingRevision">:never;
 export type NativeAccountIntent=Intent<NativeManagementCommand>;
-export interface NativeAccountViewState {snapshot?:NativeManagementSnapshot;fresh:boolean;loading:boolean;pendingAction?:NativeManagementCommand["action"];error?:UiError;notice?:NativeManagementCommand["action"]}
+export interface NativeAccountViewState {snapshot?:NativeManagementSnapshot;fresh:boolean;loading:boolean;pendingAction?:NativeManagementCommand["action"]|"pair";error?:UiError;notice?:NativeManagementCommand["action"]|"pair"}
 
 /** Late status reads cannot overwrite a completed selection or revive a disposed view. */
 export class NativeAccountStore {
@@ -37,9 +37,23 @@ export class NativeAccountStore {
     ++this.generation;this.update({pendingAction:intent.action,error:undefined,notice:undefined});
     try{
       if(!this.client.executeNativeAccount)throw {code:"UNSUPPORTED_OPERATION"};
-      const command=NativeManagementCommandSchema.parse({...intent,expectedOwnerId:snapshot.ownerId,expectedRevision:snapshot.revision,...(intent.action==="unbind"?{expectedRoutingRevision:snapshot.routing.revision}:{})});
+      const command=NativeManagementCommandSchema.parse({...intent,expectedOwnerId:snapshot.ownerId,expectedRevision:snapshot.revision,...(intent.action==="unbind"||intent.action==="remove"||intent.action==="configure_routing"?{expectedRoutingRevision:snapshot.routing.revision}:{})});
       const result=await this.client.executeNativeAccount(command);
       this.update({snapshot:result,fresh:true,pendingAction:undefined,notice:intent.action,loading:false});return true;
+    }catch(error){this.update({fresh:false,pendingAction:undefined,error:safeUiError(error),loading:false});return false;}
+  }
+  async copyPairingCode(accountId:string):Promise<boolean>{
+    const snapshot=this.state.snapshot,age=snapshot?Date.now()-Date.parse(snapshot.observedAt):Infinity;
+    if(this.disposed||this.state.pendingAction)return false;
+    if(!this.state.fresh||!snapshot||age<0||age>10000){this.update({fresh:false,error:safeUiError({code:"RUNTIME_DISCONNECTED"})});return false;}
+    const account=snapshot.accounts.find(row=>row.accountId===accountId);
+    if(!snapshot.canMutate){this.update({error:safeUiError({code:"BUSY"})});return false;}
+    if(!account?.enabled||account.browserTransport!=="extension"){this.update({error:safeUiError({code:"INVALID_ARGUMENT"})});return false;}
+    ++this.generation;this.update({pendingAction:"pair",error:undefined,notice:undefined});
+    try{
+      if(!this.client.copyNativeExtensionPairingCode)throw {code:"UNSUPPORTED_OPERATION"};
+      await this.client.copyNativeExtensionPairingCode({accountId,expectedOwnerId:snapshot.ownerId,expectedRevision:snapshot.revision});
+      this.update({fresh:true,pendingAction:undefined,notice:"pair",loading:false});return true;
     }catch(error){this.update({fresh:false,pendingAction:undefined,error:safeUiError(error),loading:false});return false;}
   }
   dispose(){this.disposed=true;++this.generation;clearInterval(this.timer);this.listeners.clear();}

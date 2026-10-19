@@ -27,6 +27,28 @@ test("Duplicate clicks coalesce locally and disposed views ignore late operation
   store.dispose();const count=updates;pending.resolve(snapshot);await first;assert.equal(updates,count);
 });
 
+test("Pairing sends only account authority to preload, and removal binds both account and routing revisions",async()=>{
+  const base=nativeAccountFixture(),snapshot=nativeAccountFixture({...base,runtimeRevision:41,accounts:base.accounts.map(row=>row.accountId==="acc_fixture_B"?{...row,browserTransport:"extension" as const}:row)});
+  const client:LauncherClient=new MockLauncherClient();client.getNativeAccounts=async()=>snapshot;
+  let paired:unknown,removed:unknown;
+  client.copyNativeExtensionPairingCode=async intent=>{paired=intent;};
+  client.executeNativeAccount=async command=>{removed=command;return nativeAccountFixture({...snapshot,revision:2,accounts:[snapshot.accounts[0]!],selectedAccountId:snapshot.accounts[0]!.accountId});};
+  const store=new NativeAccountStore(client);await store.refresh();
+  assert.equal(await store.copyPairingCode("acc_fixture_B"),true);assert.equal(store.current.notice,"pair");
+  assert.deepEqual(paired,{accountId:"acc_fixture_B",expectedOwnerId:snapshot.ownerId,expectedRevision:snapshot.revision});
+  assert.equal(await store.execute({action:"remove",accountId:"acc_fixture_B"}),true);
+  assert.equal((removed as any).expectedRevision,snapshot.revision);assert.equal((removed as any).expectedRoutingRevision,snapshot.routing.revision);assert.equal(store.current.snapshot?.accounts.length,1);store.dispose();
+});
+
+test("Routing changes include both owner revision and the current routing revision",async()=>{
+  const snapshot=nativeAccountFixture();const client:LauncherClient=new MockLauncherClient();client.getNativeAccounts=async()=>snapshot;
+  let received:unknown;client.executeNativeAccount=async command=>{received=command;return nativeAccountFixture({...snapshot,revision:2,routing:{...snapshot.routing,mode:"sticky",revision:1,automaticEnabled:true}});};
+  const store=new NativeAccountStore(client);await store.refresh();
+  assert.equal(await store.execute({action:"configure_routing",settings:{mode:"sticky",priority:[],roundRobinOptIn:false}}),true);
+  assert.deepEqual(received,{action:"configure_routing",settings:{mode:"sticky",priority:[],roundRobinOptIn:false},expectedOwnerId:snapshot.ownerId,expectedRevision:snapshot.revision,expectedRoutingRevision:snapshot.routing.revision});
+  assert.equal(store.current.snapshot?.routing.mode,"sticky");store.dispose();
+});
+
 test("Old success feedback is cleared after disconnection or a newer owner operation",async()=>{
   let snapshot=nativeAccountFixture(),offline=false;const client:LauncherClient=new MockLauncherClient();
   client.getNativeAccounts=async()=>{if(offline)throw {code:"RUNTIME_DISCONNECTED"};return snapshot;};client.executeNativeAccount=async()=>snapshot;

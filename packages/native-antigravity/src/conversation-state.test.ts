@@ -27,6 +27,11 @@ test("Retained context keeps ownership across history and rule edits but isolate
   const other = states.prepare("task-B", context())!; assert.notEqual(other.key, rules.key);
 });
 
+test("Retained Native context keeps its account registered until the context is retired",()=>{
+  const states=new NativeConversationState(),plan=states.prepare("task-account",context(),false,undefined,"acc_fixture_B",0)!;
+  states.complete(plan);assert.equal(states.hasAccount("acc_fixture_B"),true);assert.equal(states.hasAccount("acc_fixture_A"),false);
+});
+
 test("Stale completion and failure cannot disturb a newer reservation even for identical revisions", () => {
   const states = new NativeConversationState();
   const first = states.prepare("task", context())!; states.complete(first);

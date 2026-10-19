@@ -16,7 +16,7 @@ export const NativeRoutingSettingsSchema=z.object({
   failover:NativeFailoverSettingsSchema.optional(),
 }).strict().superRefine((value,context)=>{
   if(new Set(value.priority).size!==value.priority.length)context.addIssue({code:z.ZodIssueCode.custom,path:["priority"],message:"Account priority contains duplicates."});
-  if(value.mode!=="manual"&&!value.modelSelection)context.addIssue({code:z.ZodIssueCode.custom,path:["modelSelection"],message:"Automatic routing requires one explicit Web model/effort policy."});
+  if((value.mode==="priority"||value.mode==="round_robin"||value.failover?.enabled===true)&&!value.modelSelection)context.addIssue({code:z.ZodIssueCode.custom,path:["modelSelection"],message:"Priority, round-robin and failover routing require one explicit Web model/effort policy."});
   if(value.mode==="round_robin"&&!value.roundRobinOptIn)context.addIssue({code:z.ZodIssueCode.custom,path:["roundRobinOptIn"],message:"Round robin requires explicit opt-in."});
   if(value.failover?.enabled&&value.mode==="manual")context.addIssue({code:z.ZodIssueCode.custom,path:["failover"],message:"Failover requires an explicit automatic routing mode and fixed model policy."});
 });

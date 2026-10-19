@@ -192,6 +192,8 @@ Phạm vi:
 
 Gate: A/B đăng nhập đồng thời, cookies/state/ledger cách ly; đổi account trong profile được phát hiện trước Send; port collision và worker restart không chiếm nhầm profile; disable account không xóa chat hay lịch sử. **Fixture đã có kiểm tra hồi quy; live tài khoản mặc định đã verify. Hai tài khoản thật chưa nghiệm thu đầy đủ, nên P1 chưa đạt toàn bộ gate.**
 
+Source 41 / worker 26 triển khai transport `extension` để mỗi profile Chrome thông thường ghép riêng với account bridge qua mã riêng, không đọc/chuyển cookie và không dùng Chrome remote-debugging port. Launcher có lựa chọn transport và khởi động connector; extension chỉ cho điều khiển tab Gemini, identity vẫn phải verify tại bridge. Browser broker, extension worker, account routing và Electron launcher fixture đã qua local tests. **Cài extension, ghép hồ sơ Google thật, A ↔ B trên cùng chat IDE và xác nhận tool loop vẫn là gate P1/P2 đang mở.** [Hướng dẫn và giới hạn](CHROME_PROFILE_CONNECTOR.md), [evidence source 41](evidence/chrome-profile-connector-r41.md).
+
 Bằng chứng cập nhật: [P1/P2 safety validation](evidence/g4-native-p1-p2-safety-validation.md). Báo cáo fixture ban đầu được giữ tại [P1](evidence/g4-native-p1-account-registry.md), không dùng làm chứng nhận live.
 
 ### P2 — Binding và đồng bộ A ↔ B — ĐANG NGHIỆM THU
@@ -293,6 +295,8 @@ Phạm vi gồm bốn nhánh có thể phát hành độc lập:
 Gate: mỗi nhánh có test, bằng chứng live, capability flag và rollback riêng. Nhánh không được account hỗ trợ được ghi NOT_AVAILABLE/NOT_TESTED có lý do, không chặn phát hành phần core đã đạt.
 
 ### P8 — Ổn định và phát hành — ĐANG TRIỂN KHAI
+
+Source 42 / worker 26 thêm policy account Thủ công/Ghim theo chat, chẩn đoán model selector trong launcher và kiểm tra tương thích runtime cũ. Source 41 đã thêm Chrome profile connector. Build/test local không đồng nghĩa đã cài extension, ghép account thật, kiểm chứng Chrome/IDE thật hoặc hoàn tất P8; xem [evidence revision 42](evidence/g4-native-r42-account-routing.md), [evidence connector](evidence/chrome-profile-connector-r41.md) và [hướng dẫn cập nhật](CHROME_PROFILE_CONNECTOR.md).
 
 Đã có [recovery runbook theo source 33](NATIVE_RECOVERY_RUNBOOK.md) cho account/binding, Stop không rõ, ledger/cache, upload/model restoration và rollback bằng cấu hình. Đây là tài liệu vận hành từ implementation hiện tại; chưa thay cho thử restore/rollback từ baseline, Windows restart hoặc soak. Source 33 sửa việc kết quả quá TTL vẫn đọc được ở MCP, trong khi giữ receipt/fence.
 

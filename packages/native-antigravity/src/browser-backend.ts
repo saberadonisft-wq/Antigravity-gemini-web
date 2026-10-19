@@ -42,6 +42,7 @@ export interface NativeBrowserBackend {
   assertAuthority?(): void;
   prepare?(signal: AbortSignal): Promise<void>;
   releaseConversation?(key: string, preserve?: boolean): Promise<void>;
+  removeAccount?(accountId:string):Promise<void>;
   resourceStatus?(): JsonObject;
 }
 /**
@@ -99,6 +100,7 @@ export class McpNativeBrowserBackend implements NativeBrowserBackend {
   }
   async openBrowser(_accountId?: string) {
     await this.connect();
+    if (this.envOverrides?.AG_MCP_BROWSER_TRANSPORT === "extension") return { connectorStarted: true, requiresProfileConnection: true, promptSent: false };
     if (this.nodeSemiSpaceMiB !== null) await this.call("gemini_status", {});
     return this.call("gemini_open_browser", {});
   }

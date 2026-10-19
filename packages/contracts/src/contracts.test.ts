@@ -12,6 +12,7 @@ test("Native account controls require current owner/revision and cannot accept p
 
 test("Failover is opt-in, requires a fixed automatic policy and has finite attempt/time bounds",()=>{
   assert.equal(NativeRoutingSettingsSchema.parse({}).failover,undefined);
+  assert.equal(NativeRoutingSettingsSchema.parse({mode:"sticky"}).modelSelection,undefined);
   const enabled=NativeRoutingSettingsSchema.parse({mode:"priority",modelSelection:{model:"Fixture"},failover:{enabled:true}});
   assert.equal(enabled.failover?.maxAttempts,2);assert.equal(enabled.failover?.deadlineMs,60000);
   for(const settings of [

@@ -35,6 +35,25 @@ test("Management status is owner-authenticated, redacted and does not start a br
   assert.deepEqual(f.calls,{opens:0,checks:0,generations:0});
 });
 
+test("Management status surfaces the rejected model selector without leaking request content",async t=>{
+  const f=await fixture(t);
+  const rejected=await fetch(f.base+"/v1internal:generateContent",{method:"POST",headers:{authorization:"Bearer fixture","content-type":"application/json"},body:JSON.stringify({model:"wrong-web-model",sessionId:"model-selector-fixture",request:{contents:[{role:"user",parts:[{text:"private prompt text"}]}]}})});
+  assert.equal(rejected.status,409);const status=await f.status();
+  assert.equal(status.latestIssue?.code,"NATIVE_MODEL_NOT_SELECTED");assert.equal(status.latestIssue?.expectedModel,WEB_MODEL);
+  assert.deepEqual(status.latestIssue?.receivedModelSelectors,{model:"wrong-web-model"});
+  assert.ok(!JSON.stringify(status).includes("private prompt text"));assert.equal(f.calls.generations,0);
+});
+
+test("Sticky routing is configurable through revision-bound management without selecting a Web model",async t=>{
+  const f=await fixture(t),before=await f.status();
+  const stale=await f.command({action:"configure_routing",settings:{mode:"sticky"},expectedRoutingRevision:before.routing.revision+1},before);
+  assert.equal(stale.status,409);assert.equal(stale.data.error.code,"STALE_ROUTING_REVISION");
+  const configured=await f.command({action:"configure_routing",settings:{mode:"sticky"},expectedRoutingRevision:before.routing.revision},before);
+  assert.equal(configured.status,200);assert.equal(configured.data.routing.mode,"sticky");assert.equal(configured.data.routing.automaticEnabled,true);
+  assert.equal(configured.data.routing.experimentalEnabled,false);assert.equal(configured.data.routing.modelSelection,undefined);
+  assert.deepEqual(f.calls,{opens:0,checks:0,generations:0});
+});
+
 test("Adding an account uses owner-generated paths and rejects stale owner/revision or caller paths",async t=>{
   const f=await fixture(t),before=await f.status();
   assert.equal((await f.command({action:"add",displayName:"New",profilePath:"C:/untrusted"},before)).status,400);
@@ -52,6 +71,53 @@ test("Profile opening, identity enrollment and selection share the native pool w
   await f.command({action:"open",accountId:id});assert.equal((await f.status()).accounts[1].identityVerified,false);
   await f.command({action:"disable",accountId:id});assert.equal((await f.status()).accounts[1].state,"disabled");assert.equal((await f.status()).selectedAccountId,f.accounts[0].accountId);
   await f.command({action:"enable",accountId:id});assert.equal((await f.status()).accounts[1].enabled,true);assert.equal(f.calls.generations,0);
+});
+
+test("Existing Chrome accounts retain their extension transport through owner admission and sanitized snapshots",async t=>{
+  const f=await fixture(t),before=await f.status();
+  assert.equal((await f.command({action:"add",displayName:"Invalid",browserTransport:"unknown"},before)).status,400);
+  const added=await f.command({action:"add",displayName:"Chrome profile",browserTransport:"extension"},before);
+  assert.equal(added.status,200);
+  const account=f.registry.list().find(row=>row.displayName==="Chrome profile")!;
+  assert.equal(account.browserTransport,"extension");
+  assert.equal(added.data.accounts.find((row:{accountId:string})=>row.accountId===account.accountId).browserTransport,"extension");
+  assert.equal((await f.command({action:"open",accountId:account.accountId})).status,200);
+  assert.equal(f.calls.opens,1);assert.equal(f.calls.generations,0);
+  assert.ok(!/profilePath|statePath|identityFingerprint|token/i.test(JSON.stringify(added.data)));
+});
+
+test("Extension pairing is owner- and revision-bound and never appears in status",async t=>{
+  const f=await fixture(t),added=await f.command({action:"add",displayName:"Pair target",browserTransport:"extension"});assert.equal(added.status,200);
+  const account=f.registry.list().find(row=>row.displayName==="Pair target")!;
+  const before=await f.status();
+  const send=async(body:unknown)=>{const response=await fetch(f.base+"/__native/pairing",{method:"POST",headers:{"content-type":"application/json","x-native-control-token":"f".repeat(64)},body:JSON.stringify(body)});return {status:response.status,data:await response.json() as any};};
+  assert.equal((await send({action:"create",accountId:account.accountId,expectedOwnerId:randomUUID(),expectedRevision:before.revision})).status,409);
+  assert.equal((await send({action:"create",accountId:account.accountId,expectedOwnerId:before.ownerId,expectedRevision:before.revision-1})).status,409);
+  const result=await send({action:"create",accountId:account.accountId,expectedOwnerId:before.ownerId,expectedRevision:before.revision});assert.equal(result.status,200);
+  assert.match(result.data.pairingCode,/^agc1\.[A-Za-z0-9_-]+$/);
+  const decoded=JSON.parse(Buffer.from(result.data.pairingCode.slice(5),"base64url").toString("utf8"));
+  assert.equal(decoded.port,account.debugPort);assert.equal(decoded.name,"Pair target");assert.equal(decoded.version,1);assert.equal(decoded.profileId.length,36);assert.equal(decoded.token.length,64);
+  assert.ok(!JSON.stringify(await f.status()).includes(result.data.pairingCode));
+  const cdp=await send({action:"create",accountId:f.accounts[0].accountId,expectedOwnerId:before.ownerId,expectedRevision:before.revision});assert.equal(cdp.status,400);
+});
+
+test("Removing an account requires it to be unselected and unbound and preserves its profile files",async t=>{
+  const f=await fixture(t),selected=await f.status(),a=f.accounts[0],b=f.accounts[1];
+  const rejected=await f.command({action:"remove",accountId:a.accountId,expectedRoutingRevision:selected.routing.revision},selected);
+  assert.equal(rejected.status,409);assert.equal(rejected.data.error.code,"ACCOUNT_SELECTED");
+  fs.mkdirSync(b.profilePath,{recursive:true});const marker=path.join(b.profilePath,"keep.txt");fs.writeFileSync(marker,"preserve profile data");
+  const removed=await f.command({action:"remove",accountId:b.accountId,expectedRoutingRevision:selected.routing.revision},selected);
+  assert.equal(removed.status,200);assert.deepEqual(removed.data.accounts.map((row:{accountId:string})=>row.accountId),[a.accountId]);assert.ok(fs.existsSync(marker));
+  const only=await f.status(),last=await f.command({action:"remove",accountId:a.accountId,expectedRoutingRevision:only.routing.revision},only);
+  assert.equal(last.status,409);assert.equal(last.data.error.code,"LAST_ACCOUNT");
+});
+
+test("Account removal refuses to orphan project knowledge bindings",async t=>{
+  const f=await fixture(t),snapshot=await f.status(),account=f.accounts[1]!,now=new Date().toISOString(),sourceId=randomUUID();
+  const knowledge={version:1,revision:1,sources:[{sourceId,kind:"gem",label:"Reference",url:"https://gemini.google.com/gem/fixture",instructionVersion:"native_knowledge_reference_v1",createdAt:now,updatedAt:now,revision:1}],bindings:[{taskScope:"a".repeat(64),accountId:account.accountId,identityEpoch:0,sourceIds:[sourceId],updatedAt:now}]};
+  fs.mkdirSync(path.join(f.root,"native"),{recursive:true});fs.writeFileSync(path.join(f.root,"native","knowledge.json"),JSON.stringify(knowledge));
+  const result=await f.command({action:"remove",accountId:account.accountId,expectedRoutingRevision:snapshot.routing.revision},snapshot);
+  assert.equal(result.status,409);assert.equal(result.data.error.code,"ACCOUNT_BOUND");assert.ok(f.registry.get(account.accountId));
 });
 
 test("Status remains readable during verification, while concurrent mutations fail closed",async t=>{

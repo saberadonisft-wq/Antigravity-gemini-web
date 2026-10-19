@@ -50,6 +50,7 @@ export function getPreloadClient(): LauncherClient {
       getNativeAccounts:()=>rawClient.getNativeAccounts!(),
       executeNativeAccount:rawClient.executeNativeAccount.bind(rawClient),
     }:{}),
+    ...(rawClient.copyNativeExtensionPairingCode?{copyNativeExtensionPairingCode:rawClient.copyNativeExtensionPairingCode.bind(rawClient)}:{}),
     async getSnapshot(): Promise<RuntimeSnapshot> {
       if (!isPreloadAvailable()) throw new Error("Preload IPC disconnected.");
       return rawClient.getSnapshot();

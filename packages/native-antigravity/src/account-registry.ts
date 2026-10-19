@@ -5,7 +5,7 @@ import { AccountRegistryFileSchema, type AccountRecord, type AccountRegistryFile
 import { NativeRouteError } from "./native-protocol.js";
 import { atomicPrivateFile, assertNoLinks } from "./installation.js";
 
-type NewAccount = { displayName: string; profilePath: string; statePath: string; debugPort?: number; identityFingerprint?: string };
+type NewAccount = { displayName: string; profilePath: string; statePath: string; debugPort?: number; identityFingerprint?: string; browserTransport?: "cdp" | "extension" };
 type AccountPatch = Partial<Pick<AccountRecord, "displayName" | "identityFingerprint" | "enabled" | "capabilities">>;
 const emptyRegistry = (): AccountRegistryFile => ({ version: 1, revision: 0, activeAccountId: "", accounts: [] });
 const pathKey = (value: string) => {
@@ -107,7 +107,7 @@ export class AccountRegistry {
       while (used.has(debugPort) && debugPort <= 65535) debugPort++;
     }
     const now = new Date().toISOString();
-    const record: AccountRecord = { accountId: "acc_" + randomUUID().replaceAll("-", "").slice(0, 16), displayName: params.displayName.trim(), profilePath: path.resolve(params.profilePath), statePath: path.resolve(params.statePath), debugPort, identityFingerprint: params.identityFingerprint, identityEpoch: params.identityFingerprint ? 1 : 0, enabled: true, capabilities: {}, createdAt: now, updatedAt: now };
+    const record: AccountRecord = { accountId: "acc_" + randomUUID().replaceAll("-", "").slice(0, 16), displayName: params.displayName.trim(), profilePath: path.resolve(params.profilePath), statePath: path.resolve(params.statePath), debugPort, identityFingerprint: params.identityFingerprint, identityEpoch: params.identityFingerprint ? 1 : 0, enabled: true, capabilities: {}, createdAt: now, updatedAt: now, ...(params.browserTransport ? {browserTransport:params.browserTransport} : {}) };
     data.accounts.push(record); this.selectEnabled(data); return record;
   }
   add(params: NewAccount, expectedRevision?:number): AccountRecord { return this.mutate(data => this.append(data, params),expectedRevision); }
@@ -120,6 +120,15 @@ export class AccountRegistry {
   }
   disable(idOrName: string, expectedRevision?: number): AccountRecord {
     return this.mutate(data => { const account = this.findIn(data, idOrName); account.enabled = false; account.updatedAt = new Date().toISOString(); this.selectEnabled(data); return account; }, expectedRevision);
+  }
+  remove(idOrName:string,expectedRevision:number):AccountRecord {
+    return this.mutate(data=>{
+      const account=this.findIn(data,idOrName);
+      if(data.accounts.length<=1)throw new NativeRouteError("LAST_ACCOUNT","Add another account before removing the last bridge account.",409);
+      if(data.activeAccountId===account.accountId)throw new NativeRouteError("ACCOUNT_SELECTED","Select a different account before removing this one.",409);
+      data.accounts=data.accounts.filter(row=>row.accountId!==account.accountId);
+      return account;
+    },expectedRevision);
   }
   enrollIdentity(accountId: string, fingerprint: string, expectedEpoch: number): AccountRecord {
     return this.mutate(data => {

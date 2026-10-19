@@ -23,6 +23,7 @@ export interface BrowserDriverOptions {
   fixtureMode?: boolean;
   allowedOrigins?: string[];
   requireProfileIdentity?: boolean;
+  connectorProfileId?: string;
 }
 
 export function assertBrowserAccountIdentity(identity: unknown, expectedFingerprint?: string): string | undefined {
@@ -44,6 +45,7 @@ export class GeminiBrowserDriver {
   public readonly fixtureMode: boolean;
   public readonly allowedOrigins: string[];
   public readonly requireProfileIdentity: boolean;
+  public readonly connectorProfileId?: string;
 
   public isOwnedProcess = false;
   public isAttachedTarget = false;
@@ -61,6 +63,7 @@ export class GeminiBrowserDriver {
     this.fixtureMode = options.fixtureMode ?? false;
     this.allowedOrigins = options.allowedOrigins ?? [];
     this.requireProfileIdentity = options.requireProfileIdentity ?? false;
+    this.connectorProfileId = options.connectorProfileId;
   }
 
   get isConnected(): boolean {
@@ -103,7 +106,7 @@ export class GeminiBrowserDriver {
         let created: string | undefined, committed = false;
         try {
           await control.connect(Math.min(3000, timeoutMs));
-          if (this.requireProfileIdentity && !await verifyBrowserProfile(control, this.userDataDir, this.debugPort, this.chromePath)) throw Error("Debug port belongs to another or unverified browser profile.");
+          if (this.requireProfileIdentity && !await verifyBrowserProfile(control, this.userDataDir, this.debugPort, this.chromePath, this.connectorProfileId)) throw Error("Debug port belongs to another or unverified browser profile.");
           if (epoch !== this.lifecycleEpoch || this.closing) return false;
           created = (await control.send<{ targetId: string }>("Target.createTarget", { url: this.targetUrl }, 3000)).targetId;
           if (!created) throw Error("New page was not acknowledged.");
@@ -128,6 +131,8 @@ export class GeminiBrowserDriver {
     if (target?.webSocketDebuggerUrl) {
       this.isAttachedTarget = !this.isOwnedProcess;
     } else {
+      // Extension accounts attach only to the paired ordinary Chrome profile.
+      if (this.connectorProfileId) return false;
       // 2. If not running, spawn Chrome as an owned process
       const args = [
         `--remote-debugging-port=${this.debugPort}`,
@@ -186,7 +191,7 @@ export class GeminiBrowserDriver {
     this.cdp?.close();
     this.cdp = new CdpClient(target.webSocketDebuggerUrl);
     await this.cdp.connect();
-    if (this.requireProfileIdentity && !await verifyBrowserProfile(this.cdp, this.userDataDir, this.debugPort, this.chromePath)) {
+    if (this.requireProfileIdentity && !await verifyBrowserProfile(this.cdp, this.userDataDir, this.debugPort, this.chromePath, this.connectorProfileId)) {
       this.cdp.close(); this.cdp = null;
       throw Error("Debug port belongs to another or unverified browser profile.");
     }
@@ -200,6 +205,7 @@ export class GeminiBrowserDriver {
     const next = new CdpClient(wsUrl);
     try {
       await next.connect();
+      if (this.connectorProfileId && !await verifyBrowserProfile(next, this.userDataDir, this.debugPort, this.chromePath, this.connectorProfileId)) throw Error("The paired Chrome profile is unavailable.");
       if (this.closing || epoch !== this.lifecycleEpoch || this.cdp !== previous) throw new Error("Browser attachment was invalidated.");
       this.cdp = next;
       this.isAttachedTarget = !this.isOwnedProcess;
@@ -229,17 +235,24 @@ export class GeminiBrowserDriver {
     let signature = "", stableSince = 0;
     while (performance.now() < deadline) {
       check();
-      const state = await this.cdp.evaluate<{ allowed: boolean; ready: boolean; signature: string }>(`(() => {
+      const state = await this.cdp.evaluate<{ url: string; allowed: boolean; ready: boolean; signature: string }>(`(() => {
         const dom = ${getDomInspectionSnippet({ fixtureMode: this.fixtureMode, allowedOrigins: this.allowedOrigins })};
         const editor = document.querySelector("${GEMINI_SELECTORS.COMPOSER_INPUT}");
         const visible = el => el && el.getBoundingClientRect().height > 0 && getComputedStyle(el).visibility !== 'hidden';
         const buttons = [...document.querySelectorAll("${GEMINI_SELECTORS.SEND_BUTTON}")].filter(el => visible(el) && !el.disabled && el.getAttribute('aria-disabled') !== 'true');
         const allowed = dom.isAllowedSurface && dom.accountState === 'signed_in';
         const ready = allowed && !dom.isGenerating && visible(editor) && !editor.disabled && !editor.readOnly && !editor.closest('[aria-busy="true"], [inert]') && getComputedStyle(editor).pointerEvents !== 'none' && ${requireSend ? "buttons.length === 1" : "true"};
-        return { allowed, ready: Boolean(ready), signature: JSON.stringify([dom.lastResponseKey, dom.lastUserQueryKey, editor?.outerHTML, buttons.map(el => el.outerHTML)]) };
+        return { url: dom.url, allowed, ready: Boolean(ready), signature: JSON.stringify([dom.lastResponseKey, dom.lastUserQueryKey, editor?.outerHTML, buttons.map(el => el.outerHTML)]) };
       })()`, true, Math.max(1, Math.min(1500, deadline - performance.now())));
       check();
-      if (!state?.allowed) return false;
+      // Chrome can acknowledge CDP before its initial about:blank target commits
+      // the requested Gemini URL. Wait through that transient only; an actual
+      // unsupported or sign-in URL still fails immediately.
+      if (!state?.allowed && state?.url !== "about:blank") return false;
+      if (!state.allowed) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        continue;
+      }
       if (!state.ready || signature !== state.signature) { signature = state.ready ? state.signature : ""; stableSince = performance.now(); }
       else if (performance.now() - stableSince >= 200) return true;
       await new Promise(resolve => setTimeout(resolve, 100));

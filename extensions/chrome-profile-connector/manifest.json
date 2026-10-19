@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Antigravity Gemini Profile Connector",
+  "version": "0.1.1",
+  "minimum_chrome_version": "118",
+  "description": "Kết nối Gemini trong hồ sơ Chrome hiện tại với Native bridge trên máy.",
+  "permissions": ["debugger", "storage", "tabs"],
+  "host_permissions": ["https://gemini.google.com/*", "http://127.0.0.1/*"],
+  "incognito": "not_allowed",
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": { "default_popup": "popup.html", "default_title": "Gemini Profile Connector" }
+}

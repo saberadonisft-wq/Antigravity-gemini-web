@@ -32,6 +32,7 @@ export function emptyImportObservation(status: ChatImportSurfaceObservation["sta
 /** Inspect existing non-conversation tabs only. Never open/navigate/activate/close a user tab. */
 export async function inspectExistingImportSurface(driver: GeminiBrowserDriver, expectedFingerprint: string, check: () => void): Promise<ChatImportSurfaceObservation> {
   check();
+  if (driver.connectorProfileId) return emptyImportObservation("not_observed");
   const deadline = performance.now() + 10000;
   const bounded = () => { check(); if (performance.now() >= deadline) throw Error("Import inspection deadline."); };
   let bootstrap: CdpClient | undefined;
@@ -42,7 +43,9 @@ export async function inspectExistingImportSurface(driver: GeminiBrowserDriver, 
       if (!target?.webSocketDebuggerUrl) return emptyImportObservation("browser_unavailable");
       bootstrap = new CdpClient(target.webSocketDebuggerUrl); await bootstrap.connect(1500); original = bootstrap;
     }
-    if (!await verifyBrowserProfile(original, driver.userDataDir, driver.debugPort, driver.chromePath)) return emptyImportObservation("browser_unavailable");
+    // Fixture mode already owns an isolated, synthetic browser and an explicit
+    // allowlisted origin; production inspection still requires OS/CDP profile proof.
+    if (!driver.fixtureMode && !await verifyBrowserProfile(original, driver.userDataDir, driver.debugPort, driver.chromePath)) return emptyImportObservation("browser_unavailable");
     bounded(); return await scan(driver, original, expectedFingerprint, bounded);
   } catch { check(); return emptyImportObservation("browser_unavailable"); }
   finally { bootstrap?.close(); }

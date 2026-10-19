@@ -6,7 +6,7 @@ import { canonical, NativeRouteError, type JsonObject } from "./native-protocol.
 import type { AccountRecord } from "@antigravity-gemini-web/contracts";
 import { parseMcpNodeSemiSpace } from "@antigravity-gemini-web/contracts";
 
-const workerConfig = (account: AccountRecord) => canonical({ profile: account.profilePath, state: account.statePath, port: account.debugPort, fingerprint: account.identityFingerprint, epoch: account.identityEpoch });
+const workerConfig = (account: AccountRecord) => canonical({ profile: account.profilePath, state: account.statePath, port: account.debugPort, fingerprint: account.identityFingerprint, epoch: account.identityEpoch, transport:account.browserTransport ?? "cdp" });
 const MAX_CACHED_WORKERS=32,MAX_CONVERSATION_OWNERS=256,MAX_PENDING_RELEASES_PER_ACCOUNT=256;
 
 export class NativeBrowserBackendPool implements NativeBrowserBackend {
@@ -30,6 +30,7 @@ export class NativeBrowserBackendPool implements NativeBrowserBackend {
       if(this.backends.size>=MAX_CACHED_WORKERS)throw new NativeRouteError("RESOURCE_LIMIT","Cached account workers reached their bound; no new worker was created.",503);
       const backend = this.backendFactory ? this.backendFactory(account) : new McpNativeBrowserBackend(this.cliPath, {
         AG_MCP_BROWSER_PROFILE: account.profilePath, AG_MCP_STATE_DIR: account.statePath, AG_MCP_DEBUG_PORT: String(account.debugPort), AG_MCP_NODE_SEMI_SPACE_MB: this.nodeSemiSpaceMiB === null ? "off" : String(this.nodeSemiSpaceMiB),
+        AG_MCP_BROWSER_TRANSPORT: account.browserTransport ?? "cdp",
       }, account.identityFingerprint ?? "");
       entry = { config, backend }; this.backends.set(account.accountId, entry);
     }
@@ -114,6 +115,13 @@ export class NativeBrowserBackendPool implements NativeBrowserBackend {
   }
   async releaseConversation(key: string, preserve = false) {const owner=this.conversationOwners.get(key);for(const accountId of owner?[owner]:this.backends.keys())await this.releaseOn(accountId,key,preserve);}
   resourceStatus(){return {lifecycle:this.closed?"closed":this.closing?"closing":"active",cachedWorkers:this.backends.size,conversationOwners:this.conversationOwners.size,pendingConversationReleases:[...this.pendingReleases.values()].reduce((sum,entries)=>sum+entries.size,0),drainingAccounts:this.draining.size,requestedNodeSemiSpaceMiB:this.nodeSemiSpaceMiB,limits:{cachedWorkers:MAX_CACHED_WORKERS,conversationOwners:MAX_CONVERSATION_OWNERS,deferredReleasesPerAccount:MAX_PENDING_RELEASES_PER_ACCOUNT}};}
+  async removeAccount(accountId:string){
+    if(this.closing)throw new NativeRouteError("SERVICE_UNAVAILABLE","The account pool is shutting down.",503);
+    if([...this.conversationOwners.values()].includes(accountId)||this.pendingReleases.get(accountId)?.size||this.draining.has(accountId))throw new NativeRouteError("ACCOUNT_IN_USE","This account still owns a retained chat or pending cleanup.",409);
+    const entry=this.backends.get(accountId);if(!entry)return;
+    await entry.backend.close();
+    if(this.backends.get(accountId)===entry)this.backends.delete(accountId);
+  }
   async close() {
     if(!this.shutdown){this.closing=true;this.shutdown=(async()=>{try{const results=await Promise.allSettled([...this.backends.values()].map(async({backend})=>backend.close()));const failure=results.find((result):result is PromiseRejectedResult=>result.status==="rejected");if(failure)throw failure.reason;}finally{this.backends.clear();this.conversationOwners.clear();this.pendingReleases.clear();this.draining.clear();this.closed=true;}})();}
     return this.shutdown;

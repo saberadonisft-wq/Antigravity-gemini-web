@@ -12,9 +12,9 @@ import { createPreloadClient } from "../preload/client.js";
 import { nativeKnowledgeFixture } from "../testing/native-knowledge-fixture.js";
 
 async function fixture(t:test.TestContext){
-  const root=fs.mkdtempSync(path.join(os.tmpdir(),"launcher-native-owner-")),file=path.join(root,"owner.json"),token="a".repeat(64),snapshot=nativeAccountFixture();
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),"launcher-native-owner-")),file=path.join(root,"owner.json"),token="a".repeat(64),snapshot=nativeAccountFixture(),pairingCode="agc1.fixtureabcdefghijklmnop";
   const imports={service:"gemini-native-chat-import",version:1,ownerId:snapshot.ownerId,revision:0,accountRevision:snapshot.revision,experimentalEnabled:true,canInspect:true,inspectionActive:false,jobs:[],googleSubmission:"not_submitted"};
-  const knowledge=nativeKnowledgeFixture(snapshot),config={pid:process.pid,supported:true,runtimeRevision:35,knowledgeEnabled:true,importsEnabled:true,leakRoot:false,redirect:false,rewriteDescriptor:false,errorCode:"",oversized:false},commands:any[]=[];
+  const knowledge=nativeKnowledgeFixture(snapshot),config={pid:process.pid,supported:true,runtimeRevision:42,knowledgeEnabled:true,importsEnabled:true,leakRoot:false,redirect:false,rewriteDescriptor:false,errorCode:"",oversized:false},commands:any[]=[];
   const server=http.createServer(async(request,response)=>{
     response.setHeader("content-type","application/json");
     if(request.url==="/__native/health"){
@@ -25,19 +25,29 @@ async function fixture(t:test.TestContext){
     assert.equal(request.headers["x-native-control-token"],token);let body="";for await(const chunk of request)body+=chunk;commands.push(JSON.parse(body));
     if(config.errorCode){response.writeHead(409);response.end(JSON.stringify({error:{code:config.errorCode,message:"cookie=private; token="+token}}));return;}
     if(config.oversized){response.end(JSON.stringify({padding:"x".repeat(270000)}));return;}
-    response.end(JSON.stringify(request.url==="/__native/imports"?{...imports,...(config.leakRoot?{file:"C:/private.zip"}:{})}:request.url==="/__native/knowledge"?{...knowledge,...(config.leakRoot?{root:"C:/private"}:{})}:snapshot));
+    response.end(JSON.stringify(request.url==="/__native/imports"?{...imports,...(config.leakRoot?{file:"C:/private.zip"}:{})}:request.url==="/__native/knowledge"?{...knowledge,...(config.leakRoot?{root:"C:/private"}:{})}:request.url==="/__native/pairing"?{pairingCode}:snapshot));
   });
   await new Promise<void>(resolve=>server.listen(0,"127.0.0.1",resolve));const endpoint="http://127.0.0.1:"+(server.address() as {port:number}).port;
   fs.writeFileSync(file,JSON.stringify({version:1,pid:process.pid,endpoint,controlToken:token}));
   t.after(async()=>{await new Promise<void>(resolve=>server.close(()=>resolve()));const resolved=fs.realpathSync(root);assert.equal(path.dirname(resolved).toLowerCase(),fs.realpathSync(os.tmpdir()).toLowerCase());assert.ok(path.basename(resolved).startsWith("launcher-native-owner-"));fs.rmSync(resolved,{recursive:true,force:true});});
-  return {root,client:new NativeOwnerClient(file,endpoint),config,commands,snapshot,knowledge,token};
+  return {root,client:new NativeOwnerClient(file,endpoint),config,commands,snapshot,knowledge,token,pairingCode};
 }
 test("Launcher main authenticates the real HTTP owner without exposing its descriptor/token",async t=>{
   const f=await fixture(t),result=await f.client.getNativeAccounts();assert.equal(result.ownerId,f.snapshot.ownerId);assert.deepEqual(f.commands,[{action:"status"}]);assert.ok(!JSON.stringify(result).includes(f.token));
 });
 
+test("Pairing secret is consumed in the main process and the preload returns no code",async t=>{
+  const f=await fixture(t);f.config.runtimeRevision=42;let mainClipboard="";
+  const bridge=new IpcSecurityBridge({backend:new RuntimeFacade({mode:"demo"}),nativeAccounts:f.client,nativePairing:{copyNativeExtensionPairingCode:async intent=>{mainClipboard=await f.client.createNativeExtensionPairingCode(intent);}},trustedSender:sender=>sender.id===7});
+  const context={sender:{id:7,send:()=>{}},isMainFrame:true,origin:"app://local/index.html"};
+  const preload=createPreloadClient({invoke:(channel,...args)=>bridge.invoke(channel,context,...args),on:()=>{},removeListener:()=>{}});
+  const result=await preload.copyNativeExtensionPairingCode!({accountId:"acc_fixture_B",expectedOwnerId:f.snapshot.ownerId,expectedRevision:f.snapshot.revision});
+  assert.equal(result,undefined);assert.equal(mainClipboard,f.pairingCode);assert.deepEqual(f.commands[0],{action:"create",accountId:"acc_fixture_B",expectedOwnerId:f.snapshot.ownerId,expectedRevision:f.snapshot.revision});
+  assert.equal(result,undefined);assert.ok(!JSON.stringify(await f.client.getNativeAccounts()).includes(f.pairingCode));
+});
+
 test("Import owner client requires revision 38 and keeps chosen paths within the main-only request",async t=>{
-  const f=await fixture(t);await assert.rejects(f.client.getNativeChatImports(),{code:"NATIVE_RUNTIME_UPDATE_REQUIRED"});assert.equal(f.commands.length,0);
+  const f=await fixture(t);f.config.runtimeRevision=35;await assert.rejects(f.client.getNativeChatImports(),{code:"NATIVE_RUNTIME_UPDATE_REQUIRED"});assert.equal(f.commands.length,0);
   f.config.runtimeRevision=38;assert.equal((await f.client.getNativeChatImports()).ownerId,f.snapshot.ownerId);
   const intent={expectedOwnerId:f.snapshot.ownerId,expectedRevision:0,expectedAccountRevision:f.snapshot.revision,accountId:f.snapshot.accounts[0]!.accountId,identityEpoch:1,provider:"chatgpt" as const};
   assert.throws(()=>f.client.inspectSelectedChatArchive(intent,"relative.zip"),{code:"INVALID_ARGUMENT"});
@@ -71,7 +81,8 @@ test("Main-only file grants derive relative selected files; renderer commands ca
 test("Owner mismatch, old runtime and descriptor replacement prevent management POST",async t=>{
   const f=await fixture(t);f.config.pid=process.pid+100;await assert.rejects(f.client.getNativeAccounts(),{code:"OWNER_MISMATCH"});assert.equal(f.commands.length,0);
   f.config.pid=process.pid;f.config.supported=false;await assert.rejects(f.client.getNativeAccounts(),{code:"NATIVE_RUNTIME_UPDATE_REQUIRED"});assert.equal(f.commands.length,0);
-  f.config.supported=true;f.config.rewriteDescriptor=true;await assert.rejects(f.client.getNativeAccounts(),{code:"OWNER_MISMATCH"});assert.equal(f.commands.length,0);
+  f.config.supported=true;f.config.runtimeRevision=41;await assert.rejects(f.client.getNativeAccounts(),{code:"NATIVE_RUNTIME_UPDATE_REQUIRED"});assert.equal(f.commands.length,0);
+  f.config.runtimeRevision=42;f.config.rewriteDescriptor=true;await assert.rejects(f.client.getNativeAccounts(),{code:"OWNER_MISMATCH"});assert.equal(f.commands.length,0);
 });
 test("Redirects, oversized responses and raw error messages never cross the owner client",async t=>{
   const f=await fixture(t);f.config.redirect=true;await assert.rejects(f.client.getNativeAccounts(),{code:"RUNTIME_DISCONNECTED"});

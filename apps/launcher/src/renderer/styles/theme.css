@@ -394,8 +394,14 @@ tr:hover td {
 .native-accounts h3 { font-size: 16px; }
 .native-accounts p { margin-top: 8px; color: var(--text-secondary); line-height: 1.6; }
 .native-account-header { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+.native-account-route-control { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.native-account-route-control label { margin: 0; }
+.native-account-route-control select { min-width: 180px; }
 .native-account-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.native-accounts button, .native-accounts input, .native-accounts summary { min-height: 44px; }
+.native-account-remove-confirm { margin-top: 12px; padding: 14px; border: 1px solid var(--danger, #d9534f); border-radius: 8px; }
+.native-account-remove-confirm h4 { margin: 0 0 8px; }
+.native-accounts button, .native-accounts input, .native-accounts select, .native-accounts summary { min-height: 44px; }
+.native-accounts select { max-width: 100%; min-width: 0; font: inherit; padding: 8px; border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary); }
 .native-accounts input { min-width: 0; max-width: 100%; flex: 1 1 230px; font-size: 16px; }
 .native-accounts label { display: block; font-weight: 600; margin-bottom: 8px; }
 .native-account-list { display: grid; gap: 12px; }

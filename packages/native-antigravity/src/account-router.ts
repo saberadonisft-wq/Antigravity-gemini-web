@@ -44,14 +44,21 @@ export class NativeAccountRouter {
   }
   snapshot(){
     const state=this.load();
-    return {...state,experimentalEnabled:this.experimental,automaticRoutingEnabled:this.experimental&&state.settings.mode!=="manual",failoverEnabled:this.experimental&&state.settings.mode!=="manual"&&state.settings.failover?.enabled===true,
+    return {...state,experimentalEnabled:this.experimental,automaticRoutingEnabled:state.settings.mode==="sticky"||this.experimental&&state.settings.mode!=="manual",failoverEnabled:this.experimental&&state.settings.mode!=="manual"&&state.settings.failover?.enabled===true,
       activeLeases:[...this.leases.values()].map(lease=>({leaseId:lease.leaseId,requestId:lease.requestId,taskScope:lease.taskScope,accountId:lease.account.accountId,identityEpoch:lease.account.identityEpoch})),
       observations:[...this.observations.entries()].filter(([,value])=>value.until>Date.now()).map(([accountId,value])=>({accountId,...value}))};
   }
+  assertAccountRemovable(accountId:string,expectedRevision:number){
+    const state=this.load();
+    if(state.revision!==expectedRevision)throw new NativeRouteError("STALE_ROUTING_REVISION","Routing configuration changed; refresh before removing the account.",409);
+    if([...this.leases.values()].some(lease=>lease.account.accountId===accountId))throw new NativeRouteError("BUSY","Wait for this account's active turn to settle.",409);
+    if(state.bindings.some(binding=>binding.accountId===accountId)||state.settings.priority.includes(accountId))throw new NativeRouteError("ACCOUNT_BOUND","Unbind this account from chats and routing priority before removing it.",409);
+  }
+  forgetAccount(accountId:string){this.observations.delete(accountId);}
   configure(settings:NativeRoutingSettings,expectedRevision:number){
     if(this.leases.size)throw new NativeRouteError("BUSY","Configure routing after active turns settle.",409);
     const parsed=NativeRoutingSettingsSchema.safeParse(settings);if(!parsed.success)throw new NativeRouteError("INVALID_ROUTING_SETTINGS","Routing mode, model policy or round-robin opt-in is invalid.");
-    if(parsed.data.mode!=="manual"&&!this.experimental)throw new NativeRouteError("ROUTING_EXPERIMENT_DISABLED","Restart with AG_NATIVE_ROUTER_EXPERIMENTAL=1 before configuring automatic routing.",412);
+    if((parsed.data.mode==="priority"||parsed.data.mode==="round_robin"||parsed.data.failover?.enabled===true)&&!this.experimental)throw new NativeRouteError("ROUTING_EXPERIMENT_DISABLED","Restart with AG_NATIVE_ROUTER_EXPERIMENTAL=1 before configuring priority, round-robin or failover routing.",412);
     for(const id of parsed.data.priority)if(!this.registry.get(id))throw new NativeRouteError("ACCOUNT_NOT_FOUND","A routing priority account is unavailable.",404);
     this.mutate(expectedRevision,state=>{state.settings=parsed.data;state.cursor=0;});return this.snapshot();
   }
@@ -73,7 +80,7 @@ export class NativeAccountRouter {
     if(!/^native_[a-f0-9]{64}$/.test(requestId)||(taskScope!==undefined&&!/^[a-f0-9]{64}$/.test(taskScope)))throw new NativeRouteError("INVALID_ARGUMENT","Invalid logical request or IDE task identity.");
     if(taskScope&&this.tasks.has(taskScope))throw new NativeRouteError("BUSY","This IDE chat already has an active turn; it cannot switch workers concurrently.",409);
     const state=this.load(),settings=state.settings;
-    if(settings.mode!=="manual"&&!this.experimental)throw new NativeRouteError("ROUTING_EXPERIMENT_DISABLED","Automatic routing is configured but its experimental runtime flag is off.",412);
+    if((settings.mode==="priority"||settings.mode==="round_robin"||settings.failover?.enabled===true)&&!this.experimental)throw new NativeRouteError("ROUTING_EXPERIMENT_DISABLED","Priority, round-robin or failover routing requires AG_NATIVE_ROUTER_EXPERIMENTAL=1.",412);
     if(settings.mode==="sticky"&&!taskScope)throw new NativeRouteError("TASK_SCOPE_REQUIRED","Sticky routing requires a stable IDE chat identity.",409);
     const all=this.registry.list(),active=this.registry.getActive(),binding=taskScope&&settings.mode==="sticky"?state.bindings.find(row=>row.taskScope===taskScope):undefined;
     if(binding&&explicitAccountId&&binding.accountId!==explicitAccountId)throw new NativeRouteError("RESUME_ACCOUNT_MISMATCH","The explicit resume account differs from this sticky binding.",409);

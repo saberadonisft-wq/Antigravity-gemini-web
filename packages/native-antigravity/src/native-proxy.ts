@@ -18,11 +18,13 @@ import { NativeKnowledgeRegistry,type KnowledgeResolution } from "./knowledge-re
 import { NativeChatImportJobs } from "./chat-import-jobs.js";
 import { ChatImportRequestSchema, ChatImportCapabilitySchema } from "@antigravity-gemini-web/contracts";
 import { KnowledgeRequestSchema } from "@antigravity-gemini-web/contracts";
+import { NativeExtensionPairingRequestSchema, NativeExtensionPairingResultSchema } from "@antigravity-gemini-web/contracts";
+import { extensionCredentials } from "@antigravity-gemini-web/gemini-browser";
 
 const PROD = "https://cloudcode-pa.googleapis.com";
 const DAILY = "https://daily-cloudcode-pa.googleapis.com";
 export const NATIVE_PROXY_PORT = 9236;
-export const NATIVE_RUNTIME_REVISION = 40;
+export const NATIVE_RUNTIME_REVISION = 42;
 /**
  * The picker identifier is deliberately distinct from WEB_MODEL (the internal
  * bridge route) and from MODEL_PLACEHOLDER_M* (the IDE enum).  Antigravity
@@ -322,7 +324,7 @@ export async function startNativeProxy(options: NativeProxyOptions) {
         backendResources:options.backend.resourceStatus?.(),
         resumeArmed: !!resumeRequest && resumeRequest.expiresAt > Date.now(), deadlines: { stallTimeoutMs: idleBudget, maxDurationMs: maximum }, upstreamCatalog, lastTurn, counters, observations, stopping }); return;
     }
-    if (request.method === "POST" && ["/__native/stop", "/__native/browser", "/__native/cancel", "/__native/resume", "/__native/account", "/__native/reconcile", "/__native/router", "/__native/manage", "/__native/knowledge", "/__native/imports"].includes(url.pathname)) {
+    if (request.method === "POST" && ["/__native/stop", "/__native/browser", "/__native/cancel", "/__native/resume", "/__native/account", "/__native/reconcile", "/__native/router", "/__native/manage", "/__native/pairing", "/__native/knowledge", "/__native/imports"].includes(url.pathname)) {
       const token = request.headers["x-native-control-token"];
       const receivedToken=typeof token==="string"?Buffer.from(token):undefined,expectedToken=Buffer.from(options.controlToken??"");
       if (!options.controlToken || !receivedToken || receivedToken.length!==expectedToken.length || !timingSafeEqual(receivedToken,expectedToken)) throw new NativeRouteError("UNAUTHORIZED", "Owner control token required.", 401);
@@ -398,7 +400,7 @@ export async function startNativeProxy(options: NativeProxyOptions) {
           const registry=options.accountRegistry!;
           if(command.action==="add"){
             const accountRoot=path.join(options.stateDirectory,"accounts",randomUUID());
-            registry.add({displayName:command.displayName,profilePath:path.join(accountRoot,"profile"),statePath:path.join(accountRoot,"mcp")},command.expectedRevision);
+            registry.add({displayName:command.displayName,profilePath:path.join(accountRoot,"profile"),statePath:path.join(accountRoot,"mcp"),browserTransport:command.browserTransport},command.expectedRevision);
           }else if(command.action==="use")registry.setActive(command.accountId,command.expectedRevision);
           else if(command.action==="enable")registry.enable(command.accountId,command.expectedRevision);
           else if(command.action==="disable"){registry.disable(command.accountId,command.expectedRevision);verifiedAccounts.delete(command.accountId);}
@@ -410,7 +412,15 @@ export async function startNativeProxy(options: NativeProxyOptions) {
             if(!options.backend.verifyAccount)throw new NativeRouteError("UNSUPPORTED_OPERATION","No account identity verifier installed.",503);
             await options.backend.verifyAccount(command.accountId,AbortSignal.timeout(25000));
             const account=registry.get(command.accountId)!;router!.identityVerified(account.accountId);verifiedAccounts.set(account.accountId,{epoch:account.identityEpoch,observedAt:new Date().toISOString()});accountFailures.delete(account.accountId);
-          }else if(command.action==="unbind")router!.unbind(command.taskScope,command.expectedRoutingRevision);
+          }else if(command.action==="remove"){
+            const account=registry.get(command.accountId);if(!account)throw new NativeRouteError("ACCOUNT_NOT_FOUND","Account was not found.",404);
+            router!.assertAccountRemovable(account.accountId,command.expectedRoutingRevision);
+            if(knowledgeStore().snapshot().bindings.some(binding=>binding.accountId===account.accountId))throw new NativeRouteError("ACCOUNT_BOUND","Remove this account's project knowledge bindings before removing it.",409);
+            if(conversations.hasAccount(account.accountId))throw new NativeRouteError("ACCOUNT_IN_USE","This account still owns retained Native chat context; keep it registered until that context is retired.",409);
+            await options.backend.removeAccount?.(account.accountId);
+            registry.remove(account.accountId,command.expectedRevision);router!.forgetAccount(account.accountId);verifiedAccounts.delete(account.accountId);accountFailures.delete(account.accountId);
+          }else if(command.action==="configure_routing")router!.configure(command.settings,command.expectedRoutingRevision);
+          else if(command.action==="unbind")router!.unbind(command.taskScope,command.expectedRoutingRevision);
           else if(command.action==="resume"){
             const selected=registry.getActive();if(!selected)throw new NativeRouteError("ACCOUNT_NOT_FOUND","Select an enabled account first.",412);
             resumeRequest={url:command.url,scope:undefined,accountId:selected.accountId,identityEpoch:selected.identityEpoch,expiresAt:Date.now()+300000};
@@ -420,6 +430,23 @@ export async function startNativeProxy(options: NativeProxyOptions) {
           throw error;
         }finally{accountControlActive=false;}
         json(response,200,managementSnapshot());return;
+      }
+      if(url.pathname==="/__native/pairing"){
+        let raw:unknown;try{raw=JSON.parse((await readBody(request)).toString("utf8"));}catch{throw new NativeRouteError("INVALID_ARGUMENT","Expected one extension pairing request.");}
+        const parsed=NativeExtensionPairingRequestSchema.safeParse(raw);if(!parsed.success)throw new NativeRouteError("INVALID_ARGUMENT","Invalid extension pairing request.");
+        const command=parsed.data,snapshot=managementSnapshot();
+        if(command.expectedOwnerId!==managementOwnerId)throw new NativeRouteError("STALE_AUTHORITY","The native owner restarted; refresh before creating a pairing code.",409);
+        if(command.expectedRevision!==snapshot.revision)throw new NativeRouteError("CONFIG_CONFLICT","Account settings changed; refresh before creating a pairing code.",409);
+        if(!snapshot.canMutate)throw new NativeRouteError("BUSY","Wait for active native work before creating a pairing code.",409);
+        const account=options.accountRegistry?.get(command.accountId);
+        if(!account?.enabled)throw new NativeRouteError("ACCOUNT_DISABLED","Choose an enabled account.",409);
+        if(account.browserTransport!=="extension")throw new NativeRouteError("INVALID_ARGUMENT","Pairing codes are only available for existing Chrome profile accounts.",400);
+        accountControlActive=true;
+        try{
+          const credentials=extensionCredentials(account.profilePath);
+          const pairingCode="agc1."+Buffer.from(JSON.stringify({...credentials,port:account.debugPort,name:account.displayName})).toString("base64url");
+          json(response,200,NativeExtensionPairingResultSchema.parse({pairingCode}));return;
+        }finally{accountControlActive=false;}
       }
       if (url.pathname === "/__native/cancel") {
         const activeTurns = [...turns.values()].filter(turn => !turn.settled && !turn.controller.signal.aborted);

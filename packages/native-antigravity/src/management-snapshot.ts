@@ -25,7 +25,7 @@ export function buildManagementSnapshot(input:{
   const snapshot={
     service:"gemini-native-management",version:1,ownerId:input.ownerId,pid:process.pid,runtimeRevision:input.runtimeRevision,observedAt:new Date(now).toISOString(),revision:input.registry.revision,
     selectedAccountId:input.registry.activeAccountId||undefined,canMutate:input.canMutate,accountControlActive:input.accountControlActive,resumeArmed:input.resumeArmed,
-    routing:{mode:routing.settings.mode,revision:routing.revision,automaticEnabled:routing.automaticRoutingEnabled,failoverEnabled:routing.failoverEnabled,modelSelection:routing.settings.modelSelection,bindingsCount:routing.bindings.length,bindings:routing.bindings.slice(0,128).map(({taskScope,accountId,identityEpoch})=>({taskScope,accountId,identityEpoch}))},
+    routing:{mode:routing.settings.mode,revision:routing.revision,automaticEnabled:routing.automaticRoutingEnabled,experimentalEnabled:routing.experimentalEnabled,failoverEnabled:routing.failoverEnabled,modelSelection:routing.settings.modelSelection,bindingsCount:routing.bindings.length,bindings:routing.bindings.slice(0,128).map(({taskScope,accountId,identityEpoch})=>({taskScope,accountId,identityEpoch}))},
     accounts:input.registry.accounts.map(account=>{
       const verified=input.verified.get(account.accountId),age=verified?now-Date.parse(verified.observedAt):Infinity;
       const identityVerified=verified?.epoch===account.identityEpoch&&age>=0&&age<30000;
@@ -35,7 +35,7 @@ export function buildManagementSnapshot(input:{
       let state:NativeManagementSnapshot["accounts"][number]["state"]=identityVerified?"checked":"unverified";
       if(reasonCode)state=reasonCode==="BROWSER_USER_ACTION_REQUIRED"?"verification_required":reasonCode==="BROWSER_LOGIN_REQUIRED"?"login_required":reasonCode==="ACCOUNT_IDENTITY_CHANGED"?"identity_mismatch":observed?"cooldown":"unavailable";
       if(busy)state="busy";if(!account.enabled)state="disabled";
-      return {accountId:account.accountId,displayName:account.displayName,enabled:account.enabled,selected:account.accountId===input.registry.activeAccountId,identityRegistered:!!account.identityFingerprint,identityVerified,identityEpoch:account.identityEpoch,lastVerifiedAt:verified?.epoch===account.identityEpoch?verified.observedAt:undefined,state,reasonCode,
+      return {accountId:account.accountId,displayName:account.displayName,browserTransport:account.browserTransport,enabled:account.enabled,selected:account.accountId===input.registry.activeAccountId,identityRegistered:!!account.identityFingerprint,identityVerified,identityEpoch:account.identityEpoch,lastVerifiedAt:verified?.epoch===account.identityEpoch?verified.observedAt:undefined,state,reasonCode,
         capabilities:Object.entries(account.capabilities).filter(([name])=>name.length>0&&name.length<=80).slice(0,32).map(([name,value])=>({name,status:value.status,observedAt:value.observedAt&&Number.isFinite(Date.parse(value.observedAt))?new Date(value.observedAt).toISOString():undefined}))};
     }),
     activeTurns:routing.activeLeases.map(lease=>{
@@ -43,6 +43,7 @@ export function buildManagementSnapshot(input:{
       return {requestId:lease.requestId,accountId:lease.accountId,taskScope:lease.taskScope,phase:turn?.settled||turn?.controller.signal.aborted?"stopping":managementPhase(turn?.diagnostic)};
     }),
     lastOutcome:last&&typeof last.requestId==="string"&&/^native_[a-f0-9]{64}$/.test(last.requestId)?{requestId:last.requestId,accountId:typeof last.accountId==="string"?last.accountId:undefined,phase:managementPhase(last),code:code(last.code),delivery:last.delivery==="not_sent"||last.delivery==="unknown"?last.delivery:undefined,browserStopConfirmed:typeof last.browserStopConfirmed==="boolean"?last.browserStopConfirmed:undefined,elapsedMs:duration(last.elapsedMs),firstTextMs:last.firstTextMs===null?null:duration(last.firstTextMs),transportMessages:typeof last.transportMessages==="number"&&last.transportMessages>=1&&last.transportMessages<=11?last.transportMessages:undefined,attemptCount:Array.isArray(last.attempts)&&last.attempts.length?last.attempts.length:undefined}:undefined,
+    latestIssue:last&&code(last.code)?{code:code(last.code)!,phase:typeof last.phase==="string"?last.phase.slice(0,80):undefined,expectedModel:typeof last.expectedModel==="string"?last.expectedModel.slice(0,128):undefined,receivedModelSelectors:last.receivedModelSelectors&&typeof last.receivedModelSelectors==="object"&&!Array.isArray(last.receivedModelSelectors)?Object.fromEntries(Object.entries(last.receivedModelSelectors).filter(([key,value])=>["model","modelId","model_id"].includes(key)&&typeof value==="string").slice(0,3).map(([key,value])=>[key,(value as string).slice(0,128)])):undefined}:undefined,
   };
   return NativeManagementSnapshotSchema.parse(snapshot);
 }

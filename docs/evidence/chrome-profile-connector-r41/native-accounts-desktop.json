@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-19T13:09:17.349Z",
+  "status": "PASS_ELECTRON_NATIVE_ACCOUNT_CONTROLS",
+  "runtimeRevision": 41,
+  "desktop": "real_electron",
+  "ipc": "real_sandboxed_preload",
+  "owner": "real_loopback_http",
+  "browser": "SYNTHETIC",
+  "ideExecutor": "NOT_TESTED",
+  "accountSelection": true,
+  "identityEnrollment": true,
+  "chromeProfileAccount": true,
+  "trafficVerificationError": true,
+  "addEnableDisable": true,
+  "resumeWithoutReplay": true,
+  "busyControlsLocked": true,
+  "cancel": true,
+  "tokenInRenderer": false,
+  "englishDarkMode": true,
+  "widths": [
+    1280,
+    800
+  ],
+  "horizontalOverflow": false,
+  "minimumTarget44px": true,
+  "contrast": {
+    "light": 14.839194581350755,
+    "dark": 14.639773375342953
+  },
+  "captureWarmupFrames": 2,
+  "keyboard": true,
+  "rendererErrors": 0,
+  "opens": 1,
+  "identityChecks": 3,
+  "syntheticGenerations": 1,
+  "realGoogleRequests": 0
+}

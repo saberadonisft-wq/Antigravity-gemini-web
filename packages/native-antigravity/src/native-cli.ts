@@ -11,6 +11,7 @@ import { startNativeProxy, NATIVE_PROXY_PORT, NATIVE_RUNTIME_REVISION } from "./
 import { inspectIde, nativeHome, isolatedIdeProfile, configureIsolatedProfile, atomicPrivateFile, assertNoLinks } from "./installation.js";
 import { NativeRouteError } from "./native-protocol.js";
 import { ChatImportProbeRequestSchema, ChatImportCapabilitySchema } from "@antigravity-gemini-web/contracts";
+import { extensionCredentials } from "@antigravity-gemini-web/gemini-browser";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const endpoint = "http://127.0.0.1:" + NATIVE_PROXY_PORT;
@@ -98,6 +99,7 @@ try {
         AG_MCP_BROWSER_PROFILE: account.profilePath,
         AG_MCP_STATE_DIR: account.statePath,
         AG_MCP_DEBUG_PORT: String(account.debugPort),
+        AG_MCP_BROWSER_TRANSPORT: account.browserTransport ?? "cdp",
       });
       try {
         console.log(JSON.stringify(await backend.openBrowser(), null, 2));
@@ -136,6 +138,7 @@ try {
       accounts: accounts.map(a => ({
         accountId: a.accountId,
         displayName: a.displayName,
+        browserTransport: a.browserTransport ?? "cdp",
         debugPort: a.debugPort,
         active: a.accountId === active?.accountId,
         enabled: a.enabled,
@@ -144,22 +147,35 @@ try {
         profilePath: a.profilePath,
       })),
     }, null, 2));
+  } else if (command === "account:pair") {
+    const account = getRegistry().find(process.argv[3] ?? "");
+    if (!account?.enabled || account.browserTransport !== "extension") throw new NativeRouteError("INVALID_ARGUMENT", "Select an enabled extension account: account:pair <id|name>.");
+    assertNoLinks(account.profilePath);
+    const credentials = extensionCredentials(account.profilePath);
+    const code = "agc1." + Buffer.from(JSON.stringify({ ...credentials, port: account.debugPort, name: account.displayName })).toString("base64url");
+    console.log("Paste this private pairing code in the connector installed in the intended Chrome profile. Do not share it:");
+    console.log(code);
+    console.log("Open this account in launcher to start its connector, then connect the extension and verify the Gemini identity.");
   } else if (command === "account:add") {
     const name = process.argv[3];
     if (!name || name.startsWith("--")) throw new NativeRouteError("INVALID_ARGUMENT", "Account name required: account:add <name> [--profile <path>] [--state <path>] [--port <port>]");
     const profileIdx = process.argv.indexOf("--profile");
     const stateIdx = process.argv.indexOf("--state");
     const portIdx = process.argv.indexOf("--port");
+    const transportIdx = process.argv.indexOf("--transport"), browserTransport = transportIdx < 0 ? undefined : process.argv[transportIdx + 1];
+    if (browserTransport !== undefined && browserTransport !== "cdp" && browserTransport !== "extension") throw new NativeRouteError("INVALID_ARGUMENT", "Use --transport cdp|extension.");
+    if (browserTransport === "extension" && (profileIdx >= 0 || stateIdx >= 0)) throw new NativeRouteError("INVALID_ARGUMENT", "Extension accounts use private bridge metadata directories, not existing Chrome user-data directories.");
     if(await isProxyRunning()){
       if(profileIdx>=0||stateIdx>=0||portIdx>=0)throw new NativeRouteError("UNSUPPORTED_OPERATION","Custom account paths/ports require an offline native owner. Online additions use owner-generated isolated paths.",412);
       const status=await ownerControl("manage",{action:"status"});
-      console.log(JSON.stringify(await ownerControl("manage",{action:"add",displayName:name,expectedOwnerId:status.ownerId,expectedRevision:status.revision}),null,2));
+      if(browserTransport === "extension" && status.runtimeRevision < 41) throw new NativeRouteError("ACCOUNT_RUNTIME_STALE", "Restart with Native 41 before adding an extension account.", 412);
+      console.log(JSON.stringify(await ownerControl("manage",{action:"add",displayName:name,browserTransport,expectedOwnerId:status.ownerId,expectedRevision:status.revision}),null,2));
     }else{
     const profilePath = profileIdx >= 0 ? process.argv[profileIdx + 1] : path.join(nativeHome, "accounts", slugify(name), "browser_profile");
     const statePath = stateIdx >= 0 ? process.argv[stateIdx + 1] : path.join(nativeHome, "accounts", slugify(name), "mcp");
     const debugPort = portIdx >= 0 ? Number(process.argv[portIdx + 1]) : undefined;
     const registry = getRegistry();
-    const record = registry.add({ displayName: name, profilePath, statePath, debugPort });
+    const record = registry.add({ displayName: name, profilePath, statePath, debugPort, browserTransport });
     console.log(JSON.stringify({ added: record }, null, 2));
     }
   } else if (command === "account:use") {
