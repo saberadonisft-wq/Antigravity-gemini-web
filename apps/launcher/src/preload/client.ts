@@ -4,6 +4,7 @@ import {
   ActivityEntrySchema, RuntimeEventSchema, UiErrorSchema, createPageSchema, safeUiError,
   NativeManagementSnapshotSchema,NativeManagementCommandSchema,
   KnowledgeSnapshotSchema,KnowledgeUiCommandSchema,KnowledgeImportIntentSchema,
+  ChatImportSnapshotSchema,ChatImportIntentSchema,ChatImportUiCommandSchema,
 } from "@antigravity-gemini-web/contracts";
 
 export interface IpcInvoker {
@@ -41,6 +42,9 @@ export function createPreloadClient(invoker: IpcInvoker): LauncherClient {
     for (const listener of listeners) { try { listener(structuredClone(result.data)); } catch {} }
   };
   return {
+    async getNativeChatImports(){return ChatImportSnapshotSchema.parse(await call("launcher:getNativeChatImports"));},
+    async inspectNativeChatImport(intent){return ChatImportSnapshotSchema.parse(await call("launcher:inspectNativeChatImport",ChatImportIntentSchema.parse(intent)));},
+    async executeNativeChatImport(command){return ChatImportSnapshotSchema.parse(await call("launcher:executeNativeChatImport",ChatImportUiCommandSchema.parse(command)));},
     async getNativeKnowledge(){return KnowledgeSnapshotSchema.parse(await call("launcher:getNativeKnowledge"));},
     async executeNativeKnowledge(command){return KnowledgeSnapshotSchema.parse(await call("launcher:executeNativeKnowledge",KnowledgeUiCommandSchema.parse(command)));},
     async importNativeKnowledge(intent){return KnowledgeSnapshotSchema.parse(await call("launcher:importNativeKnowledge",KnowledgeImportIntentSchema.parse(intent)));},

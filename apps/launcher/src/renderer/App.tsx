@@ -16,10 +16,11 @@ import { ActivityView } from "./views/ActivityView.js";
 import { SettingsView } from "./views/SettingsView.js";
 import { NativeAccountsView } from "./views/NativeAccountsView.js";
 import { NativeKnowledgeView } from "./views/NativeKnowledgeView.js";
+import { NativeChatImportView } from "./views/NativeChatImportView.js";
 import { t, errorText } from "./i18n.js";
 import "./styles/theme.css";
 
-type ViewId = "overview" | "onboarding" | "sessions" | "activity" | "settings" | "native_accounts" | "native_knowledge";
+type ViewId = "overview" | "onboarding" | "sessions" | "activity" | "settings" | "native_accounts" | "native_knowledge" | "native_imports";
 
 export const App: React.FC<{ clientOverride?: LauncherClient }> = ({ clientOverride }) => {
   const [client, setClient] = useState<LauncherClient | null>(null);
@@ -170,6 +171,7 @@ export const App: React.FC<{ clientOverride?: LauncherClient }> = ({ clientOverr
           </button>
           <button className={`nav-link ${currentView==="native_accounts"?"active":""}`} data-native-nav aria-current={currentView==="native_accounts"?"page":undefined} onClick={()=>setCurrentView("native_accounts")}>{lang==="vi"?"Tài khoản Web":"Web accounts"}</button>
           <button className={`nav-link ${currentView==="native_knowledge"?"active":""}`} data-knowledge-nav aria-current={currentView==="native_knowledge"?"page":undefined} onClick={()=>setCurrentView("native_knowledge")}>{lang==="vi"?"Nguồn dự án":"Project references"}</button>
+          <button className={`nav-link ${currentView==="native_imports"?"active":""}`} data-imports-nav aria-current={currentView==="native_imports"?"page":undefined} onClick={()=>setCurrentView("native_imports")}>{lang==="vi"?"Nhập lịch sử":"History import"}</button>
         </nav>
 
         <div style={{ marginTop: "auto", borderTop: "1px solid var(--border-color)", paddingTop: 14 }}>
@@ -221,7 +223,8 @@ export const App: React.FC<{ clientOverride?: LauncherClient }> = ({ clientOverr
         )}
 
         {/* View Router */}
-        <fieldset disabled={isDisconnected&&currentView!=="native_accounts"&&currentView!=="native_knowledge"} className="view-controls">
+        <fieldset disabled={isDisconnected&&currentView!=="native_accounts"&&currentView!=="native_knowledge"&&currentView!=="native_imports"} className="view-controls">
+        {currentView==="native_imports"&&<NativeChatImportView client={client} lang={lang}/>}
         {currentView==="native_knowledge"&&<NativeKnowledgeView client={client} lang={lang}/>}
         {currentView==="native_accounts"&&<NativeAccountsView client={client} lang={lang}/>}
         {currentView === "overview" && (

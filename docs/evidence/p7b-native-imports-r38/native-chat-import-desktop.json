@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-19T06:56:17.110Z",
+  "status": "PASS_ELECTRON_CHAT_IMPORT_PREVIEW",
+  "nativeRuntimeRevision": 38,
+  "electron": "REAL",
+  "ipc": "REAL_SANDBOXED_PRELOAD",
+  "owner": "REAL_HTTP",
+  "archiveWorker": "REAL_WORKER_THREAD",
+  "osChooser": "SYNTHETIC_MAIN_GRANT",
+  "accountIdentity": "SYNTHETIC_REGISTERED",
+  "arbitraryRendererPathsDenied": true,
+  "selectionCancelCreatesNoJob": true,
+  "accountChangeWithdrawsPreview": true,
+  "explicitSecondAccount": true,
+  "metadataOnly": true,
+  "googleSubmission": "not_submitted",
+  "widths": [
+    1280,
+    800
+  ],
+  "minimumTarget44px": true,
+  "keyboard": true,
+  "horizontalOverflow": false,
+  "rendererErrors": 0,
+  "nativeGenerations": 0,
+  "realGooglePromptRequests": 0
+}

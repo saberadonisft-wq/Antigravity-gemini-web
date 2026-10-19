@@ -83,13 +83,30 @@ if (!app.requestSingleInstanceLock()) {
     });
     const nativeAccountSmoke=smoke&&process.env.AG_NATIVE_ACCOUNTS_SMOKE==="1";
     const nativeKnowledgeSmoke=nativeAccountSmoke&&process.env.AG_NATIVE_KNOWLEDGE_SMOKE==="1";
+    const nativeImportsSmoke=nativeAccountSmoke&&process.env.AG_NATIVE_IMPORTS_SMOKE==="1";
     const nativeRealChooser=nativeKnowledgeSmoke&&process.env.AG_NATIVE_KNOWLEDGE_REAL_CHOOSER==="1";
     const smokeOwnerFile=nativeAccountSmoke?path.join(smokeSandbox!,"native-owner.json"):undefined;
     const nativeAccounts=smokeOwnerFile?new NativeOwnerClient(smokeOwnerFile,JSON.parse(fs.readFileSync(smokeOwnerFile,"utf8")).endpoint):mode==="live"&&!smoke?new NativeOwnerClient():undefined;
-    let knowledgeDialogOpen=false;
-    bridge = new IpcSecurityBridge({ backend: runtime, nativeAccounts,nativeKnowledge:nativeAccounts,
+    let nativeDialogOpen=false;
+    bridge = new IpcSecurityBridge({ backend: runtime, nativeAccounts,nativeKnowledge:nativeAccounts,nativeChatImports:nativeAccounts,
+      onInspectChatImport:nativeAccounts?async intent=>{
+        if(nativeDialogOpen)throw {code:"BUSY"};nativeDialogOpen=true;
+        try{
+          const [status,accounts]=await Promise.all([nativeAccounts.getNativeChatImports(),nativeAccounts.getNativeAccounts()]);
+          if(status.ownerId!==intent.expectedOwnerId||accounts.ownerId!==intent.expectedOwnerId)throw {code:"STALE_AUTHORITY"};
+          if(status.revision!==intent.expectedRevision||status.accountRevision!==intent.expectedAccountRevision||accounts.revision!==intent.expectedAccountRevision)throw {code:"CONFIG_CONFLICT"};
+          if(!status.experimentalEnabled)throw {code:"UNSUPPORTED_OPERATION"};
+          if(!status.canInspect||!accounts.canMutate)throw {code:"BUSY"};
+          const account=accounts.accounts.find(value=>value.accountId===intent.accountId);
+          if(!account?.enabled||!account.identityRegistered||account.identityEpoch!==intent.identityEpoch)throw {code:"STALE_AUTHORITY"};
+          const selected=nativeImportsSmoke?JSON.parse(fs.readFileSync(path.join(smokeSandbox!,"imports-dialog.json"),"utf8")):await dialog.showOpenDialog(window!,{title:(await runtime!.getSnapshot()).settings.language==="en"?"Select chat export ZIP":"Chọn ZIP xuất lịch sử chat",filters:[{name:"ZIP",extensions:["zip"]}],properties:["openFile","dontAddToRecent"]});
+          if(selected.canceled||selected.filePaths?.length!==1)throw {code:"CANCELLED"};
+          if(!window||window.isDestroyed())throw {code:"CANCELLED"};
+          return await nativeAccounts.inspectSelectedChatArchive(intent,selected.filePaths[0]);
+        }finally{nativeDialogOpen=false;}
+      }:undefined,
       onImportKnowledge:nativeAccounts?async intent=>{
-        if(knowledgeDialogOpen)throw {code:"BUSY"};knowledgeDialogOpen=true;
+        if(nativeDialogOpen)throw {code:"BUSY"};nativeDialogOpen=true;
         try{
           const status=await nativeAccounts.getNativeKnowledge();
           if(status.ownerId!==intent.expectedOwnerId)throw {code:"STALE_AUTHORITY"};
@@ -103,7 +120,7 @@ if (!app.requestSingleInstanceLock()) {
           recordChooser(selected.canceled?"cancel":"selected",selected.filePaths?.length??0);
           if(selected.canceled||!selected.filePaths?.length)throw {code:"CANCELLED"};
           return await nativeAccounts.importSelectedKnowledgeFiles(intent,selected.filePaths);
-        }finally{knowledgeDialogOpen=false;}
+        }finally{nativeDialogOpen=false;}
       }:undefined,allowedOrigins: ["app://local"], trustedSender: sender => registered.has(sender.id) });
     ipcMain.on("launcher:preload-ready", (event, flags) => {
       try {
@@ -133,7 +150,9 @@ if (!app.requestSingleInstanceLock()) {
     const target = "app://local/index.html?mode=" + mode;
     await window.loadURL(target);
     if(nativeAccountSmoke){
-      if(nativeRealChooser){
+      if(nativeImportsSmoke){
+        const { runNativeChatImportDesktop }=await import("./native-chat-import-desktop.js");await runNativeChatImportDesktop(window,runtime,smokeSandbox!);
+      }else if(nativeRealChooser){
         window.setTitle("Native Knowledge - Real Chooser Acceptance");
         const { runNativeKnowledgeRealChooser }=await import("./native-knowledge-real-chooser.js");await runNativeKnowledgeRealChooser(window,smokeSandbox!);
       }else if(nativeKnowledgeSmoke){

@@ -5,6 +5,7 @@ import {
   sanitizeDiagnostics, safeUiError,
   NativeManagementCommandSchema,NativeManagementSnapshotSchema,type NativeManagementClient,
   KnowledgeUiCommandSchema,KnowledgeImportIntentSchema,KnowledgeSnapshotSchema,type NativeKnowledgeClient,type KnowledgeImportIntent,type KnowledgeSnapshot,
+  ChatImportIntentSchema,ChatImportUiCommandSchema,ChatImportSnapshotSchema,type NativeChatImportClient,type ChatImportIntent,type ChatImportSnapshot,
 } from "@antigravity-gemini-web/contracts";
 
 export interface IpcSender {
@@ -17,6 +18,8 @@ export interface IpcBridgeOptions {
   nativeAccounts?:NativeManagementClient;
   nativeKnowledge?:Pick<NativeKnowledgeClient,"getNativeKnowledge"|"executeNativeKnowledge">;
   onImportKnowledge?:(intent:KnowledgeImportIntent)=>Promise<KnowledgeSnapshot>;
+  nativeChatImports?:Pick<NativeChatImportClient,"getNativeChatImports"|"executeNativeChatImport">;
+  onInspectChatImport?:(intent:ChatImportIntent)=>Promise<ChatImportSnapshot>;
   allowedOrigins?: string[]; backend: LauncherClient;
   trustedSender?: (sender: IpcSender) => boolean;
   onSaveDialog?: () => Promise<string | null>;
@@ -43,6 +46,7 @@ export class IpcSecurityBridge {
     "launcher:getSessions", "launcher:getActivity", "launcher:subscribe", "launcher:unsubscribe",
     "launcher:getNativeAccounts", "launcher:executeNativeAccount",
     "launcher:getNativeKnowledge", "launcher:executeNativeKnowledge", "launcher:importNativeKnowledge",
+    "launcher:getNativeChatImports", "launcher:inspectNativeChatImport", "launcher:executeNativeChatImport",
   ]);
   constructor(private readonly options: IpcBridgeOptions) {
     this.backend = options.backend;
@@ -63,9 +67,23 @@ export class IpcSecurityBridge {
   public async handleInvoke(channel: string, context: IpcCallContext, ...args: unknown[]): Promise<unknown> {
     if (!IpcSecurityBridge.ALLOWED_CHANNELS.has(channel)) throw { code: "UNKNOWN_CHANNEL", message: "Channel denied.", retryable: false } satisfies UiError;
     this.validateContext(context);
-    const noArgs = ["launcher:getSnapshot", "launcher:subscribe", "launcher:unsubscribe", "launcher:getNativeAccounts", "launcher:getNativeKnowledge"].includes(channel);
+    const noArgs = ["launcher:getSnapshot", "launcher:subscribe", "launcher:unsubscribe", "launcher:getNativeAccounts", "launcher:getNativeKnowledge", "launcher:getNativeChatImports"].includes(channel);
     if ((noArgs && args.length) || (!noArgs && args.length > 1)) throw { code: "INVALID_ARGUMENT", message: "Invalid argument count.", retryable: false } satisfies UiError;
     switch (channel) {
+      case "launcher:getNativeChatImports": {
+        if(!this.options.nativeChatImports)throw safeUiError({code:"UNSUPPORTED_OPERATION"});
+        return ChatImportSnapshotSchema.parse(await this.options.nativeChatImports.getNativeChatImports());
+      }
+      case "launcher:inspectNativeChatImport": {
+        if(!this.options.onInspectChatImport)throw safeUiError({code:"UNSUPPORTED_OPERATION"});
+        const intent=ChatImportIntentSchema.safeParse(args[0]);if(!intent.success)throw safeUiError({code:"CONTRACT_MISMATCH"});
+        return ChatImportSnapshotSchema.parse(await this.options.onInspectChatImport(intent.data));
+      }
+      case "launcher:executeNativeChatImport": {
+        if(!this.options.nativeChatImports)throw safeUiError({code:"UNSUPPORTED_OPERATION"});
+        const command=ChatImportUiCommandSchema.safeParse(args[0]);if(!command.success)throw safeUiError({code:"CONTRACT_MISMATCH"});
+        return ChatImportSnapshotSchema.parse(await this.options.nativeChatImports.executeNativeChatImport(command.data));
+      }
       case "launcher:getNativeKnowledge": {
         if(!this.options.nativeKnowledge)throw safeUiError({code:"UNSUPPORTED_OPERATION"});
         return KnowledgeSnapshotSchema.parse(await this.options.nativeKnowledge.getNativeKnowledge());

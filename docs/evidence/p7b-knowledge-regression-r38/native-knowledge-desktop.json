@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-19T06:55:08.426Z",
+  "status": "PASS_ELECTRON_KNOWLEDGE_CONTROLS",
+  "nativeRuntimeRevision": 38,
+  "electron": "REAL",
+  "ipc": "REAL_SANDBOXED_PRELOAD",
+  "owner": "REAL_HTTP",
+  "browser": "SYNTHETIC",
+  "osChooser": "SYNTHETIC_MAIN_GRANT",
+  "realIdeExecutor": "NOT_TESTED",
+  "fileSelectionPathsFromRenderer": false,
+  "import": true,
+  "explicitAccountBindings": true,
+  "staleCheckRefresh": true,
+  "externalAdapterNotVerified": true,
+  "cancelNoImport": true,
+  "credentialFileDenied": true,
+  "busyLocked": true,
+  "ownerUnavailableLocked": true,
+  "metadataRemovalKeepsFiles": true,
+  "lightVietnameseDarkEnglish": true,
+  "widths": [
+    1280,
+    800
+  ],
+  "horizontalOverflow": false,
+  "minimumTarget44px": true,
+  "contrast": {
+    "light": 5.388649238304182,
+    "dark": 5.624016439464753
+  },
+  "keyboard": true,
+  "rendererErrors": 0,
+  "syntheticGenerations": 2,
+  "realGooglePromptRequests": 0
+}

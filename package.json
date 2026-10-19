@@ -44,6 +44,7 @@
     "test:desktop-cache": "npm run --workspace=@antigravity-gemini-web/launcher smoke:cache",
     "test:desktop-accounts": "npm run --workspace=@antigravity-gemini-web/launcher smoke:native-accounts",
     "test:desktop-native-knowledge": "node apps/launcher/scripts/native-knowledge-smoke.mjs",
+    "test:desktop-native-imports": "node apps/launcher/scripts/native-chat-import-smoke.mjs",
     "test:desktop-native-lifecycle": "node apps/launcher/scripts/native-lifecycle-smoke.mjs"
   },
   "devDependencies": {

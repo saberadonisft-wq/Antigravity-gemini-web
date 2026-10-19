@@ -10,7 +10,6 @@ import { AccountRegistry } from "./account-registry.js";
 import { startNativeProxy, NATIVE_PROXY_PORT, NATIVE_RUNTIME_REVISION } from "./native-proxy.js";
 import { inspectIde, nativeHome, isolatedIdeProfile, configureIsolatedProfile, atomicPrivateFile, assertNoLinks } from "./installation.js";
 import { NativeRouteError } from "./native-protocol.js";
-import { inspectChatImportArchive, chatImportInspectionArguments } from "./chat-import.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const endpoint = "http://127.0.0.1:" + NATIVE_PROXY_PORT;
@@ -65,6 +64,7 @@ async function isProxyRunning(): Promise<boolean> {
 
 try {
   if (command === "imports:inspect") {
+    const { inspectChatImportArchive, chatImportInspectionArguments } = await import("./chat-import.js");
     const selected = chatImportInspectionArguments(process.argv.slice(3));
     console.log(JSON.stringify(await inspectChatImportArchive(selected.file, selected.provider), null, 2));
   } else if (command === "check") {
@@ -254,6 +254,7 @@ try {
       backend,
       accountRegistry: registry,
       knowledgeExperimental:process.env.AG_NATIVE_KNOWLEDGE_EXPERIMENTAL==="1",
+      importsExperimental:process.env.AG_NATIVE_IMPORTS_EXPERIMENTAL==="1",
       stateDirectory: nativeHome,
       controlToken,
       contextModelSelection: process.env.AG_NATIVE_CONTEXT_MODEL === "off" ? undefined : { model: process.env.AG_NATIVE_CONTEXT_MODEL ?? "3.8 Flash", ...(process.env.AG_NATIVE_CONTEXT_EFFORT ? { effort: process.env.AG_NATIVE_CONTEXT_EFFORT } : {}) },

@@ -13,18 +13,19 @@ import { nativeKnowledgeFixture } from "../testing/native-knowledge-fixture.js";
 
 async function fixture(t:test.TestContext){
   const root=fs.mkdtempSync(path.join(os.tmpdir(),"launcher-native-owner-")),file=path.join(root,"owner.json"),token="a".repeat(64),snapshot=nativeAccountFixture();
-  const knowledge=nativeKnowledgeFixture(snapshot),config={pid:process.pid,supported:true,runtimeRevision:35,knowledgeEnabled:true,leakRoot:false,redirect:false,rewriteDescriptor:false,errorCode:"",oversized:false},commands:any[]=[];
+  const imports={service:"gemini-native-chat-import",version:1,ownerId:snapshot.ownerId,revision:0,accountRevision:snapshot.revision,experimentalEnabled:true,canInspect:true,inspectionActive:false,jobs:[],googleSubmission:"not_submitted"};
+  const knowledge=nativeKnowledgeFixture(snapshot),config={pid:process.pid,supported:true,runtimeRevision:35,knowledgeEnabled:true,importsEnabled:true,leakRoot:false,redirect:false,rewriteDescriptor:false,errorCode:"",oversized:false},commands:any[]=[];
   const server=http.createServer(async(request,response)=>{
     response.setHeader("content-type","application/json");
     if(request.url==="/__native/health"){
       if(config.rewriteDescriptor)fs.writeFileSync(file,JSON.stringify({version:1,pid:process.pid,endpoint,controlToken:"b".repeat(64)}));
-      response.end(JSON.stringify({service:"gemini-native-proxy",version:1,pid:config.pid,accountManagementSupported:config.supported,runtimeRevision:config.runtimeRevision,knowledgeExperimental:config.knowledgeEnabled}));return;
+      response.end(JSON.stringify({service:"gemini-native-proxy",version:1,pid:config.pid,accountManagementSupported:config.supported,runtimeRevision:config.runtimeRevision,knowledgeExperimental:config.knowledgeEnabled,importInspectionExperimental:config.importsEnabled}));return;
     }
     if(config.redirect){response.writeHead(302,{location:"http://127.0.0.1:1/forbidden"});response.end();return;}
     assert.equal(request.headers["x-native-control-token"],token);let body="";for await(const chunk of request)body+=chunk;commands.push(JSON.parse(body));
     if(config.errorCode){response.writeHead(409);response.end(JSON.stringify({error:{code:config.errorCode,message:"cookie=private; token="+token}}));return;}
     if(config.oversized){response.end(JSON.stringify({padding:"x".repeat(270000)}));return;}
-    response.end(JSON.stringify(request.url==="/__native/knowledge"?{...knowledge,...(config.leakRoot?{root:"C:/private"}:{})}:snapshot));
+    response.end(JSON.stringify(request.url==="/__native/imports"?{...imports,...(config.leakRoot?{file:"C:/private.zip"}:{})}:request.url==="/__native/knowledge"?{...knowledge,...(config.leakRoot?{root:"C:/private"}:{})}:snapshot));
   });
   await new Promise<void>(resolve=>server.listen(0,"127.0.0.1",resolve));const endpoint="http://127.0.0.1:"+(server.address() as {port:number}).port;
   fs.writeFileSync(file,JSON.stringify({version:1,pid:process.pid,endpoint,controlToken:token}));
@@ -33,6 +34,18 @@ async function fixture(t:test.TestContext){
 }
 test("Launcher main authenticates the real HTTP owner without exposing its descriptor/token",async t=>{
   const f=await fixture(t),result=await f.client.getNativeAccounts();assert.equal(result.ownerId,f.snapshot.ownerId);assert.deepEqual(f.commands,[{action:"status"}]);assert.ok(!JSON.stringify(result).includes(f.token));
+});
+
+test("Import owner client requires revision 38 and keeps chosen paths within the main-only request",async t=>{
+  const f=await fixture(t);await assert.rejects(f.client.getNativeChatImports(),{code:"NATIVE_RUNTIME_UPDATE_REQUIRED"});assert.equal(f.commands.length,0);
+  f.config.runtimeRevision=38;assert.equal((await f.client.getNativeChatImports()).ownerId,f.snapshot.ownerId);
+  const intent={expectedOwnerId:f.snapshot.ownerId,expectedRevision:0,expectedAccountRevision:f.snapshot.revision,accountId:f.snapshot.accounts[0]!.accountId,identityEpoch:1,provider:"chatgpt" as const};
+  assert.throws(()=>f.client.inspectSelectedChatArchive(intent,"relative.zip"),{code:"INVALID_ARGUMENT"});
+  const file=path.join(f.root,"synthetic.zip"),result=await f.client.inspectSelectedChatArchive(intent,file);
+  assert.deepEqual(f.commands.at(-1),{...intent,action:"inspect",file});assert.ok(!JSON.stringify(result).includes(f.root));
+  assert.throws(()=>f.client.inspectSelectedChatArchive({...intent,file} as any,file));
+  f.config.leakRoot=true;await assert.rejects(f.client.getNativeChatImports(),{code:"CONTRACT_MISMATCH"});
+  f.config.leakRoot=false;f.config.errorCode="IMPORT_EXPERIMENT_DISABLED";await assert.rejects(f.client.getNativeChatImports(),{code:"UNSUPPORTED_OPERATION"});
 });
 
 test("Knowledge main requires current runtime, validates redacted snapshots and preserves safe source errors",async t=>{

@@ -1,6 +1,6 @@
 # Gemini Web trong chat native Antigravity IDE
 
-**Source 37 / worker 24 (19/10/2026):** thêm lựa chọn thử nghiệm `AG_MCP_NODE_SEMI_SPACE_MB=8|16|off`, mặc định tắt; cấu hình đến cả shared owner, có fingerprint và kiểm tra startup/status trước Send. [Hướng dẫn bộ nhớ Node](NATIVE_NODE_MEMORY.md). Runtime chính chưa được reload trong lúc người dùng xác minh Google; các đoạn revision cũ dưới đây là lịch sử, không phải nghiệm thu source mới trên Web thật.
+**Source 38 / worker 24 (19/10/2026):** thêm preview ZIP lịch sử theo tài khoản ở launcher, mặc định tắt (`AG_NATIVE_IMPORTS_EXPERIMENTAL=1`); [hướng dẫn và giới hạn](NATIVE_CHAT_IMPORT.md). Kiểm tra dùng worker thread riêng, không upload Google. Giữ lựa chọn thử nghiệm `AG_MCP_NODE_SEMI_SPACE_MB=8|16|off`, mặc định tắt, có fingerprint và kiểm tra startup/status trước Send. [Hướng dẫn bộ nhớ Node](NATIVE_NODE_MEMORY.md). Runtime chính chưa được reload trong lúc người dùng xác minh Google; các đoạn revision cũ dưới đây là lịch sử, không phải nghiệm thu source mới trên Web thật.
 
 Quan sát read-only ngày 19/10: health tại cổng 9236 không kết nối trong hai lần đọc, PID trong descriptor trả `ESRCH`. Không tự khởi động lại hoặc tác động browser. Mốc runtime 29 ở các báo cáo ngày 18/10 là quan sát lịch sử, không phải xác nhận proxy hiện còn chạy.
 

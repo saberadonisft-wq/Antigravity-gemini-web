@@ -51,7 +51,7 @@ const pool=new NativeBrowserBackendPool(registry,"unused",account=>{
     throw Error("Unexpected fixture broker operation");
   }});return backend;
 });
-const token=randomBytes(32).toString("hex"),proxy=await startNativeProxy({backend:pool,accountRegistry:registry,stateDirectory:nativeHome,port:Number(process.argv[3]??0),controlToken:token,knowledgeExperimental:process.argv.includes("--knowledge"),control:async()=>{throw Error("External control transport forbidden");}});
+const token=randomBytes(32).toString("hex"),proxy=await startNativeProxy({backend:pool,accountRegistry:registry,stateDirectory:nativeHome,port:Number(process.argv[3]??0),controlToken:token,knowledgeExperimental:process.argv.includes("--knowledge"),importsExperimental:process.argv.includes("--imports"),control:async()=>{throw Error("External control transport forbidden");}});
 const endpoint="http://127.0.0.1:"+proxy.port;
 const owner={version:1,pid:process.pid,controlToken:token};
 // Only the CLI preloader rewrites the fixed production origin into this owned fixture.

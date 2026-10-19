@@ -1,6 +1,6 @@
 # G4 contract alignment
 
-Cập nhật 18/10/2026, source 35. LauncherClient v0.1 giữ 6 methods core và có 5 methods Native optional: 2 quản lý account, 3 quản lý nguồn. Preload hiện expose đúng 11 methods; shared schemas là nguồn chuẩn. Import nguồn chỉ nhận label/owner/revision; paths do chooser ở main cấp. [Chi tiết và giới hạn nghiệm thu](../../../docs/evidence/g4-native-p6b-project-knowledge-ui.md).
+Cập nhật 19/10/2026, source 38. LauncherClient v0.1 giữ 6 methods core và có 8 methods Native optional: 2 quản lý account, 3 quản lý nguồn, 3 preview ZIP lịch sử. Preload hiện expose đúng 14 methods; shared schemas là nguồn chuẩn. Import nguồn chỉ nhận label/owner/revision; preview ZIP chỉ nhận account/epoch/provider/owner/revisions hoặc cancel/clear job. Paths do chooser ở main cấp, không nhận từ renderer. [Nguồn dự án](../../../docs/evidence/g4-native-p6b-project-knowledge-ui.md), [preview ZIP và giới hạn nghiệm thu](../../../docs/evidence/g4-native-p7b-chat-import-preview.md).
 
 - Operation ID derive từ requestId; fingerprint full command độc lập để kiểm tra conflict. Một ID giữa receipt/engine/event/lastCheck.
 - Browser/check/export/cancel durable queued receipt trước external wait; accepted ACK chỉ reservation, UI quan sát terminal.

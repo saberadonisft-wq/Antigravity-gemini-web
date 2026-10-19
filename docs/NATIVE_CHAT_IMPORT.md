@@ -1,6 +1,18 @@
 # Kiểm tra archive trước khi nhập lịch sử chat
 
-P7a, ngày 19/10/2026. CLI hiện có bước **kiểm tra ZIP cục bộ**. Bước này không gửi file tới Google, không cần proxy đang chạy và không tạo dữ liệu tài khoản Native. Workflow chọn tài khoản/upload/theo dõi kết quả trên Gemini vẫn đang phát triển.
+P7a/P7b, ngày 19/10/2026, Native source 38 / browser worker 24. Có **kiểm tra ZIP cục bộ** qua CLI hoặc màn hình Nhập lịch sử của launcher. Cả hai chỉ kiểm tra file trên máy. Upload và theo dõi kết quả trên Gemini vẫn đang phát triển.
+
+## Dùng launcher thử nghiệm
+
+Sau build, cấu hình `AG_NATIVE_IMPORTS_EXPERIMENTAL=1` trong môi trường của Native owner trước khi khởi động, rồi mở launcher bằng `npm run launcher`. Màn hình **Nhập lịch sử** đọc owner đang có, không tự khởi động/restart proxy. Nếu owner cũ/offline hoặc chưa bật tính năng, màn hình khóa chọn file. Không restart browser/proxy đang chờ xác minh hay có lượt chưa rõ kết quả chỉ để bật cờ này.
+
+Chọn tài khoản đích có identity đã đăng ký và provider xuất dữ liệu, rồi bấm **Chọn ZIP và kiểm tra**. File được chọn bằng hộp thoại OS ở main; renderer không được đưa đường dẫn, nội dung hoặc URL vào lệnh. Một hộp thoại dùng chung với phần Nguồn dự án. Hủy chọn file không tạo job. Đăng ký identity chỉ ràng buộc preview với tài khoản, chưa xác nhận quyền import trên Google.
+
+Worker thread riêng đọc file, trả tiến độ hash và thống kê. Chỉ công bố `ready` sau khi worker đã thoát thành công và tài khoản/epoch/cấu hình vẫn khớp. Đổi account registry hoặc epoch làm preview cũ mất hiệu lực; không chuyển preview sang account khác. Lúc Native bận không bắt đầu kiểm tra mới, nhưng vẫn có thể hủy job đang chạy.
+
+Tối đa một worker và tám preview trong RAM, TTL 15 phút tính bằng đồng hồ monotonic, thu hồi khi đọc trạng thái. Hủy/expiry/đổi target giữ slot tới khi worker thật thoát. Preview không lưu qua proxy restart; cần chọn file lại. **Bỏ bản kiểm tra cục bộ** chỉ xóa metadata trong RAM, giữ ZIP gốc. Đường dẫn đầy đủ được giữ riêng trong owner để có thể xác minh lại ở bước upload tương lai, không xuất ra IPC/status/log. Không có upload API hoặc thao tác Google trong mốc này.
+
+[Kiểm thử P7b](evidence/g4-native-p7b-chat-import-preview.md) dùng Electron, preload sandbox, HTTP và worker thật, nhưng account identity và grant từ chooser là tổng hợp. Chưa nghiệm thu người dùng chọn ZIP bằng OS dialog thật hay upload Google.
 
 ## Dùng CLI
 
@@ -39,6 +51,6 @@ Các thông tin này không chứng minh Gemini A → B được hỗ trợ, kh�
 
 ## Phần tiếp theo của P7
 
-Workflow tiếp theo cần chọn file qua OS chooser của main, gắn account/identity epoch, kiểm tra capability import thật, hiển thị dữ liệu sẽ truyền, xác minh lại file trước upload và theo dõi trạng thái nhập. Mỗi lần truyền phải có receipt/fence riêng; partial/outcome_unknown không được tự upload lại. Hoàn thành trên Web, phạm vi history/attachment giữ được và memory-text import vẫn cần nghiệm thu riêng.
+Workflow tiếp theo cần nghiệm thu OS chooser thật, kiểm tra capability import trên account, hiển thị dữ liệu sẽ truyền, xác minh lại file trước upload và theo dõi trạng thái nhập. Mỗi lần truyền phải có receipt/fence riêng; partial/outcome_unknown không được tự upload lại. Hoàn thành trên Web, phạm vi history/attachment giữ được và memory-text import vẫn cần nghiệm thu riêng.
 
 Không dùng memory/imported history làm nơi chứa active tool policy, nonce hoặc chứng cứ bytes hiện tại của workspace. [Kế hoạch đầy đủ](NATIVE_UPGRADE_PLAN.md).

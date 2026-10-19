@@ -6,8 +6,9 @@ import type { ActivityEntry, ActivityQuery, Page } from "./activity.js";
 import type { RuntimeEvent } from "./events.js";
 import type { NativeManagementClient } from "./native-management.js";
 import type { NativeKnowledgeClient } from "./knowledge.js";
+import type { NativeChatImportClient } from "./chat-import.js";
 
-export interface LauncherClient extends Partial<NativeManagementClient>,Partial<NativeKnowledgeClient> {
+export interface LauncherClient extends Partial<NativeManagementClient>,Partial<NativeKnowledgeClient>,Partial<NativeChatImportClient> {
   getSnapshot(): Promise<RuntimeSnapshot>;
   execute(command: ControlCommand): Promise<CommandAck>;
   getOperation(operationId: string): Promise<OperationRecord>;

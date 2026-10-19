@@ -1,8 +1,10 @@
 # Khôi phục Native Gemini Web
 
-Tài liệu vận hành cho source Native **37 / browser worker 24**, gồm các thủ tục từ source 33 về sau. Đây là một phần P8; chưa chứng nhận toàn bộ migration, rollback, Windows restart hoặc soak. Đối chiếu [kế hoạch](NATIVE_UPGRADE_PLAN.md), [P4 ledger](evidence/g4-native-p4-physical-ledger.md) và [P5](evidence/g4-native-p5-account-management.md) trước khi kết luận hệ thống đã nghiệm thu.
+Tài liệu vận hành cho source Native **38 / browser worker 24**, gồm các thủ tục từ source 33 về sau. Đây là một phần P8; chưa chứng nhận toàn bộ migration, rollback, Windows restart hoặc soak. Đối chiếu [kế hoạch](NATIVE_UPGRADE_PLAN.md), [P4 ledger](evidence/g4-native-p4-physical-ledger.md) và [P5](evidence/g4-native-p5-account-management.md) trước khi kết luận hệ thống đã nghiệm thu.
 
 Source 37 có [tùy chọn semi-space Node](NATIVE_NODE_MEMORY.md), mặc định tắt. Khi bật, worker phải xác nhận đúng startup flag; config conflict không được xử lý bằng tự động kill worker, xóa profile/fences hoặc replay request. Thay cấu hình cần quy trình dừng/khởi động khi nhàn rỗi. Giữ cửa sổ Google đang chờ người dùng xác minh.
+
+Source 38 có [preview ZIP nhập lịch sử](NATIVE_CHAT_IMPORT.md), mặc định tắt. Job chỉ sống trong RAM, tối đa tám preview, một worker và TTL 15 phút theo đồng hồ monotonic. Hủy/đổi tài khoản vẫn giữ slot cho đến khi worker thật thoát; shutdown đợi worker tối đa năm giây và báo lỗi nếu còn pending. Sau proxy restart cần chọn lại file, không phục hồi hay tự gửi archive. Xóa preview chỉ bỏ metadata, không xóa ZIP gốc. Chưa có upload/receipt nhập Google; không diễn giải preview `ready` thành import thành công.
 
 ## Đọc trạng thái trước khi thay đổi
 

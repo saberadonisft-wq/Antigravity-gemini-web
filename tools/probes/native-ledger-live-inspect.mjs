@@ -13,7 +13,7 @@ const endpoint="http://127.0.0.1:9236",health=await fetch(endpoint+"/__native/he
 assert.ok(health.runtimeRevision>=26);assert.equal(health.counters.active,0);
 const account=new AccountRegistry(path.join(os.homedir(),".gemini/antigravity-gemini-web-live/app_data/native-route/accounts.json")).getActive();assert.ok(account);assert.equal(account.accountId,health.account.accountId);
 const worker=JSON.parse(fs.readFileSync(path.join(account.profilePath,"browser-stdio-owner.json"),"utf8"));
-const expectedWorkerVersion=new Map([[26,18],[27,19],[28,20],[29,21],[30,22],[31,22],[32,22],[33,23],[34,23],[35,23],[36,23],[37,24]]).get(health.runtimeRevision);
+const expectedWorkerVersion=new Map([[26,18],[27,19],[28,20],[29,21],[30,22],[31,22],[32,22],[33,23],[34,23],[35,23],[36,23],[37,24],[38,24]]).get(health.runtimeRevision);
 assert.ok(expectedWorkerVersion,"Inspect the current worker fingerprint version before checking a new runtime revision.");
 assert.equal(worker.fingerprint,runtimeFingerprint({version:expectedWorkerVersion,profile:path.resolve(account.profilePath),state:path.resolve(account.statePath),port:account.debugPort,chromePath:process.env.AG_MCP_CHROME_PATH??"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",...(health.runtimeRevision>=37?{nodeSemiSpaceMiB:McpNodeSemiSpaceSchema.parse(health.backendResources?.requestedNodeSemiSpaceMiB)??0}:{})}));
 const legacy=path.join(account.statePath,"receipts.json"),marker=JSON.parse(fs.readFileSync(legacy,"utf8")),backup=fs.readFileSync(legacy+".v1.backup"),old=JSON.parse(backup.toString("utf8"));

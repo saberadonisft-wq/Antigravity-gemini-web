@@ -36,6 +36,11 @@ export function getPreloadClient(): LauncherClient {
   const rawClient = window.launcherClient!;
 
   return {
+    ...(rawClient.getNativeChatImports&&rawClient.inspectNativeChatImport&&rawClient.executeNativeChatImport?{
+      getNativeChatImports:rawClient.getNativeChatImports.bind(rawClient),
+      inspectNativeChatImport:rawClient.inspectNativeChatImport.bind(rawClient),
+      executeNativeChatImport:rawClient.executeNativeChatImport.bind(rawClient),
+    }:{}),
     ...(rawClient.getNativeKnowledge&&rawClient.executeNativeKnowledge&&rawClient.importNativeKnowledge?{
       getNativeKnowledge:()=>rawClient.getNativeKnowledge!(),
       executeNativeKnowledge:rawClient.executeNativeKnowledge.bind(rawClient),

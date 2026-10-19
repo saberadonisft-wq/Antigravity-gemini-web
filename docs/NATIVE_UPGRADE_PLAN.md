@@ -277,7 +277,7 @@ Gate: repo sửa sau import và working tree chưa commit không bị coi là b�
 
 ### P7 — Handoff và công cụ bổ trợ — ĐANG TRIỂN KHAI
 
-P7a có CLI `native:imports:inspect` kiểm tra ZIP/ZIP64 cục bộ cho provider người dùng khai báo ChatGPT/Claude: hash theo luồng, duyệt danh mục tuần tự, hủy, phát hiện file thay đổi và từ chối path/header không an toàn. Không giải nén, đọc hội thoại thành tool request, ghi account state hoặc gửi Google. [Hướng dẫn và phạm vi](NATIVE_CHAT_IMPORT.md). Đây mới là preflight của nhánh import; chưa có chooser/account-bound upload/capability probe Web, import receipt/partial handling, memory-text workflow hoặc nghiệm thu dữ liệu thật. Các nhánh và gate P7 bên dưới được giữ nguyên.
+P7a có CLI `native:imports:inspect` kiểm tra ZIP/ZIP64 cục bộ cho provider người dùng khai báo ChatGPT/Claude: hash theo luồng, duyệt danh mục tuần tự, hủy, phát hiện file thay đổi và từ chối path/header không an toàn. P7b source 38 thêm chooser ở Electron main và preview gắn account/epoch/revisions, worker riêng có tiến độ/hủy, TTL 15 phút và tối đa tám preview. Electron/IPC/HTTP/worker thật đã kiểm thử với identity và chooser grant tổng hợp; chưa nghiệm thu OS selection thật. Không giải nén, đọc hội thoại thành tool request, ghi account state hoặc gửi Google. [Hướng dẫn](NATIVE_CHAT_IMPORT.md), [bằng chứng P7b](evidence/g4-native-p7b-chat-import-preview.md). Đây mới là chuẩn bị của nhánh import; capability probe Web, upload có receipt/partial handling, memory-text workflow và nghiệm thu dữ liệu thật còn mở. Các nhánh và gate P7 bên dưới được giữ nguyên.
 
 Phạm vi gồm bốn nhánh có thể phát hành độc lập:
 

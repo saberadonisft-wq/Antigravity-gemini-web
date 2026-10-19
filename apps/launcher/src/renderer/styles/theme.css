@@ -422,3 +422,19 @@ tr:hover td {
 }
 
 
+.native-imports { display:grid; gap:16px; min-width:0; }
+.native-imports .page-header { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+.native-imports p { overflow-wrap:anywhere; }
+.native-imports button,.native-imports select { min-height:44px; }
+.import-target-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+.import-target-controls label { display:grid; gap:8px; }
+.import-target-controls select { width:100%; min-width:0; }
+.import-local-status { font-weight:600; }
+.import-job-list,.import-job { display:grid; gap:12px; min-width:0; }
+.import-job h2 { margin:0; font-size:1.1rem; overflow-wrap:anywhere; }
+.import-job progress { width:100%; }
+.import-metadata { display:grid; grid-template-columns:minmax(100px,1fr) minmax(0,2fr); gap:8px 16px; margin:0; }
+.import-metadata dd { margin:0; overflow-wrap:anywhere; }
+.import-digest { font-family:monospace; word-break:break-all; }
+.import-job-actions { display:flex; flex-wrap:wrap; gap:8px; }
+@media(max-width:900px) { .import-target-controls { grid-template-columns:1fr; } .native-imports .page-header { flex-direction:column; } }

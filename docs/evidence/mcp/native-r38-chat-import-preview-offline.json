@@ -1,0 +1,128 @@
+{
+  "checkedAt": "2026-10-19T13:57:28.0419299+07:00",
+  "feature": "P7B_ACCOUNT_BOUND_CHAT_IMPORT_PREVIEW",
+  "baselineCommit": "7bbeb92dbbcfff5decb5f3c1e908ff05c4a951fa",
+  "nativeRuntimeRevision": 38,
+  "browserWorkerFingerprint": 24,
+  "status": "PASS_LOCAL_PREVIEW_ONLY",
+  "checks": {
+    "build": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "workspaceTests": 436,
+    "newTests": 13,
+    "packages": [
+      {
+        "pass": 13,
+        "name": "contracts"
+      },
+      {
+        "pass": 47,
+        "name": "gemini-browser"
+      },
+      {
+        "pass": 52,
+        "name": "mcp-server"
+      },
+      {
+        "pass": 4,
+        "name": "model-bridge"
+      },
+      {
+        "pass": 186,
+        "name": "native-antigravity"
+      },
+      {
+        "pass": 80,
+        "name": "runtime"
+      },
+      {
+        "pass": 54,
+        "name": "launcher"
+      }
+    ],
+    "fail": 0,
+    "skipped": 0,
+    "cancelled": 0,
+    "electronImports": "PASS",
+    "electronKnowledgeRegression": "PASS",
+    "electronDesktopRegression": "PASS"
+  },
+  "scope": {
+    "electron": "REAL",
+    "ipc": "REAL_SANDBOXED_PRELOAD",
+    "nativeOwner": "REAL_HTTP",
+    "inspection": "REAL_WORKER_THREAD",
+    "osChooser": "SYNTHETIC_MAIN_GRANT",
+    "accountIdentity": "SYNTHETIC_REGISTERED",
+    "googleSubmission": "not_submitted",
+    "googlePromptRequests": 0,
+    "googleUploads": 0,
+    "mainRuntimeRestarted": false,
+    "realIdeExecutor": "NOT_TESTED",
+    "push": false,
+    "merge": false,
+    "deployment": false
+  },
+  "sourceSha256": {
+    "apps/launcher/README.md": "ea5e8e35f0e86a2d5c2d2cfe194a017f383e334ace89f7e9bb790828b09ecbd3",
+    "apps/launcher/renderer/CONTRACT_REQUESTS.md": "76e898729a40fce5607de1390c945e65acaf58fd13666aef1e1aa6d87006739d",
+    "apps/launcher/scripts/native-chat-import-smoke.mjs": "e7d57bbd5ad3b37a540772466e41a8fb6c3941b52287d2c5d508e144e5553934",
+    "apps/launcher/src/main/desktop-smoke.ts": "4ba048170b2f14e24886510d83e4eca8262dfc7afba47d376adb1e7e46a7d0db",
+    "apps/launcher/src/main/index.ts": "c8c8d76f836e97470328a57201793b19e2994d6bac669580f3d6b297a7290539",
+    "apps/launcher/src/main/ipc-bridge.ts": "437e835ee5b6ac3fced49e32a06047103a10b992e20ce4b40639774b999da190",
+    "apps/launcher/src/main/native-chat-import-desktop.ts": "a3f0e66d0f8dcd898a8d8d06b35fe718ad356ef212236e7f3378193d7911b941",
+    "apps/launcher/src/main/native-owner-client.test.ts": "148f7d9281b895789a49ea7f0a111e85ac463b316b3983819a192795ff542445",
+    "apps/launcher/src/main/native-owner-client.ts": "0170b2d26c4a7cc920de3f8f6d49e3aab9fd3daa2baeaf2d79e429b9543fd855",
+    "apps/launcher/src/preload/client.ts": "8c66997bb4aa1b4bfffdb770e60ec95c782142ac2db7ada825afb08463671dc7",
+    "apps/launcher/src/renderer/App.tsx": "9c2376d50b6e42b1684afd2601a6741d7a7cb4f2889532c63cd73cf2ad1c85e5",
+    "apps/launcher/src/renderer/client/native-chat-import-store.ts": "48b81bc75714c241c13de5f6d214abb020135eee718ddb83ab44449bf4bb522d",
+    "apps/launcher/src/renderer/client/preload-client.ts": "90f9eb037956164b48d31e7c3954a0ec624b6a8de5f2f53d339b0e7a227a70e2",
+    "apps/launcher/src/renderer/native-chat-import.test.ts": "17b0bae00e885940bc0ecf71473a815687c15732a5c909af7d539c6460d72917",
+    "apps/launcher/src/renderer/styles/theme.css": "7c9792e04f91bc2aedb9423b3f5ef4eeed96dccef8bee9ed0ba7ebabeced743a",
+    "apps/launcher/src/renderer/views/NativeChatImportView.tsx": "5c647190375c93b704e055dc76e3e0652091168a01a317a88127b0914100067a",
+    "package.json": "a624186e1e6baaa42d97870c21bb60aaf984d22c540e881170b00d59bab2311f",
+    "packages/contracts/src/chat-import.ts": "2c5122f1d04140d5548fd74b9cb054ac34477d4c7fe7b8815bd5249c62243937",
+    "packages/contracts/src/client.ts": "dcd1b6557bc56fe5c874e40b45109d9122c3e8218abee9ffba212b2fc71f49be",
+    "packages/native-antigravity/src/chat-import-http.test.ts": "2be68eb22fae7c9795d89004543d447cd1c3a71c02672982ec54467de3d427bf",
+    "packages/native-antigravity/src/chat-import-jobs.test.ts": "4e3606c1c1423fe62ea71a0f46df8a20aab14167f7f5d9f11920095204c611e2",
+    "packages/native-antigravity/src/chat-import-jobs.ts": "843331bb16d43778ad4b4ca09736d6f97d76a98ccebbc8bc0f1639fa7d009160",
+    "packages/native-antigravity/src/chat-import-worker.ts": "22a58b9a99202545a4a17a2a3245f49fca544baacbfc07c6e669dac8f6855103",
+    "packages/native-antigravity/src/native-cli.ts": "0f8e78e8896c67b743db481a706234f64660b058348f8dbbb314f788e5535a30",
+    "packages/native-antigravity/src/native-proxy.ts": "2069c39c10bb7ed14cc17a47889931eca4994152821849a6f827aade8b91768e",
+    "packages/native-antigravity/src/testing/chat-import-archive.fixture.ts": "c34dd83d59166fc7046febca5d20c25ddb0bdcba4375037eb6134526529daacd",
+    "tools/probes/fixtures/native-lifecycle-owner.mjs": "e99e8f2945a5d42956ecdb685aa965c8ebcfb08c167ec15ed218289390402b7f",
+    "tools/probes/native-ledger-live-inspect.mjs": "7061942b8b8ea2b7c8fa66f16d15b6406e94cde5303f128f0fa358ba7670bc77"
+  },
+  "compiledSha256": {
+    "packages/contracts/dist/chat-import.js": "f76fd38a117e70400cec7889ebc98510457c0bebc31410f769292c16a06fa69c",
+    "packages/native-antigravity/dist/native-proxy.js": "001ba0871e2b3724747a69e812a733bfc3197f47c40a0b12990eb671999be386",
+    "packages/native-antigravity/dist/chat-import-jobs.js": "7d81ca3afff1dff0c236a37bd3fed76b363259befb529d01132a203da71ca8dd",
+    "packages/native-antigravity/dist/chat-import-worker.js": "0b82e7b991b62d4abdf941743d2fb3a0f9c1a0bc7ba4a6847824ebf87db1ae33",
+    "apps/launcher/dist/main/native-owner-client.js": "a26a1335b6be0225da7dd677ead741350b22725c705ff412155f03d9b3f2324d",
+    "apps/launcher/dist/main/ipc-bridge.js": "b96a0d254a757295a7c3e4b61d8add7edc3f5c23c8ce681fe4d6a73e5211b090",
+    "apps/launcher/dist/preload/index.cjs": "64d23ef3c37b85c62ee421f8126096713c4aa5fb90749661a262a70eea612044"
+  },
+  "artifactSha256": {
+    "docs/evidence/p7b-desktop-regression-r38/desktop-dialog.json": "e459f7844d0960d5879983e78ff0e60d79fe55bbd06f40de781691a933f66d46",
+    "docs/evidence/p7b-desktop-regression-r38/desktop-lifecycle.json": "1acfb2c60dfbf03c02523bbb36bc50b9efe70c64d3c85b08f021c9d732a5f424",
+    "docs/evidence/p7b-desktop-regression-r38/desktop-smoke.json": "594dce06d48207df55e1abea5afa93aa611580668bd025c8968bd4620d24cd51",
+    "docs/evidence/p7b-desktop-regression-r38/desktop-ui.json": "7ce8e17f4c20ebace168a13ebbe1ec4fa3470758c0e05370a269fcf01ee2ae79",
+    "docs/evidence/p7b-desktop-regression-r38/launcher-1024x720.png": "01efa5a0c8e4d3f722ff0dbfc71c36cfb6393820b02150fe9a42fb9cfa9e7d21",
+    "docs/evidence/p7b-desktop-regression-r38/launcher-1280x800.png": "57b586f63ddd73bfef95428e3642cfaf256fdf51123ca4e1b643da6693455b0f",
+    "docs/evidence/p7b-desktop-regression-r38/launcher-800x600.png": "2faaa1e34ef5bd0b74cf778c61e6744b1cd10031bcdb2d5194eec1b5fe10a94d",
+    "docs/evidence/p7b-desktop-regression-r38/launcher-english-light.png": "68aeb78088c8360e09d323a03e50a709d1340993b40f7e9e7047b46f779c2cbd",
+    "docs/evidence/p7b-desktop-regression-r38/launcher-fixture-tools-dark.png": "b687611a1666ae48e9c268dac31b62318a070cc51653c7aa125640938f413abc",
+    "docs/evidence/p7b-desktop-regression-r38/launcher-fixture-tools-light.png": "2b200b9063daffd257a3eee91c7dad61c823e28369157c95d81f513221c394bd",
+    "docs/evidence/p7b-knowledge-regression-r38/knowledge-800px.png": "5e0c61193dddc46c1e0159bda3bf07735df1f94834aa7d94be4218a9f422d797",
+    "docs/evidence/p7b-knowledge-regression-r38/knowledge-dark.png": "6322eb6488a6fc64987b10480e925b6f2798595cba1b1fc924dc162ccaba35ef",
+    "docs/evidence/p7b-knowledge-regression-r38/knowledge-light.png": "1dd673066e195a8d9a381bb5620d79c3b523c00a408aeb14db1f417648036aaa",
+    "docs/evidence/p7b-knowledge-regression-r38/knowledge-sources-dark.png": "3b96b4d55a9dea418e300d9e4c3e391b3a75f96d06f74d47f5eacd959221db5d",
+    "docs/evidence/p7b-knowledge-regression-r38/knowledge-sources-light.png": "cc8b44dd22a3b42469884eda32cfbd564a678f0a8d6af74540945ccd0c73ab32",
+    "docs/evidence/p7b-knowledge-regression-r38/native-knowledge-desktop.json": "c24974c69db1a8c8035540b38a25f0e56406f08a19e53d871de2276ae21303e4",
+    "docs/evidence/p7b-native-imports-r38/imports-800px.png": "f13d454012315aa4e224fc8c502613a19be8137c6e7484a61dc75247cc57a557",
+    "docs/evidence/p7b-native-imports-r38/imports-dark.png": "b0f69c6f8f42b3d83c2a48222fce622c128555e24fbd4daf3233bc8460d31204",
+    "docs/evidence/p7b-native-imports-r38/imports-light.png": "ffd3165fbd6b8e29c039697b5f3d7319d73461e93cf9f39bcf9bc2a0cc6c043e",
+    "docs/evidence/p7b-native-imports-r38/native-chat-import-desktop.json": "b3628b401dbdd56cfec63172861463e2b91312b3ec6d8ce3bb49a70b3830b366"
+  }
+}

@@ -32,7 +32,7 @@ export async function runDesktopSmoke(window: BrowserWindow, runtime: RuntimeFac
   const security = getSecurity();
   assert.equal(security?.sandboxed, true); assert.equal(security?.contextIsolated, true);
   const surface = await evaluate("({ methods: Object.keys(window.launcherClient).sort(), require: typeof window.require, process: typeof window.process })");
-  assert.deepEqual(surface.methods, ["execute", "executeNativeAccount", "executeNativeKnowledge", "getActivity", "getNativeAccounts", "getNativeKnowledge", "getOperation", "getSessions", "getSnapshot", "importNativeKnowledge", "subscribe"]);
+  assert.deepEqual(surface.methods, ["execute", "executeNativeAccount", "executeNativeChatImport", "executeNativeKnowledge", "getActivity", "getNativeAccounts", "getNativeChatImports", "getNativeKnowledge", "getOperation", "getSessions", "getSnapshot", "importNativeKnowledge", "inspectNativeChatImport", "subscribe"]);
   assert.equal(await evaluate("window.launcherClient.getNativeAccounts().then(()=> 'unexpected',error=>error.code)"),"UNSUPPORTED_OPERATION");
   assert.equal(surface.require, "undefined"); assert.equal(surface.process, "undefined");
   const snapshot = await evaluate("window.launcherClient.getSnapshot()");
