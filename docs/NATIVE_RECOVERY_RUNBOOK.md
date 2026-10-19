@@ -123,7 +123,7 @@ npm run native:status
 
 Đưa router về manual trước khi bỏ cờ experimental; nếu giữ cấu hình auto rồi tắt cờ, generation cố ý báo lỗi thay vì tự đổi policy. Startup flags không làm mất result fences và không phục hồi model-restore journal bằng cách bỏ qua nó.
 
-Không checkout/start một bản cũ chưa chứng minh hiểu ledger hiện tại. Logical ledger có v1/v2, physical store SQLite v2 và các journal có phiên bản riêng; một bản cũ chỉ có cache RAM có thể không giữ được các fence mới. Rollback binary/baseline đầy đủ vẫn là gate P8, chưa phải thủ tục đã PASS.
+Không checkout/start một bản cũ chưa chứng minh hiểu ledger hiện tại. Logical ledger có v1/v2, physical store SQLite v2 và các journal có phiên bản riêng; một bản cũ chỉ có cache RAM có thể không giữ được các fence mới. [Cold restore và rollback module 36 ↔ 37](evidence/g4-native-p8e-baseline-recovery.md) đã PASS trên state fixture riêng, có WAL sau crash, chặn backup cũ/ảnh hỏng và giữ deadline/lịch sử attempt v2. Chat chưa rõ kết quả vẫn cần Resume tường minh; request cũ không được phát lại. Đây chưa phải nghiệm thu rollback stdio/shared-owner/browser hoặc dữ liệu production, không phải công cụ merge/repair tự động. Các baseline khác và rollback đầy đủ vẫn là gate P8.
 
 ## Nguồn tham chiếu dự án (source 35)
 

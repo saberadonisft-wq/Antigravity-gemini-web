@@ -296,6 +296,8 @@ Ngày 19/10 đã commit checkpoint core/P6/P8 hiện tại tại `4e28d7a`; buil
 
 Source 37 / worker 24 đã triển khai policy opt-in `8|16|off`, mặc định off, truyền đến Native frontend và shared owner, fingerprint theo cấu hình, kiểm tra flag trước tạo runtime và status trước Send. 9 kiểm thử mới gồm bootstrap production CLI, Native frontend/owner thật chỉ tra receipt, config conflict giữ worker cũ và missing/forged status không Send; toàn workspace 415 test cùng build/typecheck/lint PASS. [Hướng dẫn](NATIVE_NODE_MEMORY.md), [báo cáo P8d](evidence/g4-native-p8d-node-memory-policy.md). Main health ngày 19/10 không kết nối và PID descriptor đã mất; không restart browser/proxy trong lúc bước xác minh người dùng còn chờ. Workload Chrome/DOM, soak, recovery và các gate P6/P7/core vẫn mở.
 
+P8e kiểm thử cold metadata backup/restore và module rollback **36 → 37 → crash → restore → 36 → 37** bằng baseline `4e28d7a` build độc lập. Native HTTP, MCP service và SQLite thật trong child fixture, browser giả lập; backup cũ/hỏng bị từ chối không đổi dữ liệu, WAL `accepted` sau crash và fence v2 còn nguyên, Resume tường minh chỉ gửi follow-up mới. Có 5 logical fence/4 physical receipt/4 Send tổng hợp, không trùng. [Báo cáo và giới hạn](evidence/g4-native-p8e-baseline-recovery.md). Chưa nghiệm thu rollback stdio/shared-owner/Chrome, crash giữa các bước restore nhiều thư mục, Windows restart hoặc production repair; các gate đó vẫn mở.
+
 Phạm vi:
 
 - Chạy toàn bộ kiểm thử phù hợp với các package thay đổi, build/typecheck/lint; kiểm tra migration schema, backward compatibility và IPC/contracts drift.

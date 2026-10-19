@@ -1,0 +1,80 @@
+{
+  "checkedAt": "2026-10-19T05:35:51.507Z",
+  "status": "PASS_COLD_RESTORE_AND_36_37_36_37_ROLLBACK",
+  "baselineCommit": "4e28d7aa7e01853420a643141a9603b40379b6cb",
+  "baselineDependencies": "ISOLATED_NPM_CI_LOCKFILE_IGNORE_SCRIPTS",
+  "baselineBuild": "FULL_WORKSPACE",
+  "starts": [
+    {
+      "runtimeRevision": 36,
+      "holdResponse": false
+    },
+    {
+      "runtimeRevision": 37,
+      "holdResponse": false
+    },
+    {
+      "runtimeRevision": 37,
+      "holdResponse": true
+    },
+    {
+      "runtimeRevision": 36,
+      "holdResponse": false
+    },
+    {
+      "runtimeRevision": 37,
+      "holdResponse": false
+    }
+  ],
+  "snapshots": [
+    "baseline_36",
+    "upgraded_37",
+    "crashed_37_with_wal",
+    "final_reupgrade_37"
+  ],
+  "realHttp": true,
+  "realMcpServiceAndSqlite": true,
+  "browser": "SYNTHETIC",
+  "realGooglePromptRequests": 0,
+  "realChromeProcesses": 0,
+  "realIdeExecutor": "NOT_TESTED",
+  "windowsRestart": "NOT_TESTED",
+  "syntheticSends": 4,
+  "duplicateSends": 0,
+  "currentFenceCount": 5,
+  "currentPhysicalReceipts": 4,
+  "v2AttemptHistoryAndDeadlineBytesPreserved": true,
+  "liveWriterBackupRejected": true,
+  "oldBackupRejectedWithoutMutation": true,
+  "corruptBackupRejectedWithoutMutation": true,
+  "coldWalRestore": true,
+  "crashedAcceptedReceiptRetained": true,
+  "unknownChatBlockedUntilExplicitResume": true,
+  "explicitResumeAddsNoSend": true,
+  "newRequestAfterRollbackCompleted": true,
+  "testHarness": "CURRENT_SYNTHETIC_HARNESS_IMPORTS_PINNED_BUILD_MODULES_BASELINE_SOURCES_UNMODIFIED",
+  "dependencyLockSha256": "4b7b6af54fba1791f81db3945d13393fcf8f90a8bb52cbcf945d93c3b7f618c8",
+  "scope": "OWNED_FIXTURE_ONLY_NO_PRODUCTION_REPAIR_OR_MULTI_DIRECTORY_ATOMICITY",
+  "backupExcludesControlTokensAndChromeProfiles": true,
+  "sourceSha256": {
+    "probe": "1915d0adc058e01a04bbf9643b3aaffc952ef22c780bff37fd8439d03a36d5b5",
+    "fixture": "e97e89f80c5b07e07efec63c85e2449d4dce419261535d6ccd6ed06df9d567e4"
+  },
+  "compiled": {
+    "baseline36": {
+      "native-antigravity/dist/native-proxy.js": "af3c0731dfd3924ec252a06c6e092c751771ed8d231175be5184a19c23885f68",
+      "native-antigravity/dist/request-ledger.js": "d7305910c5b5046ece21b70d56f8e84f00ddf207d514204a7db613b81f9e3b13",
+      "mcp-server/dist/service.js": "684ddebafe46e89e3c1314cd06793d25f8ae6d7b65f1597415757c81d84cc2ad",
+      "mcp-server/dist/receipt-store.js": "afd2c07fe39b0af6ff6c83f28235f05f7008ea839752f698c3b8421ef8b75ece"
+    },
+    "current37": {
+      "native-antigravity/dist/native-proxy.js": "9871033d0a18a967616aa0ef8dcbf1a4de6bfd14edc4d4fdb8b79f0d43b4f782",
+      "native-antigravity/dist/request-ledger.js": "d7305910c5b5046ece21b70d56f8e84f00ddf207d514204a7db613b81f9e3b13",
+      "mcp-server/dist/service.js": "ce32c3e78dbb87a1ecf022173cff9128f2926113a934f47e6fb35a0892939760",
+      "mcp-server/dist/receipt-store.js": "afd2c07fe39b0af6ff6c83f28235f05f7008ea839752f698c3b8421ef8b75ece"
+    }
+  },
+  "fixtureWritersExited": true,
+  "tempRootRemoved": true,
+  "tempRootPolicy": "PRESERVED_ON_FAILURE_REMOVED_ON_PASS"
+}

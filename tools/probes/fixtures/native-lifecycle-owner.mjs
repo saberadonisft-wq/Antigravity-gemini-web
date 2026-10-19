@@ -31,8 +31,9 @@ function serviceFor(account){
     openBrowser:async()=>{event("synthetic_open",account.accountId);return {opened:true};},
     selectModel:async selected=>{if(modes.get(account.accountId)==="model_unavailable"||selected.model!==policy.model||selected.effort!==policy.effort)throw {code:"MODEL_UNAVAILABLE"};return {...selected};},
     openFreshConversation:async()=>({close:async()=>{},suspend:async()=>{},resume:async()=>{},preserve:async()=>{}}),
+    ...(process.argv.includes("--recovery-mode")?{openExistingConversation:async url=>{event("synthetic_resume_attach",account.accountId);return {conversationUrl:url,close:async()=>{},suspend:async()=>{},resume:async()=>{},preserve:async()=>{}};}}:{}),
     submitPrompt:async(id,prompt,options)=>{event("synthetic_send",account.accountId,id);prompts.set(id,prompt);return {turnId:id,status:"accepted",submittedAt:new Date().toISOString()};},
-    pollResponse:async id=>{const nonce=/"nonce":"([a-f0-9]{48})"/.exec(prompts.get(id)??"")?.[1];if(!nonce)throw Error("Fixture nonce missing");return {turnId:id,status:"completed",text:JSON.stringify({nonce,type:"final",text:"SYNTHETIC_OWNER_REPLY"}),completedAt:new Date().toISOString()};},
+    pollResponse:async id=>{if(process.argv.includes("--recovery-hold-response")){event("synthetic_response_barrier",account.accountId,id);await new Promise(()=>{});}const nonce=/"nonce":"([a-f0-9]{48})"/.exec(prompts.get(id)??"")?.[1];if(!nonce)throw Error("Fixture nonce missing");return {turnId:id,status:"completed",text:JSON.stringify({nonce,type:"final",text:"SYNTHETIC_OWNER_REPLY"}),completedAt:new Date().toISOString()};},
     cancelPrompt:async id=>({turnId:id,cancelled:false}),cleanup:async()=>{},sendPrompt:async()=>{throw Error("unused");},
   };
   service=new GeminiMcpService(browser,path.join(account.statePath,"receipts.json"));services.set(account.accountId,service);return service;
