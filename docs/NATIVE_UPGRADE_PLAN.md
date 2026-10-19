@@ -292,6 +292,8 @@ Gate: mỗi nhánh có test, bằng chứng live, capability flag và rollback r
 
 P8a source 36 tái hiện rồi sửa ownership metadata không được giải phóng và BUSY cleanup bị bỏ qua khi release qua bound backend. Có hard caps cho cached handles/ownership/pending cleanup, diagnostics không chứa paths và shutdown terminal; late BUSY/identity/reply không hồi sinh queue, enroll hoặc trả success sau shutdown. Native HTTP test giữ request fence qua restart. Probe 500 warmup + 10.000 vòng dùng browser giả lập, lấy heap/RSS sau GC và V8 space samples; không thay gate RSS/worker/Chrome thật. [Báo cáo P8a](evidence/g4-native-p8a-pool-lifecycle.md).
 
+Ngày 19/10 đã commit checkpoint core/P6/P8 hiện tại tại `4e28d7a`; build/typecheck/lint và toàn bộ 406 test PASS. Sau đó đo thêm hai MCP shared-owner, bốn stdio frontend và SQLite thật, mỗi owner 2.180 lượt với browser giả lập. Ba cấu hình đã xác nhận đủ process thoát và xóa đúng temp root; 8 MiB semi-space là ứng viên tiết kiệm RSS, chưa đổi cấu hình production. [Báo cáo process memory](evidence/g4-native-p8c-mcp-process-memory.md). Bước tiếp: policy opt-in có kiểm chứng startup/fingerprint của shared owner, rồi workload Chrome/DOM; không coi fixture này là soak Web thật.
+
 Phạm vi:
 
 - Chạy toàn bộ kiểm thử phù hợp với các package thay đổi, build/typecheck/lint; kiểm tra migration schema, backward compatibility và IPC/contracts drift.
