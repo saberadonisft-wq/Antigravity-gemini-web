@@ -21,3 +21,4 @@ export * from "./routing.js";
 export * from "./native-management.js";
 export * from "./knowledge.js";
 export * from "./node-memory.js";
+export * from "./chat-import.js";

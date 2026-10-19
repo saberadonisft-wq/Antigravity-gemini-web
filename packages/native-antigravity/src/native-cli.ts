@@ -10,6 +10,7 @@ import { AccountRegistry } from "./account-registry.js";
 import { startNativeProxy, NATIVE_PROXY_PORT, NATIVE_RUNTIME_REVISION } from "./native-proxy.js";
 import { inspectIde, nativeHome, isolatedIdeProfile, configureIsolatedProfile, atomicPrivateFile, assertNoLinks } from "./installation.js";
 import { NativeRouteError } from "./native-protocol.js";
+import { inspectChatImportArchive, chatImportInspectionArguments } from "./chat-import.js";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const endpoint = "http://127.0.0.1:" + NATIVE_PROXY_PORT;
@@ -63,7 +64,10 @@ async function isProxyRunning(): Promise<boolean> {
 }
 
 try {
-  if (command === "check") {
+  if (command === "imports:inspect") {
+    const selected = chatImportInspectionArguments(process.argv.slice(3));
+    console.log(JSON.stringify(await inspectChatImportArchive(selected.file, selected.provider), null, 2));
+  } else if (command === "check") {
     console.log(JSON.stringify({ ...inspectIde(), endpoint, isolatedIdeProfile, vendorFilesModified: false, nativeInference: "unverified_until_live_acceptance" }, null, 2));
   } else if (command === "setup" || command === "restore") {
     inspectIde();
@@ -303,7 +307,7 @@ try {
     await new Promise<void>((resolve, reject) => { child.once("spawn", resolve); child.once("error", reject); });
     child.unref();
     console.log(JSON.stringify({ launchRequested: true, endpoint, isolatedIdeProfile, selectModel: "Gemini Web (Local)", browserState: browser.browserState, browserAccountState: browser.accountState, accountLogin: "Complete Google sign-in in the isolated IDE if requested.", browserLogin: "The isolated Gemini browser is opened automatically; sign in there if requested. Credentials are never copied." }, null, 2));
-  } else throw new NativeRouteError("INVALID_COMMAND", "Use check, setup, start, launch, browser, status, accounts, accounts:status, account:add, account:use, account:disable, account:enable, account:check, account:verify, account:browser, routing, routing:set, routing:unbind, knowledge, knowledge:import, knowledge:register, knowledge:check, knowledge:refresh, knowledge:remove, knowledge:bind, knowledge:clear, receipt, cancel, stop, resume or restore.");
+  } else throw new NativeRouteError("INVALID_COMMAND", "Use check, setup, start, launch, browser, status, accounts, accounts:status, account:add, account:use, account:disable, account:enable, account:check, account:verify, account:browser, routing, routing:set, routing:unbind, knowledge, knowledge:import, knowledge:register, knowledge:check, knowledge:refresh, knowledge:remove, knowledge:bind, knowledge:clear, imports:inspect, receipt, cancel, stop, resume or restore.");
 } catch (error) {
   console.error(JSON.stringify({ code: error instanceof NativeRouteError ? error.code : "NATIVE_COMMAND_FAILED", message: error instanceof NativeRouteError ? error.message : "Native route command failed; no credentials or source payload are logged." }));
   process.exitCode = 1;

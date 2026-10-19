@@ -1,0 +1,128 @@
+{
+  "checkedAt": "2026-10-19T06:05:29.374600+00:00",
+  "feature": "P7A_LOCAL_CHAT_ARCHIVE_INSPECTION",
+  "baselineCommit": "51d25424310b5877278de78e7834abfd9492925e",
+  "nativeRuntimeRevision": 37,
+  "browserWorkerFingerprint": 24,
+  "status": "PASS_LOCAL_ONLY",
+  "checks": {
+    "build": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "newFocusedTests": 8,
+    "workspaceTests": 423,
+    "packages": [
+      {
+        "package": "contracts",
+        "tests": 13,
+        "pass": 13,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "package": "gemini-browser",
+        "tests": 47,
+        "pass": 47,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "package": "mcp-server",
+        "tests": 52,
+        "pass": 52,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "package": "model-bridge",
+        "tests": 4,
+        "pass": 4,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "package": "native-antigravity",
+        "tests": 178,
+        "pass": 178,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "package": "runtime",
+        "tests": 80,
+        "pass": 80,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      },
+      {
+        "package": "launcher",
+        "tests": 49,
+        "pass": 49,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0
+      }
+    ],
+    "runtimeAuditSnapshot": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    }
+  },
+  "googleSubmission": "not_submitted",
+  "realGooglePromptRequests": 0,
+  "realBrowserActions": 0,
+  "realIdeExecutor": "NOT_TESTED",
+  "googleImportCompatibility": "NOT_TESTED",
+  "geminiAccountMigration": "NOT_TESTED",
+  "webUploadAndMemoryWorkflow": "NOT_IMPLEMENTED",
+  "fullP7": "IN_PROGRESS",
+  "priorBaselineRecovery": "HISTORICAL_51d2542_EXACT_LOCKFILES_NOT_RERUN",
+  "sourceSha256": {
+    "README.md": "284b79b2461acd4c0fc9a2b69ccdcf36cc55db2f9eee15745cc0c04879c9ba80",
+    "docs/NATIVE_CHAT_IMPORT.md": "84b1b6a1615c9ecb684ba3b347844cfa0ca92ee90be432f2badd83612fbd8f27",
+    "docs/NATIVE_UPGRADE_PLAN.md": "7725d607513ef0c190867573bba66bb3e48b91f7501ebcb1cf011e2614eb00f7",
+    "docs/evidence/g4-native-p7a-chat-import-inspection.md": "1ccb76fcb693292844cf295600406d1160f357ceec0276e37665e78774899058",
+    "package-lock.json": "41c721a4a65619af5cbba325bbe3b70dbed90b78cd2f70a23ffe45f37a04f686",
+    "package.json": "c95eb27b42f468e0c330b9d0fcd8f7622139dbf20223b8eb8796a701e618142b",
+    "packages/contracts/src/chat-import.test.ts": "9205b0d1473a49dcafa0190772b1b2bf6dc29bbda6f55f06f68100eca7bb4214",
+    "packages/contracts/src/chat-import.ts": "65d7a145279a384e2e30f1f6352e4f19d131e9513fe8b942ab7900c140a911b8",
+    "packages/contracts/src/index.ts": "370873bb22e48a83a35c9a2bddf5c8554bb410499ab81c151e7240267bb29d72",
+    "packages/native-antigravity/package.json": "00ede0504fd476d0815f5860dee44385aa9946ee726e775b066f97f14a04c161",
+    "packages/native-antigravity/src/chat-import.test.ts": "413a4826bc600bdc0ba1931798546da1dff4053a3edcd44f9b89134f3942d326",
+    "packages/native-antigravity/src/chat-import.ts": "e148ecb3c937fba0ac7448ad63055bceaf7b0f1e728e5d5b56c2ab8479902d75",
+    "packages/native-antigravity/src/native-cli.ts": "f97543196f397fa280366d428f497846e6b42741ee92bc546a297faec640f8d2"
+  },
+  "compiledSha256": {
+    "packages/contracts/dist/chat-import.js": "584a2224199770aad37b77cb6e3b06a946ba9538a8dfdf326a0e96398433ccf7",
+    "packages/native-antigravity/dist/chat-import.js": "597d62715b6b75273a908708b4f4789ff15c5f4d927f74fe20a20b464944667e",
+    "packages/native-antigravity/dist/native-cli.js": "8a00ed7a055167649019b864cc543bfbb7f07fb1537bb55a71f12b6643a91a69"
+  },
+  "sources": [
+    {
+      "url": "https://support.google.com/gemini/answer/16868299?hl=en",
+      "checkedOn": "2026-10-19"
+    },
+    {
+      "url": "https://github.com/thejoshwolfe/yauzl",
+      "checkedOn": "2026-10-19"
+    }
+  ],
+  "nativeProxyAndBrowserApiChanged": false
+}

@@ -275,7 +275,9 @@ Phạm vi:
 
 Gate: repo sửa sau import và working tree chưa commit không bị coi là bản mới trên Web; account B thiếu quyền nguồn có lỗi đúng; model không dùng kiến thức cũ để vượt tool policy mới. Từng adapter có live acceptance riêng; không lấy việc nút Knowledge xuất hiện làm PASS.
 
-### P7 — Handoff và công cụ bổ trợ
+### P7 — Handoff và công cụ bổ trợ — ĐANG TRIỂN KHAI
+
+P7a có CLI `native:imports:inspect` kiểm tra ZIP/ZIP64 cục bộ cho provider người dùng khai báo ChatGPT/Claude: hash theo luồng, duyệt danh mục tuần tự, hủy, phát hiện file thay đổi và từ chối path/header không an toàn. Không giải nén, đọc hội thoại thành tool request, ghi account state hoặc gửi Google. [Hướng dẫn và phạm vi](NATIVE_CHAT_IMPORT.md). Đây mới là preflight của nhánh import; chưa có chooser/account-bound upload/capability probe Web, import receipt/partial handling, memory-text workflow hoặc nghiệm thu dữ liệu thật. Các nhánh và gate P7 bên dưới được giữ nguyên.
 
 Phạm vi gồm bốn nhánh có thể phát hành độc lập:
 
