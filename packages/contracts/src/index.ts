@@ -15,3 +15,8 @@ export * from "./context.js";
 export * from "./journal.js";
 
 export * from "./diagnostics.js";
+export * from "./account.js";
+export * from "./transport.js";
+export * from "./routing.js";
+export * from "./native-management.js";
+export * from "./knowledge.js";

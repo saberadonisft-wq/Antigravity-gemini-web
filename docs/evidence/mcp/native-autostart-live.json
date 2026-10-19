@@ -1,0 +1,23 @@
+{
+  "checkedAt": "2026-10-15T14:54:40.264Z",
+  "caller": "synthetic_loopback_client",
+  "ideUi": "NOT_TESTED",
+  "runtimeRevision": 4,
+  "status": "PASS_BROWSER_AUTOSTART_AND_REPLY",
+  "before": {
+    "debugBrowserReachable": false
+  },
+  "httpStatus": 200,
+  "elapsedMs": 9892,
+  "replyMatches": true,
+  "lastTurn": {
+    "requestId": "native_607b2037152ba8e6a65d3ef2ad44b11d4f8f9cfe5c4f411b55d6c168de120243",
+    "promptChars": 1206,
+    "fullPromptChars": 1128,
+    "reused": false,
+    "phase": "completed",
+    "elapsedMs": 9881,
+    "firstTextMs": 8611,
+    "silentMs": 21
+  }
+}

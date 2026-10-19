@@ -4,6 +4,11 @@ export interface FixtureServerOptions {
   port?: number;
   signedIn?: boolean;
   streamDelayMs?: number;
+  modelPickerDelayMs?: number;
+  modelOptionsDelayMs?: number;
+  exclusiveEffortMenu?: boolean;
+  transientMenuCloseMs?: number;
+  composerReadyDelayMs?: number;
 }
 
 export class GeminiDomFixtureServer {
@@ -12,11 +17,21 @@ export class GeminiDomFixtureServer {
   public signedIn: boolean;
   public streamDelayMs: number;
   public turnsReceived: string[] = [];
+  private modelPickerDelayMs: number;
+  private modelOptionsDelayMs: number;
+  private exclusiveEffortMenu: boolean;
+  private transientMenuCloseMs: number;
+  private composerReadyDelayMs: number;
 
   constructor(options: FixtureServerOptions = {}) {
     this.port = options.port ?? 0;
     this.signedIn = options.signedIn ?? true;
     this.streamDelayMs = options.streamDelayMs ?? 50;
+    this.modelPickerDelayMs = options.modelPickerDelayMs ?? 0;
+    this.modelOptionsDelayMs = options.modelOptionsDelayMs ?? 0;
+    this.exclusiveEffortMenu = options.exclusiveEffortMenu ?? false;
+    this.transientMenuCloseMs = options.transientMenuCloseMs ?? 0;
+    this.composerReadyDelayMs = options.composerReadyDelayMs ?? 0;
   }
 
   get url(): string {
@@ -69,6 +84,14 @@ export class GeminiDomFixtureServer {
       'const composer = document.getElementById("composerInput");',
       'const sendBtn = document.getElementById("sendBtn");',
       'const stopBtn = document.getElementById("stopBtn");',
+      'let selectedModel = "Gemini 1.5 Pro", selectedEffort = "Low";',
+      'const picker = document.getElementById("modePicker"), menu = document.getElementById("modeMenu"), efforts = document.getElementById("effortMenu"), effortPicker = document.getElementById("effortPicker");',
+      this.modelPickerDelayMs ? 'picker.hidden = true; setTimeout(() => { picker.hidden = false; }, ' + this.modelPickerDelayMs + ');' : '',
+      'let firstModeOpen = true;',
+      'picker.onclick = () => { const opened = picker.getAttribute("aria-expanded") !== "true"; picker.setAttribute("aria-expanded", String(opened)); menu.hidden = !opened; efforts.hidden = true; effortPicker.setAttribute("aria-expanded", "false"); if (opened && firstModeOpen) { firstModeOpen = false; const delayed = document.querySelector(\'[data-model-option="4 Argon"]\'); delayed.hidden = true; setTimeout(() => { delayed.hidden = false; }, ' + this.modelOptionsDelayMs + '); if (' + this.transientMenuCloseMs + ') setTimeout(() => { menu.hidden = true; efforts.hidden = true; picker.setAttribute("aria-expanded", "false"); }, ' + this.transientMenuCloseMs + '); } };',
+      'for (const row of document.querySelectorAll("[data-model-option]")) row.onclick = () => { selectedModel = row.dataset.modelOption; picker.textContent = selectedModel; for (const r of document.querySelectorAll("[data-model-option]")) r.classList.toggle("selected", r === row); menu.hidden = true; picker.setAttribute("aria-expanded", "false"); };',
+      'effortPicker.onclick = () => { efforts.hidden = !efforts.hidden; effortPicker.setAttribute("aria-expanded", String(!efforts.hidden)); if (' + this.exclusiveEffortMenu + ') menu.hidden = !efforts.hidden; };',
+      'for (const row of document.querySelectorAll("[data-effort-option]")) row.onclick = () => { selectedEffort = row.dataset.effortOption; for (const r of document.querySelectorAll("[data-effort-option]")) r.classList.toggle("selected", r === row); efforts.hidden = true; menu.hidden = true; picker.setAttribute("aria-expanded", "false"); effortPicker.setAttribute("aria-expanded", "false"); };',
       '',
       'const turnResponses = [',
       '  "Hello! I am Gemini. This is Turn 1 text response confirming our connection.",',
@@ -92,6 +115,8 @@ export class GeminiDomFixtureServer {
       '  const respText = document.createElement("div");',
       '  respText.className = "model-response-text";',
       '  respEl.appendChild(respText);',
+      '  const done = document.createElement("button"); done.setAttribute("aria-label", "Good response"); done.textContent = "thumb_up"; done.style.display = "none"; respEl.appendChild(done);',
+      '  const feedback = document.createElement("button"); feedback.setAttribute("aria-label", "Send feedback"); feedback.textContent = "Feedback"; feedback.onclick = () => { document.body.dataset.feedbackClicked = "true"; }; respEl.appendChild(feedback);',
       '  conversation.appendChild(respEl);',
       '  const fullText = turnCount >= 3 ? "SYNTHETIC LONG RESPONSE ".repeat(2000) : turnResponses[turnCount % turnResponses.length];',
       '  turnCount++;',
@@ -109,7 +134,9 @@ export class GeminiDomFixtureServer {
       '      clearInterval(streamTimer);',
       '      streamTimer = null;',
       '      stopBtn.style.display = "none";',
+      '      done.style.display = "inline-block";',
       '      sendBtn.style.display = "inline-block";',
+      this.composerReadyDelayMs ? '      composer.setAttribute("aria-busy", "true"); setTimeout(() => composer.removeAttribute("aria-busy"), ' + this.composerReadyDelayMs + ');' : '',
       '    }',
       '  }, ' + this.streamDelayMs + ');',
       '});',
@@ -151,9 +178,20 @@ export class GeminiDomFixtureServer {
       '</head>',
       '<body>',
       '  <div class="header">',
-      '    <button data-test-id="model-selector" class="model-selector">Gemini 1.5 Pro</button>',
+      '    <button id="modePicker" data-test-id="bard-mode-menu-button" class="model-selector" aria-expanded="false">Gemini 1.5 Pro</button>',
       '    ' + avatarHtml,
       '  </div>',
+      '  <div id="modeMenu" hidden>',
+      '    <button role="menuitem" data-model-option="Gemini 1.5 Pro" class="selected"><span class="label">Gemini 1.5 Pro</span></button>',
+      '    <button role="menuitem" data-model-option="4 Argon"><span class="label">4 Argon</span></button>',
+      '    <button role="menuitem" data-model-option="3.8 Flash"><span class="label">3.8 Flash</span></button>',
+      '    <button id="effortPicker" role="menuitem" value="thinking_level" aria-expanded="false"><span class="label">Thinking level</span></button>',
+      '  </div>',
+      '    <div id="effortMenu" hidden>',
+      '      <button role="menuitem" data-effort-option="Low" class="selected"><span class="label">Low</span></button>',
+      '      <button role="menuitem" data-effort-option="Medium"><span class="label">Medium</span></button>',
+      '      <button role="menuitem" data-effort-option="High"><span class="label">High</span></button>',
+      '    </div>',
       '  <div id="conversation" class="conversation-container"></div>',
       '  <div class="composer-container">',
       '    <rich-textarea>',

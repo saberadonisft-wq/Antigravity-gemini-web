@@ -12,7 +12,10 @@
     "dev": "vite",
     "start": "node scripts/start.mjs",
     "smoke:desktop": "node scripts/desktop-smoke.mjs",
-    "smoke:cache": "node scripts/cache-smoke.mjs"
+    "smoke:cache": "node scripts/cache-smoke.mjs",
+    "smoke:native-accounts": "node scripts/native-accounts-smoke.mjs",
+    "smoke:native-knowledge": "node scripts/native-knowledge-smoke.mjs",
+    "smoke:native-lifecycle": "node scripts/native-lifecycle-smoke.mjs"
   },
   "dependencies": {
     "@antigravity-gemini-web/contracts": "*",

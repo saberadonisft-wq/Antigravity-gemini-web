@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-18T05:45:57.791548+00:00",
+  "accountId": "acc_98a4b2ec14ee3d16",
+  "runtimeRevision": 29,
+  "readinessCode": "BROWSER_NOT_READY",
+  "observedPage": {
+    "host": "www.google.com",
+    "path": "/sorry/index"
+  },
+  "promptsSentByVerification": 0,
+  "verificationBypassed": false,
+  "status": "WAITING_FOR_USER_BROWSER_VERIFICATION",
+  "boundary": "The browser redirect was observed after later readiness failures. It does not establish the cause of the earlier model-capture failure. Initial 3.8 staging native acceptance remains incomplete."
+}

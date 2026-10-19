@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-10-16T11:42:36.688Z",
+  "runtimeRevision": 21,
+  "caller": "synthetic_loopback_client",
+  "browser": "real_Gemini_Web",
+  "ideExecutor": "NOT_TESTED",
+  "syntheticSystemChars": 75731,
+  "status": "PASS_LONG_CONTEXT_TOOL_AND_DELTA_FOLLOW_UP",
+  "httpStatus": 200,
+  "elapsedMs": 120107,
+  "lastTurn": {
+    "requestId": "native_6b9f6eef6419054472fff2cc6221d562244d55d389624c7048836ff83302c827",
+    "promptChars": 78642,
+    "fullPromptChars": 78564,
+    "reused": false,
+    "contextMode": "full",
+    "contextReason": "new_scope_or_restart",
+    "patchOperations": 0,
+    "savedPromptChars": 0,
+    "toolDescriptionCharsSaved": 0,
+    "existingConversationRebind": false,
+    "phase": "completed",
+    "transportMessages": 5,
+    "elapsedMs": 120070,
+    "firstTextMs": null,
+    "silentMs": 1656
+  },
+  "markersMatch": true,
+  "followup": {
+    "httpStatus": 200,
+    "elapsedMs": 14074,
+    "replyMatches": true,
+    "lastTurn": {
+      "requestId": "native_f67c8f2c7e478836fa4b50c6676f30ae93da0b980bdf82bebce71bfd5a506bfc",
+      "promptChars": 1247,
+      "fullPromptChars": 78955,
+      "reused": true,
+      "contextMode": "patch",
+      "contextReason": "existing_revision",
+      "patchOperations": 2,
+      "savedPromptChars": 77708,
+      "toolDescriptionCharsSaved": 0,
+      "existingConversationRebind": false,
+      "phase": "completed",
+      "transportMessages": 1,
+      "elapsedMs": 14042,
+      "firstTextMs": 11078,
+      "silentMs": 1690
+    }
+  }
+}

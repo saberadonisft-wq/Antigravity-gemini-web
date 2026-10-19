@@ -1,5 +1,7 @@
 # Kế hoạch Antigravity – Gemini Web
 
+**Kế hoạch nâng cấp tổng hợp 16/10/2026:** xem [NATIVE_UPGRADE_PLAN.md](NATIVE_UPGRADE_PLAN.md) cho baseline revision 22, đa tài khoản, handoff giữ chat IDE, upload context, nguồn kiến thức Gemini Web và các gate P0–P8. Nội dung lịch sử bên dưới giữ nguyên để đối chiếu.
+
 **Cập nhật native provider 15/10/2026:** đã triển khai endpoint Cloud Code local trên profile IDE riêng, model Gemini Web (Local), fresh browser conversation và native functionCall/functionResponse. Chat native và view_file thật đã PASS. Sửa file/chạy test, cancel và compaction còn nghiệm thu riêng; Google reverse connector độc lập. [Cách chạy](NATIVE_SETUP.md), [bằng chứng hiện tại](evidence/g4-native-provider-validation.md), [ADR 0008](adr/0008-native-gemini-web-provider.md). Các gate BLOCKED và kết luận chưa thay native model trong snapshot bên dưới không còn đại diện cho hai ca native đã PASS này.
 
 Ngày lập: 14/10/2026. Cập nhật 15/10/2026: đã triển khai qua G4 theo chỉ thị người dùng. **G4-A launcher/control/fixture VERIFIED**, **G4-B BLOCKED / NOT_TESTED**, chưa G5. Các hiện trạng khảo sát ban đầu bên dưới là snapshot ngày lập. [Nghiệm thu hiện tại](evidence/g4-acceptance-validation.md), [hướng dẫn tự test](G4_USER_TEST_GUIDE.md).

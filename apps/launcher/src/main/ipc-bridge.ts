@@ -3,6 +3,8 @@ import {
   ControlCommandSchema, ActivityQuerySchema, RuntimeSnapshotSchema, CommandAckSchema,
   OperationRecordSchema, SessionSummarySchema, ActivityEntrySchema, RuntimeEventSchema, createPageSchema,
   sanitizeDiagnostics, safeUiError,
+  NativeManagementCommandSchema,NativeManagementSnapshotSchema,type NativeManagementClient,
+  KnowledgeUiCommandSchema,KnowledgeImportIntentSchema,KnowledgeSnapshotSchema,type NativeKnowledgeClient,type KnowledgeImportIntent,type KnowledgeSnapshot,
 } from "@antigravity-gemini-web/contracts";
 
 export interface IpcSender {
@@ -12,6 +14,9 @@ export interface IpcSender {
 }
 export interface IpcCallContext { sender: IpcSender; isMainFrame: boolean; origin: string; }
 export interface IpcBridgeOptions {
+  nativeAccounts?:NativeManagementClient;
+  nativeKnowledge?:Pick<NativeKnowledgeClient,"getNativeKnowledge"|"executeNativeKnowledge">;
+  onImportKnowledge?:(intent:KnowledgeImportIntent)=>Promise<KnowledgeSnapshot>;
   allowedOrigins?: string[]; backend: LauncherClient;
   trustedSender?: (sender: IpcSender) => boolean;
   onSaveDialog?: () => Promise<string | null>;
@@ -36,6 +41,8 @@ export class IpcSecurityBridge {
   public static readonly ALLOWED_CHANNELS = new Set([
     "launcher:getSnapshot", "launcher:execute", "launcher:getOperation",
     "launcher:getSessions", "launcher:getActivity", "launcher:subscribe", "launcher:unsubscribe",
+    "launcher:getNativeAccounts", "launcher:executeNativeAccount",
+    "launcher:getNativeKnowledge", "launcher:executeNativeKnowledge", "launcher:importNativeKnowledge",
   ]);
   constructor(private readonly options: IpcBridgeOptions) {
     this.backend = options.backend;
@@ -56,9 +63,32 @@ export class IpcSecurityBridge {
   public async handleInvoke(channel: string, context: IpcCallContext, ...args: unknown[]): Promise<unknown> {
     if (!IpcSecurityBridge.ALLOWED_CHANNELS.has(channel)) throw { code: "UNKNOWN_CHANNEL", message: "Channel denied.", retryable: false } satisfies UiError;
     this.validateContext(context);
-    const noArgs = ["launcher:getSnapshot", "launcher:subscribe", "launcher:unsubscribe"].includes(channel);
+    const noArgs = ["launcher:getSnapshot", "launcher:subscribe", "launcher:unsubscribe", "launcher:getNativeAccounts", "launcher:getNativeKnowledge"].includes(channel);
     if ((noArgs && args.length) || (!noArgs && args.length > 1)) throw { code: "INVALID_ARGUMENT", message: "Invalid argument count.", retryable: false } satisfies UiError;
     switch (channel) {
+      case "launcher:getNativeKnowledge": {
+        if(!this.options.nativeKnowledge)throw safeUiError({code:"UNSUPPORTED_OPERATION"});
+        return KnowledgeSnapshotSchema.parse(await this.options.nativeKnowledge.getNativeKnowledge());
+      }
+      case "launcher:executeNativeKnowledge": {
+        if(!this.options.nativeKnowledge)throw safeUiError({code:"UNSUPPORTED_OPERATION"});
+        const command=KnowledgeUiCommandSchema.safeParse(args[0]);if(!command.success)throw safeUiError({code:"CONTRACT_MISMATCH"});
+        return KnowledgeSnapshotSchema.parse(await this.options.nativeKnowledge.executeNativeKnowledge(command.data));
+      }
+      case "launcher:importNativeKnowledge": {
+        if(!this.options.onImportKnowledge)throw safeUiError({code:"UNSUPPORTED_OPERATION"});
+        const intent=KnowledgeImportIntentSchema.safeParse(args[0]);if(!intent.success)throw safeUiError({code:"CONTRACT_MISMATCH"});
+        return KnowledgeSnapshotSchema.parse(await this.options.onImportKnowledge(intent.data));
+      }
+      case "launcher:getNativeAccounts": {
+        if(!this.options.nativeAccounts)throw safeUiError({code:"UNSUPPORTED_OPERATION"});
+        return NativeManagementSnapshotSchema.parse(await this.options.nativeAccounts.getNativeAccounts());
+      }
+      case "launcher:executeNativeAccount": {
+        if(!this.options.nativeAccounts)throw safeUiError({code:"UNSUPPORTED_OPERATION"});
+        const parsed=NativeManagementCommandSchema.safeParse(args[0]);if(!parsed.success)throw safeUiError({code:"CONTRACT_MISMATCH"});
+        return NativeManagementSnapshotSchema.parse(await this.options.nativeAccounts.executeNativeAccount(parsed.data));
+      }
       case "launcher:getSnapshot": return sanitizeDiagnostics(RuntimeSnapshotSchema.parse(await this.backend.getSnapshot()));
       case "launcher:execute": {
         const parsed = ControlCommandSchema.safeParse(args[0]);

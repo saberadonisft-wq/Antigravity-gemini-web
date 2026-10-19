@@ -1,0 +1,58 @@
+{
+  "checkedAt": "2026-10-16T15:54:59.951Z",
+  "browser": "SYNTHETIC",
+  "ideExecutor": "NOT_TESTED",
+  "http": "real_loopback",
+  "physicalStore": "real_sqlite_wal",
+  "status": "PASS_HTTP_SQLITE_RECONCILIATION",
+  "runtimeRevision": 26,
+  "accountSwitchAfterRestart": true,
+  "originalAccountOnly": true,
+  "missingReceiptCannotReplay": true,
+  "missingOwnerRemainsUncorrelated": true,
+  "mismatchedAttemptRejected": true,
+  "changedEpochRejected": true,
+  "sendCountA": 1,
+  "sendCountB": 0,
+  "reconciliation": {
+    "logical": {
+      "version": 1,
+      "requestId": "native_8a441cb4211036e350d0c4713fe3b5f7c6b8ea01521a37d296479b592f19fedd",
+      "attemptId": "17fa9585-4961-4ee4-8e2b-a7620fd7a33c",
+      "accountId": "acc_a7c35055f16d443d",
+      "identityEpoch": 1,
+      "taskScope": "e9196d7eebdd5a063cecf69369c6cf188e1e48aab16f6ca1368c029070ce162b",
+      "state": "completed",
+      "createdAt": "2026-10-16T15:54:59.997Z",
+      "updatedAt": "2026-10-16T15:55:00.021Z",
+      "physicalRequests": [
+        "native_0ff6b3370dc993d2692c99917c12c9ab64694b5addee32dbe0c0d46a009acb25"
+      ]
+    },
+    "physical": [
+      {
+        "requestId": "native_0ff6b3370dc993d2692c99917c12c9ab64694b5addee32dbe0c0d46a009acb25",
+        "found": true,
+        "receipt": {
+          "requestId": "native_0ff6b3370dc993d2692c99917c12c9ab64694b5addee32dbe0c0d46a009acb25",
+          "hash": "90cabf47f4d929ba10164070195cd70e8527d1445fe7406a75241687c050f6b9",
+          "phase": "terminal",
+          "attemptId": "2cd1804a-b70a-43b1-a034-8fc59a705491",
+          "createdAt": "2026-10-16T15:55:00.009Z",
+          "updatedAt": "2026-10-16T15:55:00.018Z",
+          "owner": {
+            "logicalRequestId": "native_8a441cb4211036e350d0c4713fe3b5f7c6b8ea01521a37d296479b592f19fedd",
+            "logicalAttemptId": "17fa9585-4961-4ee4-8e2b-a7620fd7a33c",
+            "accountId": "acc_a7c35055f16d443d",
+            "identityEpoch": 1
+          }
+        },
+        "replayAllowed": false,
+        "resultAvailable": false,
+        "correlation": "verified"
+      }
+    ],
+    "replayAllowed": false,
+    "persistedResultAvailable": false
+  }
+}

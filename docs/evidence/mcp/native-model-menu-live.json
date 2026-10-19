@@ -1,0 +1,43 @@
+{
+  "checkedAt": "2026-10-15T17:39:51.932Z",
+  "caller": "synthetic_loopback_client",
+  "ideUi": "NOT_TESTED",
+  "runtimeRevision": 5,
+  "modelSelection": {
+    "model": "4 Argon",
+    "effort": "Low"
+  },
+  "turns": [
+    {
+      "httpStatus": 200,
+      "replyMatches": true,
+      "elapsedMs": 9505,
+      "lastTurn": {
+        "requestId": "native_987742ec77e0f13ed56cb966c470184f08bd8c04907b8a0a5b28b04ec01c6461",
+        "promptChars": 79743,
+        "fullPromptChars": 79665,
+        "reused": false,
+        "phase": "completed",
+        "elapsedMs": 9485,
+        "firstTextMs": 8159,
+        "silentMs": 38
+      }
+    },
+    {
+      "httpStatus": 200,
+      "replyMatches": true,
+      "elapsedMs": 16773,
+      "lastTurn": {
+        "requestId": "native_2b448a9a9a893629a62688364d4ab29eea57a7c80de5366c5f8965e0bbba46de",
+        "promptChars": 1516,
+        "fullPromptChars": 79825,
+        "reused": true,
+        "phase": "completed",
+        "elapsedMs": 16759,
+        "firstTextMs": 15748,
+        "silentMs": 42
+      }
+    }
+  ],
+  "status": "PASS_LARGE_CONTEXT_AND_RETAINED_FOLLOWUP"
+}

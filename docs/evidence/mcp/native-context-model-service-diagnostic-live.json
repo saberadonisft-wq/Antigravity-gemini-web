@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-10-18T05:35:48.224Z",
+  "accountId": "acc_98a4b2ec14ee3d16",
+  "runtimeRevision": 29,
+  "promptsSent": 0,
+  "status": "FAILED",
+  "stage": "select_context_model",
+  "catalog": {
+    "selected": {
+      "model": "3.5 Flash-Lite",
+      "effort": "Low"
+    },
+    "options": [
+      {
+        "model": "3.5 Flash-Lite",
+        "disabled": false
+      },
+      {
+        "model": "3.8 Flash",
+        "disabled": false
+      },
+      {
+        "model": "3.1 Pro",
+        "disabled": false
+      },
+      {
+        "model": "4 Argon",
+        "disabled": false
+      }
+    ]
+  },
+  "contextModel": {
+    "model": "3.8 Flash"
+  },
+  "primaryRestored": true,
+  "captureDiagnostic": {
+    "stage": "open_effort",
+    "verificationOnly": true
+  },
+  "serviceResult": {
+    "status": "failed",
+    "code": "MODEL_UNAVAILABLE",
+    "diagnostic": {
+      "stage": "open_effort",
+      "verificationOnly": true
+    },
+    "delivery": "not_sent"
+  },
+  "code": "ERR_ASSERTION",
+  "nativeRestored": true
+}

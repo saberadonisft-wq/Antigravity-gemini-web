@@ -2,6 +2,8 @@ import {
   type LauncherClient, type RuntimeEvent, type UiError,
   RuntimeSnapshotSchema, CommandAckSchema, OperationRecordSchema, SessionSummarySchema,
   ActivityEntrySchema, RuntimeEventSchema, UiErrorSchema, createPageSchema, safeUiError,
+  NativeManagementSnapshotSchema,NativeManagementCommandSchema,
+  KnowledgeSnapshotSchema,KnowledgeUiCommandSchema,KnowledgeImportIntentSchema,
 } from "@antigravity-gemini-web/contracts";
 
 export interface IpcInvoker {
@@ -39,6 +41,11 @@ export function createPreloadClient(invoker: IpcInvoker): LauncherClient {
     for (const listener of listeners) { try { listener(structuredClone(result.data)); } catch {} }
   };
   return {
+    async getNativeKnowledge(){return KnowledgeSnapshotSchema.parse(await call("launcher:getNativeKnowledge"));},
+    async executeNativeKnowledge(command){return KnowledgeSnapshotSchema.parse(await call("launcher:executeNativeKnowledge",KnowledgeUiCommandSchema.parse(command)));},
+    async importNativeKnowledge(intent){return KnowledgeSnapshotSchema.parse(await call("launcher:importNativeKnowledge",KnowledgeImportIntentSchema.parse(intent)));},
+    async getNativeAccounts(){return NativeManagementSnapshotSchema.parse(await call("launcher:getNativeAccounts"));},
+    async executeNativeAccount(command){return NativeManagementSnapshotSchema.parse(await call("launcher:executeNativeAccount",NativeManagementCommandSchema.parse(command)));},
     async getSnapshot() {
       if (listeners.size) await schedule(); // handshake subscription before establishing the snapshot
       if (subscriptionError) throw subscriptionError;

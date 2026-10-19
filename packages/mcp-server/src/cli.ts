@@ -14,14 +14,15 @@ const state = path.resolve(process.env.AG_MCP_STATE_DIR ?? path.join(root, "mcp"
 const port = Number(process.env.AG_MCP_DEBUG_PORT ?? 9223);
 const chromePath = process.env.AG_MCP_CHROME_PATH ?? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw Error("Invalid CDP port");
-if (Number(process.versions.node.split(".")[0]) < 22 || !globalThis.WebSocket) throw Error("Node 22+ required");
+const [nodeMajor,nodeMinor] = process.versions.node.split(".").map(Number);
+if (nodeMajor < 22 || nodeMajor === 23 || (nodeMajor === 22 && nodeMinor < 13) || !globalThis.WebSocket) throw Error("Node 22.13+ (22.x) or Node 24+ with built-in SQLite required");
 try {
   await runSharedStdio({
     scope: `browser:${profile}`, descriptorFile: path.join(profile, "browser-stdio-owner.json"),
-    fingerprint: runtimeFingerprint({ version: 2, profile, state, port, chromePath }),
+    fingerprint: runtimeFingerprint({ version: 23, profile, state, port, chromePath }),
     createRuntime: async () => {
       fs.mkdirSync(state, { recursive: true }); fs.mkdirSync(profile, { recursive: true });
-      const browser = new LiveGeminiBrowserAdapter({ userDataDir: profile, debugPort: port, chromePath, headless: false });
+      const browser = new LiveGeminiBrowserAdapter({ userDataDir: profile, debugPort: port, chromePath, headless: false, requireProfileIdentity: true });
       const service = new GeminiMcpService(browser, path.join(state, "receipts.json"));
       return { createServer: () => createGeminiMcpServer(service), close: () => service.close() };
     }

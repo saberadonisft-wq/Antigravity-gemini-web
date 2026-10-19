@@ -1,0 +1,45 @@
+{
+  "fixtureOnly": true,
+  "liveModelRequests": 0,
+  "measurement": "JavaScript UTF-16 string length; not provider tokens or quota",
+  "turns": [
+    {
+      "name": "bootstrap",
+      "mode": "full",
+      "fullPromptChars": 65095,
+      "sentPromptChars": 65173,
+      "exactReconstruction": true
+    },
+    {
+      "name": "tool_result",
+      "mode": "append",
+      "fullPromptChars": 66321,
+      "sentPromptChars": 1903,
+      "exactReconstruction": true
+    },
+    {
+      "name": "follow_up",
+      "mode": "append",
+      "fullPromptChars": 66443,
+      "sentPromptChars": 799,
+      "exactReconstruction": true
+    },
+    {
+      "name": "rules_history_tool_removal",
+      "mode": "patch",
+      "fullPromptChars": 66290,
+      "sentPromptChars": 1125,
+      "exactReconstruction": true
+    },
+    {
+      "name": "history_rebase",
+      "mode": "patch",
+      "fullPromptChars": 65123,
+      "sentPromptChars": 913,
+      "exactReconstruction": true
+    }
+  ],
+  "totalFullPromptChars": 329272,
+  "totalSentPromptChars": 69913,
+  "reductionPercent": 78.77
+}

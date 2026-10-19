@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-18T06:17:53.314852+00:00",
+  "sourceNativeRevision": 31,
+  "sourceBrowserWorker": 22,
+  "status": "PASS_OFFLINE_AND_HTTP_MCP_SQLITE_FIXTURE",
+  "checks": {
+    "native": {
+      "passed": 125,
+      "failed": 0,
+      "log": ".tmp/p4-failover-r31-native-full.log"
+    },
+    "contracts": {
+      "passed": 9,
+      "failed": 0,
+      "log": ".tmp/p4-failover-r31-contracts.log"
+    }
+  },
+  "workspaceBuild": "PASS",
+  "workspaceTypecheck": "PASS",
+  "integrationEvidence": "native-p4-failover-fixture.json",
+  "browserMcpUnitTests": "NOT_RERUN_UNCHANGED_THIS_MILESTONE",
+  "liveOwnerObserved": {
+    "nativeRevision": 29,
+    "pid": 13592,
+    "active": 0,
+    "mode": "manual",
+    "automaticRouting": false,
+    "failover": false,
+    "upload": false,
+    "contextModel": "3.8 Flash"
+  },
+  "mainOwnerReloaded": false,
+  "liveTwoAccountAcceptance": "PENDING",
+  "context38NativeLoop": "PENDING_USER_GOOGLE_VERIFICATION",
+  "ideExecutor": "NOT_TESTED",
+  "remoteCI": "NOT_RUN"
+}

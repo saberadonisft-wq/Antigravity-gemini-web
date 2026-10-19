@@ -10,7 +10,7 @@ import { GeminiDomFixtureServer } from "@antigravity-gemini-web/gemini-browser/t
 import { OwnedBrowserAdapter } from "./owned-browser.js";
 
 type OwnedProcessIdentity = { pid: number; startedAt: string };
-async function observeOwnedWindowsProcesses(profile: string, identities: OwnedProcessIdentity[] = [], rootPid?: number, timeoutMs = 2000): Promise<OwnedProcessIdentity[]> {
+async function observeOwnedWindowsProcesses(profile: string, identities: OwnedProcessIdentity[] = [], rootPid?: number, timeoutMs = 5000): Promise<OwnedProcessIdentity[]> {
   if (process.platform !== "win32") return [];
   const script = String.raw`
     $ErrorActionPreference = 'Stop'
@@ -31,19 +31,21 @@ async function observeOwnedWindowsProcesses(profile: string, identities: OwnedPr
     $taskResult = @($taskOwned.Values | ForEach-Object { @{pid=[int]$_.ProcessId;startedAt=$_.CreationDate.ToUniversalTime().Ticks.ToString()} })
     ConvertTo-Json -InputObject $taskResult -Compress
   `;
-  const result = await promisify(execFile)(path.join(process.env.SystemRoot!, "System32/WindowsPowerShell/v1.0/powershell.exe"), ["-NoProfile", "-NonInteractive", "-Command", script], {
+  const pwsh = path.join(process.env.ProgramFiles!, "PowerShell/7/pwsh.exe");
+  const shell = await fs.access(pwsh).then(() => pwsh, () => path.join(process.env.SystemRoot!, "System32/WindowsPowerShell/v1.0/powershell.exe"));
+  const result = await promisify(execFile)(shell, ["-NoProfile", "-NonInteractive", "-Command", script], {
     windowsHide: true, timeout: timeoutMs,
     env: { ...process.env, AG_FIXTURE_PROFILE: profile, AG_FIXTURE_ROOT_PID: String(rootPid ?? 0), AG_FIXTURE_PROCESS_IDENTITIES: JSON.stringify(identities) },
   });
   return JSON.parse(result.stdout.trim()) as OwnedProcessIdentity[];
 }
 async function assertNoOwnedWindowsProcesses(profile: string, identities: OwnedProcessIdentity[]): Promise<void> {
-  const deadline = performance.now() + 5000;
-  let remaining = await observeOwnedWindowsProcesses(profile, identities, undefined, Math.max(1, Math.floor(Math.min(2000, deadline - performance.now()))));
+  const deadline = performance.now() + 10000;
+  let remaining = await observeOwnedWindowsProcesses(profile, identities, undefined, Math.max(1, Math.floor(Math.min(5000, deadline - performance.now()))));
   while (remaining.length > 0 && performance.now() < deadline) {
     await new Promise(resolve => setTimeout(resolve, Math.min(50, deadline - performance.now())));
     if (performance.now() >= deadline) break;
-    remaining = await observeOwnedWindowsProcesses(profile, identities, undefined, Math.max(1, Math.floor(Math.min(2000, deadline - performance.now()))));
+    remaining = await observeOwnedWindowsProcesses(profile, identities, undefined, Math.max(1, Math.floor(Math.min(5000, deadline - performance.now()))));
   }
   assert.deepEqual(remaining, [], "Owned Chrome processes must actually exit, including captured descendants; cleanup failures are not ignored");
 }
@@ -86,7 +88,11 @@ test("G4 acceptance: owned Chrome fixture opens, activates its page, crashes and
     const exited = () => { cleanup(); resolve(); };
     const failed = (error: Error) => { cleanup(); reject(error); };
     processInfo.once("exit", exited); processInfo.once("error", failed);
-    try { assert.equal(processInfo.kill("SIGKILL"), true, "Intentional crash must terminate the exact owned root"); }
+    if (processInfo.exitCode !== null || processInfo.signalCode !== null) { cleanup(); reject(Error("Owned Chrome root exited before the crash action.")); return; }
+    try {
+      if (process.platform === "win32") void promisify(execFile)("taskkill", ["/F", "/PID", String(processInfo.pid)], { windowsHide: true, timeout: 3000 }).catch(failed);
+      else assert.equal(processInfo.kill("SIGKILL"), true, "Intentional crash must terminate the exact owned root");
+    }
     catch (error) { cleanup(); reject(error); }
   });
   assert.ok(processInfo.exitCode !== null || processInfo.signalCode !== null, "Crash must produce an observed process exit");

@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-10-16T12:40:08.539Z",
+  "caller": "synthetic_loopback_client",
+  "controlDelayMs": 1000,
+  "promptChars": 78548,
+  "status": "FAILED",
+  "code": "CONTEXT_FRAGMENT_ACK_FAILED",
+  "elapsedMs": 39294,
+  "submissions": 3
+}

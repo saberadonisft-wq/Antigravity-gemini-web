@@ -1,5 +1,5 @@
 {
-  "observedAt": "2026-10-15T11:47:15.310Z",
+  "observedAt": "2026-10-16T06:27:56.192Z",
   "mode": "status_only",
   "handshake": true,
   "tools": [
@@ -7,6 +7,7 @@
     "gemini_open_browser",
     "gemini_submit",
     "gemini_result",
+    "gemini_release_conversation",
     "gemini_cancel"
   ],
   "liveTurn": "NOT_TESTED",
@@ -14,13 +15,20 @@
   "initialStatus": {
     "browserState": "ready",
     "accountState": "signed_in",
-    "activeRequestId": "native_75a1b63c79039710f23737edb9224babb6cc6e5a83cf85b91fe85e62050cfd0d",
+    "activeRequestId": null,
     "transport": "stdio",
     "route": "mcp_browser_tool",
     "nativeInference": "unverified",
     "reverseHostTools": "not_connected",
-    "checkedAt": "2026-10-15T11:47:15.796Z",
+    "checkedAt": "2026-10-16T06:27:56.489Z",
     "maxPromptChars": 262144,
-    "freshConversationSupported": true
+    "freshConversationSupported": true,
+    "retainedConversationSupported": true,
+    "progressStreamingSupported": true,
+    "modelSelectionSupported": true,
+    "failedConversationPreservationSupported": true,
+    "existingConversationSupported": true,
+    "conversationUrlCheckpointSupported": true,
+    "retainedConversations": 0
   }
 }

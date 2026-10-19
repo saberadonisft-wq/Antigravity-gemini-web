@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-18T05:23:07.642Z",
+  "accountId": "acc_98a4b2ec14ee3d16",
+  "runtimeRevision": 28,
+  "promptsSent": 0,
+  "status": "PASS_CONTEXT_MODEL_SELECTION_AND_RESTORE_NO_SEND",
+  "stage": "select_context_model",
+  "catalog": {
+    "selected": {
+      "model": "3.5 Flash-Lite",
+      "effort": "Low"
+    },
+    "options": [
+      {
+        "model": "3.5 Flash-Lite",
+        "disabled": false
+      },
+      {
+        "model": "3.8 Flash",
+        "disabled": false
+      },
+      {
+        "model": "3.1 Pro",
+        "disabled": false
+      },
+      {
+        "model": "4 Argon",
+        "disabled": false
+      }
+    ]
+  },
+  "contextModel": {
+    "model": "3.8 Flash"
+  },
+  "primaryRestored": true,
+  "nativeRestored": true
+}

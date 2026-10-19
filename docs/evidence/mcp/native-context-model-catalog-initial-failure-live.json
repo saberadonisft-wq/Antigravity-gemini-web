@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-10-18T05:22:31.741Z",
+  "accountId": "acc_98a4b2ec14ee3d16",
+  "runtimeRevision": 28,
+  "promptsSent": 0,
+  "status": "FAILED",
+  "code": "MODEL_UNAVAILABLE",
+  "nativeRestored": true
+}

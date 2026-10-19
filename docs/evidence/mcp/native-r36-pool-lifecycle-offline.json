@@ -1,0 +1,80 @@
+{
+  "checkedAt": "2026-10-18T12:46:59.105482+00:00",
+  "sourceNativeRevision": 36,
+  "sourceBrowserWorker": 23,
+  "status": "PASS_P8A_POOL_LIFECYCLE_FIXTURES_NOT_FULL_RELEASE",
+  "tests": {
+    "native": {
+      "passed": 167,
+      "failed": 0,
+      "log": ".tmp/p8-r36-native-tests.log"
+    },
+    "contracts": {
+      "passed": 10,
+      "failed": 0,
+      "log": ".tmp/p8-r36-contracts-tests.log"
+    },
+    "launcher": {
+      "passed": 49,
+      "failed": 0,
+      "log": ".tmp/p8-r36-launcher-tests.log"
+    }
+  },
+  "freshTestTotal": 226,
+  "newPoolLifecycleCases": 12,
+  "workspaceBuild": "PASS .tmp/p8-r36-build.log",
+  "workspaceTypecheck": "PASS .tmp/p8-r36-typecheck.log",
+  "workspaceLint": "PASS .tmp/p8-r36-lint.log",
+  "poolBefore": "docs/evidence/mcp/native-r35-pool-cleanup-before.json",
+  "poolAfter": "docs/evidence/mcp/native-r36-pool-cleanup-after.json",
+  "compiledPoolHashVerified": true,
+  "probeHashVerified": true,
+  "beforeOwnershipEntries": 10501,
+  "afterOwnershipEntries": 0,
+  "afterHeapDeltaAfterGc": 167704,
+  "afterRssDelta": 112140288,
+  "afterLastHalfHeapDelta": -4240,
+  "afterLastHalfRssDelta": 68689920,
+  "rssMemoryGate": "OPEN_NOT_PROVEN_FOR_LIVE_MCP_CHROME",
+  "desktop": "docs/evidence/p8-native-knowledge-regression-r36/native-knowledge-desktop.json",
+  "cli": "docs/evidence/mcp/native-r36-knowledge-cli-fixture.json",
+  "realWindowsChooser": "NOT_COMPLETED_REAL_SELECTION",
+  "realChooserAttempt": "docs/evidence/p6b-native-real-chooser-r35/attempt.json",
+  "mainOwnerObservation": {
+    "checkedAt": "2026-10-18T12:46:58.492Z",
+    "runtimeRevision": 29,
+    "active": 0,
+    "routingMode": "manual",
+    "contextModelSelection": {
+      "model": "3.8 Flash"
+    },
+    "restarted": false,
+    "browserControlInvoked": false
+  },
+  "realGooglePromptRequests": 0,
+  "realIdeExecutor": "NOT_TESTED",
+  "wholePlan": "IN_PROGRESS",
+  "newFileChecks": "PASS",
+  "localDocLinks": "PASS",
+  "sourceSha256": {
+    "packages/native-antigravity/src/browser-backend-pool.ts": "547553fb8d721c3b625849a2863ef51b0c80a286b28c1cff68689ef2e95a950e",
+    "packages/native-antigravity/src/browser-backend.ts": "cf15cd276813f0939c4c7e8f149951e5ef25b0b8cd66c392d296b171ed9da616",
+    "packages/native-antigravity/src/native-proxy.ts": "1ef4a1ac347b76ec0acc9b5184d609339ab96c570f452bb2bd45a711f161f145",
+    "packages/native-antigravity/src/pool-lifecycle.test.ts": "c9ff9bcec48c05432e63cf4f7ad5eaecc50a8469d7b7f90aa99285d812f3c26e",
+    "packages/contracts/src/errors.ts": "6ba40e1100cbde9f94a76007e1aafe87307d40ef5662a1260d62f4d10315ac22",
+    "apps/launcher/src/main/index.ts": "3bb559df6ae419b3624ea7f56df51637eb5ac95a019f1977f924f8609de2d882",
+    "apps/launcher/src/main/native-knowledge-real-chooser.ts": "8ef5392e8a314ce27be9bd502cca81058082c45f51bfd3f9b1bdad2d04ef8a20",
+    "apps/launcher/scripts/native-knowledge-smoke.mjs": "a2bc95dad3a37c2a822d719d9c80a5803c54129a55c65b4482a430eed661833c",
+    "apps/launcher/src/renderer/views/NativeAccountsView.tsx": "ee688b805739552db7b1f9837f093c20dad3bcfa3324ebb7e40afcbc5cada963",
+    "tools/probes/native-pool-lifecycle-spike.mjs": "9a6fbc941b663d7aabc5858043d97c23a64405dabd2ede333610925b650b8421",
+    "tools/probes/native-ledger-live-inspect.mjs": "bdd75fa0f43f1d0de416239ffe1cb43b01e7df680d3dc5d493d5c063653dfaeb",
+    "tools/probes/native-knowledge-fixture.mjs": "28f342b8ae0dbb24d65edc323f501960dca6b59f95ea349148c43948669172e1",
+    "README.md": "7ef7127e60e018470944339fe3c0d4eb60bbb5f18cabedf18a8fda8ca7e14c85",
+    "docs/NATIVE_SETUP.md": "2eb168e4a54c7af571dd452e438e896864cf96a58403285bb21dcf41b0fe8108",
+    "docs/NATIVE_UPGRADE_PLAN.md": "57162f834832ae03799b15aaa119d381d335cd8be55a8f049cca0ecf149bf2c4",
+    "docs/NATIVE_RECOVERY_RUNBOOK.md": "eb3834c31ca6107450bf76a686f665b73babd9903c5a8c50ba5e4bd877a74c06",
+    "docs/evidence/g4-native-p8a-pool-lifecycle.md": "be11bfd60ccf1fd632c9e8c3ff3338d820bf464699bee3e8fe228ca232a3c7c0",
+    "docs/evidence/g4-native-p6b-project-knowledge-ui.md": "96b3f6ec225e20537a55fcaa8ed990c625589d15747fb6da0e456ba175422f07"
+  },
+  "whitespaceDiffCheck": "PASS"
+}

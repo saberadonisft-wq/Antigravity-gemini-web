@@ -1,0 +1,62 @@
+{
+  "checkedAt": "2026-10-18T05:49:38.118336+00:00",
+  "sourceRevision": 30,
+  "workerVersion": 22,
+  "liveRevisionAtLastHealth": 29,
+  "tests": [
+    {
+      "package": "browser",
+      "log": ".tmp/context-model-r30-browser-full.log",
+      "sha256": "defe70f123eb040f77e566ce4c874f883c6755ba2b971bbd5d138f78df61f5a1",
+      "tests": 47,
+      "pass": 47,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    {
+      "package": "mcp",
+      "log": ".tmp/context-model-r30-mcp-full.log",
+      "sha256": "e9725a83c8522aea237632484dcb6f019693a4fb6a2271f192ebe0d11506f28d",
+      "tests": 48,
+      "pass": 48,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    {
+      "package": "native",
+      "log": ".tmp/context-model-r30-native-full.log",
+      "sha256": "37d9c2e80314d4c1f1f521fbb98c6bd22c3df69165fc49521c5e8f5c5f5ca9fc",
+      "tests": 108,
+      "pass": 108,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    {
+      "package": "contracts",
+      "log": ".tmp/context-model-contracts.log",
+      "sha256": "b27899cedc0fcff618f58d63a6b72982875a9aaf97b4a58255cc1c1d0a9a34ad",
+      "tests": 8,
+      "pass": 8,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    }
+  ],
+  "totalPass": 211,
+  "build": {
+    "status": "PASS",
+    "log": ".tmp/context-model-r30-build-final.log"
+  },
+  "typecheck": {
+    "status": "PASS",
+    "log": ".tmp/context-model-r30-typecheck-final.log"
+  },
+  "liveStagingAcceptance": "INCOMPLETE",
+  "browserBlock": "USER_GOOGLE_TRAFFIC_VERIFICATION",
+  "ideExecutor": "NOT_TESTED",
+  "secondAccount": "NOT_TESTED",
+  "scope": "Local source/fixtures only. No remote CI, commit, push or deployment."
+}

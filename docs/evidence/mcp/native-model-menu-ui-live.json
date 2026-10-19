@@ -1,0 +1,99 @@
+{
+  "checkedAt": "2026-10-15T17:56:11.052Z",
+  "runtimeRevision": 7,
+  "method": "Computer Use @oai/sky",
+  "windowTitle": "Gemini Web Native Test",
+  "turns": [
+    {
+      "expected": "IDE_OK_3",
+      "assistantTextObserved": true,
+      "workingVisible": false,
+      "errorVisible": false,
+      "proxy": {
+        "requestId": "native_da22ce38afa7d369a28903197724a17b41dbbc745845ae5a12d4b3ce1e265998",
+        "promptChars": 70565,
+        "fullPromptChars": 70487,
+        "reused": false,
+        "phase": "completed",
+        "elapsedMs": 17989,
+        "firstTextMs": 16721,
+        "silentMs": 17
+      }
+    },
+    {
+      "expected": "IDE_FOLLOWUP_OK",
+      "assistantTextObserved": true,
+      "workingVisible": false,
+      "errorVisible": false,
+      "proxy": {
+        "requestId": "native_70101eca4b16f80a32e75b9d42f6d25cb2eb80b4d2803ad012ef50de469726f4",
+        "promptChars": 1628,
+        "fullPromptChars": 70759,
+        "reused": true,
+        "phase": "completed",
+        "elapsedMs": 55057,
+        "firstTextMs": 54135,
+        "silentMs": 40
+      }
+    }
+  ],
+  "cancel": {
+    "startedAt": "2026-10-15T17:58:54.722Z",
+    "cancelClickedAt": "2026-10-15T17:59:26.789Z",
+    "observedAt": "2026-10-15T18:00:12.805Z",
+    "workingVisible": false,
+    "cancelButtonVisible": false,
+    "before": {
+      "observedAt": "2026-10-15T17:59:16.025Z",
+      "lastTurn": {
+        "requestId": "native_9c6f0e5c9b8da6fa3e55acd14590b25c7883db52cd24f98efc85b3740b574ee5",
+        "promptChars": 1720,
+        "fullPromptChars": 71123,
+        "reused": true,
+        "phase": "generating"
+      },
+      "counters": {
+        "catalog": 5,
+        "control": 41,
+        "nativeRequests": 4,
+        "browserRequests": 3,
+        "completed": 2,
+        "failed": 0,
+        "active": 1
+      }
+    },
+    "after": {
+      "observedAt": "2026-10-15T17:59:27.746Z",
+      "lastTurn": {
+        "requestId": "native_9c6f0e5c9b8da6fa3e55acd14590b25c7883db52cd24f98efc85b3740b574ee5",
+        "promptChars": 1720,
+        "fullPromptChars": 71123,
+        "reused": true,
+        "phase": "failed",
+        "code": "CANCELLED",
+        "elapsedMs": 31939,
+        "firstTextMs": null,
+        "silentMs": 30848
+      },
+      "counters": {
+        "catalog": 7,
+        "control": 50,
+        "nativeRequests": 4,
+        "browserRequests": 3,
+        "completed": 2,
+        "failed": 1,
+        "active": 0
+      }
+    },
+    "browser": {
+      "observedAt": "2026-10-15T18:00:14.020Z",
+      "requestId": "native_9c6f0e5c9b8da6fa3e55acd14590b25c7883db52cd24f98efc85b3740b574ee5",
+      "status": "cancelled",
+      "browserState": "ready",
+      "activeRequestId": null,
+      "retainedConversations": 0
+    }
+  },
+  "status": "PASS_NATIVE_UI_CHAT_FOLLOWUP_AND_CANCEL",
+  "scope": "No native tools executed; no file writes or shell commands requested"
+}

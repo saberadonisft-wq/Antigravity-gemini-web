@@ -1,0 +1,257 @@
+{
+  "mode": "desktop-live-control",
+  "nativeInference": "unverified",
+  "ipcRoundTrip": true,
+  "eventSubscription": true,
+  "unsubscribe": true,
+  "settingsPersistence": true,
+  "settingsDraftConflict": true,
+  "languagePersistence": true,
+  "englishViews": [
+    "System Overview",
+    "Initial Setup",
+    "Sessions & Tasks",
+    "Activity & Diagnostics",
+    "Application Settings"
+  ],
+  "contrast": [
+    {
+      "theme": "light",
+      "foreground": "--text-primary",
+      "background": "--bg-primary",
+      "ratio": 15.797619425332647
+    },
+    {
+      "theme": "light",
+      "foreground": "--text-primary",
+      "background": "--bg-secondary",
+      "ratio": 14.839194581350755
+    },
+    {
+      "theme": "light",
+      "foreground": "--text-primary",
+      "background": "--bg-tertiary",
+      "ratio": 13.548685577313865
+    },
+    {
+      "theme": "light",
+      "foreground": "--text-secondary",
+      "background": "--bg-primary",
+      "ratio": 5.736688026877348
+    },
+    {
+      "theme": "light",
+      "foreground": "--text-secondary",
+      "background": "--bg-secondary",
+      "ratio": 5.388649238304182
+    },
+    {
+      "theme": "light",
+      "foreground": "--text-secondary",
+      "background": "--bg-tertiary",
+      "ratio": 4.920018658423001
+    },
+    {
+      "theme": "light",
+      "foreground": "--text-muted",
+      "background": "--bg-primary",
+      "ratio": 5.736688026877348
+    },
+    {
+      "theme": "light",
+      "foreground": "--text-muted",
+      "background": "--bg-secondary",
+      "ratio": 5.388649238304182
+    },
+    {
+      "theme": "light",
+      "foreground": "--text-muted",
+      "background": "--bg-tertiary",
+      "ratio": 4.920018658423001
+    },
+    {
+      "theme": "dark",
+      "foreground": "--text-primary",
+      "background": "--bg-primary",
+      "ratio": 16.016082890827004
+    },
+    {
+      "theme": "dark",
+      "foreground": "--text-primary",
+      "background": "--bg-secondary",
+      "ratio": 14.639773375342953
+    },
+    {
+      "theme": "dark",
+      "foreground": "--text-primary",
+      "background": "--bg-tertiary",
+      "ratio": 12.880440753133499
+    },
+    {
+      "theme": "dark",
+      "foreground": "--text-secondary",
+      "background": "--bg-primary",
+      "ratio": 6.152739606307679
+    },
+    {
+      "theme": "dark",
+      "foreground": "--text-secondary",
+      "background": "--bg-secondary",
+      "ratio": 5.624016439464753
+    },
+    {
+      "theme": "dark",
+      "foreground": "--text-secondary",
+      "background": "--bg-tertiary",
+      "ratio": 4.948151087173341
+    },
+    {
+      "theme": "dark",
+      "foreground": "--text-muted",
+      "background": "--bg-primary",
+      "ratio": 6.152739606307679
+    },
+    {
+      "theme": "dark",
+      "foreground": "--text-muted",
+      "background": "--bg-secondary",
+      "ratio": 5.624016439464753
+    },
+    {
+      "theme": "dark",
+      "foreground": "--text-muted",
+      "background": "--bg-tertiary",
+      "ratio": 4.948151087173341
+    }
+  ],
+  "reload": true,
+  "sandbox": true,
+  "contextIsolation": true,
+  "nodeIntegration": false,
+  "keyboardFocus": true,
+  "layout": [
+    {
+      "view": "overview",
+      "width": 1280,
+      "height": 800,
+      "documentWidth": 1265
+    },
+    {
+      "view": "onboarding",
+      "width": 1280,
+      "height": 800,
+      "documentWidth": 1280
+    },
+    {
+      "view": "sessions",
+      "width": 1280,
+      "height": 800,
+      "documentWidth": 1280
+    },
+    {
+      "view": "activity",
+      "width": 1280,
+      "height": 800,
+      "documentWidth": 1280
+    },
+    {
+      "view": "settings",
+      "width": 1280,
+      "height": 800,
+      "documentWidth": 1265
+    },
+    {
+      "view": "overview",
+      "width": 1024,
+      "height": 720,
+      "documentWidth": 1009
+    },
+    {
+      "view": "onboarding",
+      "width": 1024,
+      "height": 720,
+      "documentWidth": 1024
+    },
+    {
+      "view": "sessions",
+      "width": 1024,
+      "height": 720,
+      "documentWidth": 1024
+    },
+    {
+      "view": "activity",
+      "width": 1024,
+      "height": 720,
+      "documentWidth": 1024
+    },
+    {
+      "view": "settings",
+      "width": 1024,
+      "height": 720,
+      "documentWidth": 1009
+    },
+    {
+      "view": "overview",
+      "width": 800,
+      "height": 600,
+      "documentWidth": 800
+    },
+    {
+      "view": "onboarding",
+      "width": 800,
+      "height": 600,
+      "documentWidth": 800
+    },
+    {
+      "view": "sessions",
+      "width": 800,
+      "height": 600,
+      "documentWidth": 800
+    },
+    {
+      "view": "activity",
+      "width": 800,
+      "height": 600,
+      "documentWidth": 800
+    },
+    {
+      "view": "settings",
+      "width": 800,
+      "height": 600,
+      "documentWidth": 800
+    }
+  ],
+  "versions": {
+    "node": "24.21.0",
+    "acorn": "8.18.0",
+    "ada": "4.0.0",
+    "amaro": "1.1.11",
+    "ares": "1.34.8",
+    "brotli": "1.2.0",
+    "cldr": "48.0",
+    "icu": "78.2",
+    "llhttp": "9.4.3",
+    "merve": "1.2.2",
+    "modules": "149",
+    "napi": "10",
+    "nbytes": "0.1.4",
+    "ncrypto": "0.0.1",
+    "nghttp2": "1.70.0",
+    "nghttp3": "",
+    "ngtcp2": "",
+    "openssl": "0.0.0",
+    "simdjson": "4.6.7",
+    "simdutf": "7.7.0",
+    "sqlite": "3.53.4",
+    "tz": "2026d",
+    "undici": "7.29.1",
+    "unicode": "17.0",
+    "uv": "1.52.1",
+    "uvwasi": "0.0.23",
+    "v8": "15.2.124.37-electron.0",
+    "zlib": "1.3.2.1-motley",
+    "zstd": "1.6.0",
+    "electron": "44.7.2",
+    "chrome": "152.0.7977.149"
+  }
+}

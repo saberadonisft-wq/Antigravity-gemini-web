@@ -1,0 +1,59 @@
+{
+  "checkedAt": "2026-10-18T06:55:08.072081+00:00",
+  "sourceNativeRevision": 32,
+  "sourceBrowserWorker": 22,
+  "status": "PASS_P5_OFFLINE_AND_ELECTRON_FIXTURE",
+  "tests": {
+    "native": {
+      "passed": 132,
+      "failed": 0,
+      "log": ".tmp/p5-account-r32-native-verified.log"
+    },
+    "contracts": {
+      "passed": 10,
+      "failed": 0,
+      "log": ".tmp/p5-account-r32-contracts-verified.log"
+    },
+    "launcher": {
+      "passed": 40,
+      "failed": 0,
+      "log": ".tmp/p5-account-r32-launcher-verified.log"
+    }
+  },
+  "freshTestTotal": 182,
+  "workspaceBuild": "PASS",
+  "workspaceTypecheck": "PASS",
+  "accountDesktopEvidence": "../p5-native-accounts/native-accounts-desktop.json",
+  "legacyDesktopRegression": "PASS",
+  "mainOwnerObservedReadOnly": {
+    "runtimeRevision": 29,
+    "pid": 13592,
+    "active": 0,
+    "routingMode": "manual",
+    "automaticRoutingEnabled": false,
+    "failoverEnabled": false,
+    "contextModel": {
+      "model": "3.8 Flash"
+    },
+    "accountManagementSupported": false,
+    "upload": false
+  },
+  "liveOwnerReloaded": false,
+  "liveTwoAccountAcceptance": "PENDING",
+  "context38NativeLoop": "PENDING_USER_GOOGLE_VERIFICATION",
+  "ideExecutor": "NOT_TESTED",
+  "remoteCI": "NOT_RUN",
+  "sourceSha256": {
+    "packages/contracts/src/native-management.ts": "0aecd08cb8b36fa417fc1f3e0e7ad227679bed43e8692982e3d2a172a349ae2f",
+    "packages/contracts/src/errors.ts": "7382a735f42da8f79ac97846380ab1646b16eeab47f831827e24a1dff06c01c9",
+    "packages/native-antigravity/src/native-proxy.ts": "98397db965e14021504673ca45acc44d59b4f004b76d67396769e3271014d6cc",
+    "packages/native-antigravity/src/management-snapshot.ts": "435f6035a6e9bbe40a568ae24763fd89cb64f33d9edc231c730e62a95fc7869c",
+    "packages/native-antigravity/src/native-cli.ts": "4262aaf3fb16162ae6a6575294bae94837db32a83a74378740a6b84afa1b19b4",
+    "apps/launcher/src/main/native-owner-client.ts": "ef999da5b4bc83a4d49f51edc20dbdd638ed29a7ffeeb6ac039064b9d9cc2954",
+    "apps/launcher/src/main/ipc-bridge.ts": "8c50b17b0d338423dd56e8ce3956bb2096e1d4406f1809e45d0f7b7dde093c0f",
+    "apps/launcher/src/preload/client.ts": "63fd2fc3b485f803a700dfc9bade395d78731980e75caa77db2b65d1aba9f202",
+    "apps/launcher/src/renderer/client/native-account-store.ts": "626858e59b66a174a3a8ccf510a87cea09de2bbcb913eaffcc534a6bad781408",
+    "apps/launcher/src/renderer/views/NativeAccountsView.tsx": "a4c13177f16c2d17e42632beb5bd6cf5a459798a67dfcdcbb0d646f09d20e810",
+    "apps/launcher/src/main/native-accounts-desktop.ts": "19c444fde343f204dbe37b08435b2ea3591731cf92bb3049ed362864a8a051b0"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-10-16T15:48:00.518Z",
+  "accountId": "acc_98a4b2ec14ee3d16",
+  "sourceFormat": "legacy_v1",
+  "sourceEntries": 135,
+  "sourceSha256": "0225b8df9d2fd45ac970584dbc32ecf59d57b34298dd75ca2b0dcdcbbdc6614b",
+  "sourceUnchanged": true,
+  "exactBackup": true,
+  "allHashesAndPhasesPreserved": true,
+  "legacyOwnersRemainUnknown": true,
+  "syntheticNewReceiptSurvivedRestart": true,
+  "browserRequests": 0,
+  "productionWrites": 0,
+  "status": "PASS_REAL_METADATA_COPY_MIGRATION"
+}

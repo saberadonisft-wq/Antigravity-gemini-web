@@ -1,0 +1,49 @@
+{
+  "checkedAt": "2026-10-18T12:14:19.047Z",
+  "status": "REPRODUCED_BOUND_RELEASE_LEAK_AND_BUSY_DROP",
+  "browser": "SYNTHETIC",
+  "realGooglePromptRequests": 0,
+  "realMcpWorkers": 0,
+  "realChromeProcesses": 0,
+  "gc": "EXPLICIT_NODE_ONLY",
+  "busyError": "BUSY",
+  "queued": {
+    "cachedWorkers": 2,
+    "conversationOwners": 1,
+    "pendingConversationReleases": 0,
+    "privatePrePatchDiagnostic": true
+  },
+  "drained": {
+    "cachedWorkers": 2,
+    "conversationOwners": 1,
+    "pendingConversationReleases": 0,
+    "privatePrePatchDiagnostic": true
+  },
+  "final": {
+    "cachedWorkers": 2,
+    "conversationOwners": 10501,
+    "pendingConversationReleases": 0,
+    "privatePrePatchDiagnostic": true
+  },
+  "warmupRounds": 500,
+  "soakRounds": 10000,
+  "syntheticGenerations": 10501,
+  "releaseCalls": 10501,
+  "busyReleases": 1,
+  "nodeMemoryAfterWarmup": {
+    "rss": 100360192,
+    "heapTotal": 53866496,
+    "heapUsed": 17761856,
+    "external": 2524121,
+    "arrayBuffers": 143611
+  },
+  "nodeMemoryAfterSoak": {
+    "rss": 156323840,
+    "heapTotal": 88408064,
+    "heapUsed": 18701232,
+    "external": 2524161,
+    "arrayBuffers": 143611
+  },
+  "heapDeltaAfterGc": 939376,
+  "rssDelta": 55963648
+}

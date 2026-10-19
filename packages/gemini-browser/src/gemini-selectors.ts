@@ -10,10 +10,10 @@ export const GEMINI_SELECTORS = {
   COMPOSER_INPUT: "rich-textarea div[contenteditable='true'], rich-textarea textarea",
 
   // Send button (paper plane icon or aria-label 'Send')
-  SEND_BUTTON: "button[aria-label*='Send' i], button.send-button, [data-test-id='send-button']",
+  SEND_BUTTON: "button[aria-label='Send message' i], button[aria-label='Send' i], button[aria-label='Gửi tin nhắn' i], button[aria-label='Gửi' i], button.send-button, [data-test-id='send-button']",
 
   // Stop / Cancel button during generation
-  STOP_BUTTON: "button[aria-label*='Stop' i], button.stop-button, [data-test-id='stop-button']",
+  STOP_BUTTON: "button[aria-label*='Stop' i], button[aria-label*='Dừng' i], button[aria-label*='Hủy câu trả lời' i], button[aria-label*='Huỷ câu trả lời' i], button.stop-button, [data-test-id='stop-button'], button:has(mat-icon[fonticon='stop']), button:has(mat-icon[data-mat-icon-name='stop'])",
 
   // Assistant response containers
   MODEL_RESPONSE: "model-response, .model-response, .model-response-text, .response-container, [data-test-id='model-response']",
@@ -24,7 +24,7 @@ export const GEMINI_SELECTORS = {
   SIGN_IN_BUTTON: "a[href*='accounts.google.com/ServiceLogin'], a[href*='accounts.google.com/signin'], [data-test-id='sign-in-button']",
 
   // Model indicator
-  MODEL_INDICATOR: "[data-test-id='model-selector'], .model-picker-button",
+  MODEL_INDICATOR: "[data-test-id='model-selector'], .model-picker-button, [data-test-id='bard-mode-menu-button']",
 };
 
 export interface DomInspectionOptions {
@@ -60,11 +60,18 @@ export interface DomInspectionResult {
   hasSendButton: boolean;
   isGenerating: boolean;
   accountState: "signed_in" | "needs_user_action" | "unknown";
+  accountIdentity?: string;
   modelDetected?: string;
   responseCount: number;
   lastResponseText: string;
   lastResponseCodeBlocks?: string[];
+  lastResponseKey?: string;
+  lastUserQueryKey?: string;
+  /** Visible feedback controls belonging to the newest answer, after generation. */
+  hasResponseCompletion?: boolean;
   hasCodeBlock: boolean;
+  progressLabel?: string;
+  composerChars?: number;
 }
 
 export function getDomInspectionSnippet(options?: DomInspectionOptions): string {
@@ -99,13 +106,17 @@ export function getDomInspectionSnippet(options?: DomInspectionOptions): string 
   } else {
     accountState = "unknown";
   }
+  let accountIdentity = undefined;
+  if (avatar) {
+    const raw = avatar.getAttribute("aria-label") || avatar.getAttribute("title") || avatar.getAttribute("alt") || "";
+    if (raw.trim()) accountIdentity = raw.trim();
+  }
 
   // Composer and controls are only valid on allowed surface
   const composer = isAllowedSurface ? document.querySelector("${GEMINI_SELECTORS.COMPOSER}") : null;
   const sendBtn = isAllowedSurface ? document.querySelector("${GEMINI_SELECTORS.SEND_BUTTON}") : null;
-  const stopBtn = isAllowedSurface ? document.querySelector("${GEMINI_SELECTORS.STOP_BUTTON}") : null;
-
-  const isGenerating = Boolean(stopBtn && getComputedStyle(stopBtn).display !== 'none');
+  const visible = el => Boolean(el && el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height > 0 && getComputedStyle(el).visibility !== 'hidden');
+  const isGenerating = isAllowedSurface && Array.from(document.querySelectorAll("${GEMINI_SELECTORS.STOP_BUTTON}")).some(visible);
   const hasComposer = Boolean(composer);
   const hasSendButton = Boolean(sendBtn);
 
@@ -119,7 +130,9 @@ export function getDomInspectionSnippet(options?: DomInspectionOptions): string 
   }
 
   // Responses
-  const responses = isAllowedSurface ? document.querySelectorAll("${GEMINI_SELECTORS.MODEL_RESPONSE}") : [];
+  // Fallback selectors can match nested nodes of the same response. Count one
+  // content surface per answer, rather than treating its wrapper as another turn.
+  const responses = isAllowedSurface ? [...document.querySelectorAll("${GEMINI_SELECTORS.MODEL_RESPONSE}")].filter(e => !e.querySelector("${GEMINI_SELECTORS.MODEL_RESPONSE}")) : [];
   const responseCount = responses.length;
   let lastResponseText = "";
   let hasCodeBlock = false;
@@ -133,6 +146,33 @@ export function getDomInspectionSnippet(options?: DomInspectionOptions): string 
   const lastResponseCodeBlocks = responseCount > 0
     ? Array.from(responses[responseCount - 1].querySelectorAll('pre')).map(pre => (pre.querySelector('code') || pre).textContent || '')
     : [];
+  // Code-block Copy buttons appear while tokens are still arriving. Only the
+  // answer's feedback controls are terminal evidence, including localized UI.
+  // Look in this answer's wrapper, never a previous answer's action row.
+  const lastResponse = responses[responseCount - 1];
+  const actionScope = lastResponse?.closest('model-response, .model-response, [data-test-id="model-response"]') || lastResponse;
+  // Gemini can virtualize older answers when a large prompt scrolls them away.
+  // A count alone cannot distinguish the new answer from the previous one.
+  const keys = window.__agGeminiDomKeys || (window.__agGeminiDomKeys = { nodes: new WeakMap(), next: 0 });
+  const nodeKey = element => {
+    if (!element) return undefined;
+    if (!keys.nodes.has(element)) keys.nodes.set(element, String(++keys.next));
+    return keys.nodes.get(element);
+  };
+  const fingerprint = value => {
+    let hash = 2166136261;
+    for (let index = 0; index < value.length; index++) hash = Math.imul(hash ^ value.charCodeAt(index), 16777619);
+    return (hash >>> 0).toString(16);
+  };
+  const userQueries = isAllowedSurface ? [...document.querySelectorAll('user-query, .user-query')] : [];
+  const lastUserQuery = userQueries[userQueries.length - 1];
+  const hasResponseCompletion = Boolean(actionScope && Array.from(actionScope.querySelectorAll('button')).some(button => {
+    if (!visible(button)) return false;
+    const label = button.getAttribute('aria-label') || '';
+    if (/^(?:Good response|Bad response|Phản hồi tốt|Phản hồi không tốt|Câu trả lời hay|Câu trả lời không hay)$/i.test(label)) return true;
+    return Array.from(button.querySelectorAll('mat-icon, [data-mat-icon-name], [fonticon]')).some(icon =>
+      /^(?:thumb_up|thumb_down|thumb_up_off_alt|thumb_down_off_alt)$/.test((icon.getAttribute('data-mat-icon-name') || icon.getAttribute('fonticon') || icon.textContent || '').trim()));
+  }));
   return {
     url,
     origin,
@@ -143,11 +183,17 @@ export function getDomInspectionSnippet(options?: DomInspectionOptions): string 
     hasSendButton,
     isGenerating,
     accountState,
+    accountIdentity,
     modelDetected,
     responseCount,
     lastResponseText,
     lastResponseCodeBlocks,
-    hasCodeBlock
+    lastResponseKey: actionScope ? nodeKey(actionScope) + ':' + fingerprint(lastResponseText) : undefined,
+    lastUserQueryKey: lastUserQuery ? nodeKey(lastUserQuery) + ':' + fingerprint(lastUserQuery.textContent || '') : undefined,
+    hasResponseCompletion,
+    hasCodeBlock,
+    progressLabel: isAllowedSurface ? ([...document.querySelectorAll('[data-test-id="generation-status"], .thinking-indicator, [role="status"]')].find(e => e.getBoundingClientRect().height > 0 && getComputedStyle(e).visibility !== 'hidden')?.innerText || '').trim().slice(0, 200) : '',
+    composerChars: composer ? (() => { const e = composer.matches('[contenteditable="true"],textarea') ? composer : composer.querySelector('[contenteditable="true"],textarea'); return (e?.value || e?.textContent || '').replace(/[\\s\\u200b]/g, '').length; })() : 0
   };
 })()
 `;

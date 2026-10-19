@@ -22,10 +22,23 @@ function readyAdapter() {
   adapter.checkStatus = async () => ({ browserState: "ready", accountState: "signed_in", checkedAt: new Date().toISOString() });
   adapter.driver.inspectDom = async () => ({ ...dom });
   adapter.driver.inputPrompt = async () => true;
-  adapter.driver.clickSend = async () => { sends++; return true; };
+  adapter.driver.clickSend = async (_check, _expected, onClick) => { onClick?.(); sends++; return true; };
   adapter.driver.pollForResponse = async () => ({ ...completed });
   return { adapter, sends: () => sends };
 }
+
+test("Retiring completed browser records releases large prompts while old IDs cannot Send again", async () => {
+  const { adapter, sends } = readyAdapter();
+  for (let index = 0; index < 140; index++) {
+    await adapter.submitPrompt("bounded-" + index, "prompt " + index);
+    await adapter.pollResponse("bounded-" + index);
+  }
+  await assert.rejects(adapter.submitPrompt("bounded-0", "prompt 0"), (error: { code: string }) => error.code === "OUTCOME_UNKNOWN");
+  await assert.rejects(adapter.submitPrompt("bounded-0", "changed"), (error: { code: string }) => error.code === "CONFIG_CONFLICT");
+  await adapter.submitPrompt("bounded-139", "prompt 139");
+  assert.equal(sends(), 140);
+  await adapter.cleanup();
+});
 
 test("Concurrent duplicates share submission and click Send exactly once", async () => {
   const { adapter, sends } = readyAdapter();
@@ -70,11 +83,21 @@ test("Failed input never becomes accepted on retry and thrown input releases the
 
 test("Uncertain Send failure blocks resubmission until cleanup", async () => {
   const { adapter, sends } = readyAdapter();
-  adapter.driver.clickSend = async () => { throw new Error("Synthetic lost Send acknowledgement"); };
+  adapter.driver.clickSend = async (_check, _expected, onClick) => { onClick?.(); throw new Error("Synthetic lost Send acknowledgement"); };
   await assert.rejects(adapter.submitPrompt("a", "first"));
   await assert.rejects(adapter.submitPrompt("a", "first"));
   await assert.rejects(adapter.submitPrompt("b", "new"), (error: { code?: string }) => error.code === "BUSY");
   assert.equal(sends(), 0);
+  await adapter.cleanup();
+});
+
+test("A failed DOM checkpoint before the click retains proven not_sent diagnostics and permits a new turn", async () => {
+  const { adapter } = readyAdapter();
+  adapter.driver.clickSend = async () => { throw Error("Synthetic pre-click DOM failure"); };
+  await assert.rejects(adapter.submitPrompt("before-click", "synthetic"), { delivery: "not_sent", submissionDiagnostic: { inputChars: 9, readbackVerified: true, sendClickAttempted: false, acceptanceObserved: false } });
+  adapter.driver.clickSend = async (_check, _expected, onClick) => { onClick?.(); return true; };
+  await adapter.submitPrompt("next-click", "new synthetic");
+  assert.equal((await adapter.pollResponse("next-click")).status, "completed");
   await adapter.cleanup();
 });
 

@@ -1,0 +1,38 @@
+{
+  "checkedAt": "2026-10-18T10:42:02.790Z",
+  "runtimeRevision": 33,
+  "status": "PASS_OTHER_CONTROLS_TTL_NOT_TESTED",
+  "browser": "SYNTHETIC",
+  "ideExecutor": "NOT_TESTED",
+  "staleRevisionRejected": true,
+  "actualOwnerCrash": true,
+  "ownerPidChanged": true,
+  "staleOwnerRejected": true,
+  "disconnectedUiLocked": true,
+  "cliDidNotStartMissingOwner": true,
+  "baselineRequestId": "native_e6e93fffa7606e4af932de846b92390b9f5079ba3d85098e09407faffd431b23",
+  "retryAfterRestartNoSend": true,
+  "originalAccountReceiptAfterSelectionChange": true,
+  "expiredLogin": true,
+  "modelUnavailableNoSend": true,
+  "identityObservationExpired": false,
+  "ttl": {
+    "status": "NOT_RUN",
+    "reason": "quick_fixture"
+  },
+  "cliCalls": 11,
+  "cliSource": "production_dist",
+  "cliTransport": "owned_loopback_redirect_test_preloader",
+  "nativeProcessesRestarted": true,
+  "realMcpService": true,
+  "store": "real_sqlite_wal",
+  "syntheticSends": 2,
+  "syntheticOpens": 2,
+  "realGoogleRequests": 0,
+  "scenarios": [
+    "login_required",
+    "ready",
+    "model_unavailable",
+    "ready"
+  ]
+}

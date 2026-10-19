@@ -36,6 +36,15 @@ export function getPreloadClient(): LauncherClient {
   const rawClient = window.launcherClient!;
 
   return {
+    ...(rawClient.getNativeKnowledge&&rawClient.executeNativeKnowledge&&rawClient.importNativeKnowledge?{
+      getNativeKnowledge:()=>rawClient.getNativeKnowledge!(),
+      executeNativeKnowledge:rawClient.executeNativeKnowledge.bind(rawClient),
+      importNativeKnowledge:rawClient.importNativeKnowledge.bind(rawClient),
+    }:{}),
+    ...(rawClient.getNativeAccounts&&rawClient.executeNativeAccount?{
+      getNativeAccounts:()=>rawClient.getNativeAccounts!(),
+      executeNativeAccount:rawClient.executeNativeAccount.bind(rawClient),
+    }:{}),
     async getSnapshot(): Promise<RuntimeSnapshot> {
       if (!isPreloadAvailable()) throw new Error("Preload IPC disconnected.");
       return rawClient.getSnapshot();

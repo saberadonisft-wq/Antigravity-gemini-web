@@ -1,0 +1,92 @@
+{
+  "checkedAt": "2026-10-18T11:59:20.591722+00:00",
+  "sourceNativeRevision": 35,
+  "sourceBrowserWorker": 23,
+  "status": "PASS_P6B_LAUNCHER_KNOWLEDGE_OFFLINE_P6_IN_PROGRESS",
+  "defaultKnowledgeExperimental": false,
+  "codeGraphPresent": false,
+  "tests": {
+    "native": {
+      "passed": 155,
+      "failed": 0,
+      "log": ".tmp/p6b-r35-native-tests.log"
+    },
+    "contracts": {
+      "passed": 10,
+      "failed": 0,
+      "log": ".tmp/p6b-r35-contracts-tests.log"
+    },
+    "launcher": {
+      "passed": 49,
+      "failed": 0,
+      "log": ".tmp/p6b-r35-launcher-tests.log"
+    }
+  },
+  "totalFreshTests": 214,
+  "workspaceBuild": "PASS .tmp/p6b-r35-build.log",
+  "finalLauncherBuild": "PASS .tmp/p6b-r35-launcher-build.log",
+  "workspaceTypecheck": "PASS .tmp/p6b-r35-typecheck.log",
+  "whitespaceDiffCheck": "PASS",
+  "newFileWhitespaceConflictChecks": "PASS",
+  "localDocumentationLinks": "PASS",
+  "desktop": "docs/evidence/p6b-native-knowledge-r35/native-knowledge-desktop.json",
+  "desktopRegression": "docs/evidence/p6b-desktop-regression-r35/",
+  "cliFixture": "docs/evidence/mcp/native-r35-knowledge-cli-fixture.json",
+  "mainOwnerObservation": {
+    "checkedAt": "2026-10-18T11:56:30.727Z",
+    "runtimeRevision": 29,
+    "active": 0,
+    "routingMode": "manual",
+    "contextModelSelection": {
+      "model": "3.8 Flash"
+    },
+    "restarted": false,
+    "browserControlInvoked": false
+  },
+  "realGooglePromptRequests": 0,
+  "realIdeExecutor": "NOT_TESTED",
+  "realOsChooser": "NOT_TESTED_SYNTHETIC_MAIN_GRANT",
+  "externalAdapters": "NOT_VERIFIED_METADATA_ONLY",
+  "liveContext38ToPrimary": "AWAITING_USER_VERIFICATION",
+  "sourceSha256": {
+    "packages/contracts/src/client.ts": "6b264b64597d7c0d3865c9e8b764f985ea7c0c8991ffc45a67e2435f95da88eb",
+    "packages/contracts/src/knowledge.ts": "a0df834e566519a68605d0e9022899e776c140863e3db73a9923c2622003ca26",
+    "packages/contracts/src/errors.ts": "b9653c7798ceb2db3cd5e2441bd9aa4769e000732610e811418569cd8b31e67a",
+    "packages/contracts/src/index.ts": "2adf8acd2dd1687b19e7257c7289479af747c842eb7b2130d57ea51fd58e21ae",
+    "packages/native-antigravity/src/knowledge-registry.ts": "735cccdac050b997d4d6e0d54722191f9d2b398c25aff9131d70d21d8ac1222f",
+    "packages/native-antigravity/src/knowledge-registry.test.ts": "fb44c273675c7a6d0b6d3a2249ae5473b2b3ad39db22675138ce2f48e7d42f84",
+    "packages/native-antigravity/src/knowledge-files.ts": "37d19a0ae8c93ec1a8ae1fe0e1f7f4ee92578f9f5522df8d66a247a295fe6c31",
+    "packages/native-antigravity/src/native-proxy.ts": "0da4d07e2fd869f9284bd729518c4f34f1cfe766beca373298c909c240850617",
+    "packages/native-antigravity/src/native-cli.ts": "54a96ddbfca56625730cc175cd156c0988ffbaed33a03990395e201132ed57df",
+    "packages/native-antigravity/src/native-protocol.ts": "a224c5119ad292a8d28582d4bd3ab7a671e841123b46c33c80665efd5c290ac1",
+    "packages/native-antigravity/src/knowledge-native.test.ts": "fc2214791d401953e6b6afe6a63392983b4be9b6420487450935ea89f62e0c70",
+    "apps/launcher/src/main/native-owner-client.ts": "f16d28826c0b949b93e2c0a7715983fd63f010230f8ac1033c95786afc2d26a8",
+    "apps/launcher/src/main/native-owner-client.test.ts": "2e557481347ab1c708803bafb281194d61a5895377f6899dcab338c3f38baef1",
+    "apps/launcher/src/main/ipc-bridge.ts": "66455821d2c8810857653a31c5ecd15422bbf517181d3cf588f889367e40fe70",
+    "apps/launcher/src/main/index.ts": "fb8a492aa3d90daca37d13e871d0d51aeceb717a554665a6a31676edf3ed4735",
+    "apps/launcher/src/preload/client.ts": "fbca2957bf28a5e960103a9561f4667bb688ab387a3df66fabcb8669bde51ac4",
+    "apps/launcher/src/renderer/client/preload-client.ts": "69e30ef4741a42082c372e1751ff0dc0dac731ab9107a188ed20c4b31e4a08ce",
+    "apps/launcher/src/renderer/client/native-knowledge-store.ts": "3f8da484c80bb7913d452f6e0feb7584952b1393f976e3d7bd37ff39151beb29",
+    "apps/launcher/src/renderer/native-knowledge.test.ts": "c76d2f579cb99e8d29a3bfb7c78afe7c6b8ea0546c024448587e9d2daaf816c7",
+    "apps/launcher/src/renderer/views/NativeKnowledgeView.tsx": "5e8f56159a65f552496d816e7e13fb3d88a01ab62c93cfca036a0152c0d0168f",
+    "apps/launcher/src/renderer/App.tsx": "ec8d5041b38fb99dc07b4d582d8b68fee6395fc160c9cf15b4eaf3a982f2d7a3",
+    "apps/launcher/src/renderer/styles/theme.css": "56b965f5a052f2641860f8ab201b203ee67ff26cccff2a545d4cdcd056b355dd",
+    "apps/launcher/src/testing/native-knowledge-fixture.ts": "ae0d332d82d8aaaa8ea2643161382720391ac9a17ec4b36ff951c64bf201f2b2",
+    "apps/launcher/scripts/native-knowledge-smoke.mjs": "3c0e0393d51f15102aa6bbc7729e7ac645c2f760c8f6be17bf4b693220eadbb2",
+    "apps/launcher/src/main/native-knowledge-desktop.ts": "e05dfa8d23b7573c64b666e2e68b80a5c62fa35e2b000da8dac03c51be9f1928",
+    "apps/launcher/src/main/desktop-smoke.ts": "0c5572cc0febcb480298049c5a33c4253390ac5500f6622ff26b4a8b31f8c0b3",
+    "apps/launcher/package.json": "099b1357db6db9a8be16ccc5e80c3b4de864c1cac23d1f120ec8275c4b703e13",
+    "package.json": "fa00cf16b6680b0597f2842246e4d43e17b8a59d51923bc2d719a325cd896acd",
+    "tools/probes/native-knowledge-fixture.mjs": "28f342b8ae0dbb24d65edc323f501960dca6b59f95ea349148c43948669172e1",
+    "tools/probes/native-ledger-live-inspect.mjs": "e6187440a29395932088c2b0f788d9c19884e1e850ba33e5cc87fdf4a7d25785",
+    "README.md": "eb3f9232ab3aa6c4e69bf1f1c821e76dc9483dda58ff97f433aad46c534d67d2",
+    "apps/launcher/README.md": "dc382bfe6a6550b686542c45601404e0bb63b33032da7ec045475601313cd836",
+    "docs/NATIVE_KNOWLEDGE.md": "ef84a3a9f7d7bf63140920ec6f7646bc0a67e612242cf998fe9b6115e257d8da",
+    "docs/NATIVE_SETUP.md": "b4030aab013d9e8e17874c4e4a5ef468b382abc77031d86fd99c9bfa22ba1ee2",
+    "docs/NATIVE_UPGRADE_PLAN.md": "947d9b1dc04006c9712adb04f8e85cb1020222a5973eb31f07e34a3bdcd3e6d3",
+    "docs/NATIVE_RECOVERY_RUNBOOK.md": "1bb0e3f205ec2a800775540f15a0e94e87bf7338e64b5564334e57f29b6d8c66",
+    "docs/adr/0011-native-project-knowledge.md": "59b5b6b9141d4f46feeaab3082212b22e72c2d487c3ee07e8ab3cc1955858d4b",
+    "docs/evidence/g4-native-p6b-project-knowledge-ui.md": "fe450838eb1da90ffae6af9b05d5ae1073f49a58d2812dee241a9c5b72f5af58",
+    "apps/launcher/renderer/CONTRACT_REQUESTS.md": "e5ec3b50890ec354176ee18a83a14dbce8fd7293ea5b34108a75b64c923cbb03"
+  }
+}

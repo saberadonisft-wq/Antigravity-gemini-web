@@ -44,7 +44,9 @@ Browser status mặc định không attach vào CDP bên ngoài. Khi mở browse
 
 ## IPC và vòng đời
 
-Electron main đăng ký sender thật, derive main-frame/origin và validate hai đầu IPC. Preload sandbox CJS chỉ expose 6 methods LauncherClient. Renderer không có Node integration; context isolation, sandbox và web security bật. Production dùng exact origin `app://local`; prefix tương tự, userinfo, port lạ và sender không đăng ký bị chặn.
+Electron main đăng ký sender thật, derive main-frame/origin và validate hai đầu IPC. Preload sandbox CJS expose 11 methods: 6 runtime, 2 quản lý tài khoản Native và 3 knowledge có schema riêng. Token owner chỉ nằm ở main; renderer nhận snapshot không có đường dẫn profile, state, fingerprint hoặc token. Knowledge chỉ trả relative filenames; source roots và bytes không qua IPC. Renderer không có Node integration; context isolation, sandbox và web security bật. Production dùng exact origin `app://local`; prefix tương tự, userinfo, port lạ và sender không đăng ký bị chặn.
+
+Source 35 thêm **Nguồn dự án**: chooser file ở main, kiểm tra/refresh local snapshot, chọn nguồn theo chat/account/epoch, bỏ binding và xóa metadata không xóa file. Không nhận paths từ renderer hoặc tạo native owner mới; old/offline/busy owner khóa mutations, không tự retry. Cần bật thử nghiệm ở native owner sau khi cập nhật lúc idle. [Hướng dẫn](../../docs/NATIVE_KNOWLEDGE.md), [kiểm thử Electron và giới hạn chooser/Web](../../docs/evidence/g4-native-p6b-project-knowledge-ui.md).
 
 Reload/destroy gỡ subscriptions của sender; reload không tự dừng runtime. Main giữ một owner và shutdown fence công việc cũ, báo coordinator mất kết nối rồi cleanup browser. Nếu cleanup lỗi, ứng dụng thoát mã khác 0. Không đóng Chrome ngoài ownership.
 
@@ -66,3 +68,11 @@ Early ACK/durable terminal receipts, i18n/errors, dirty draft, CSS contrast và 
 
 Prompt tiếp tục: [GEMINI_G4_CONTINUE_PROMPT.md](../../docs/GEMINI_G4_CONTINUE_PROMPT.md). Dừng G4, chưa G5.
 
+
+## Quản lý tài khoản Native (P5, source 32)
+
+Mục **Tài khoản Web / Web accounts** nối đến proxy Native hiện có bằng API owner. Mở màn hình chỉ đọc metadata; thêm tài khoản, mở profile, kiểm tra danh tính, chọn, tạm ngưng, hủy và khôi phục đều là thao tác tường minh. Launcher không tạo thêm native pool. Live cần proxy hỗ trợ API mới; Demo hiện lý do chưa hỗ trợ, không dùng dữ liệu giả để báo account ready.
+
+`npm run test:desktop-accounts` chạy Electron + preload sandbox + native HTTP thật trong thư mục tạm, với browser giả lập và không gọi Google. [P5 evidence](../../docs/evidence/g4-native-p5-account-management.md). Các số G4-A bên trên là bằng chứng lịch sử; không cộng chúng vào kiểm thử mới. Google A/B, IDE executor và toàn bộ gate P5 vẫn chưa nghiệm thu.
+
+`npm run test:desktop-native-lifecycle` từ root chạy CLI + Electron với proxy thử nghiệm trong child process, crash/restart và TTL thật 10 phút; browser giả lập, không dùng owner/profile đang chạy. `-- --quick` chỉ kiểm tra các ca nhanh và ghi TTL NOT_RUN. [Bằng chứng source 33](../../docs/evidence/g4-native-p5-lifecycle-cache-expiry.md).

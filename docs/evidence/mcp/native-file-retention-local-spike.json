@@ -1,0 +1,26 @@
+{
+  "checkedAt": "2026-10-17T04:35:36.916Z",
+  "surface": "local_Chromium_fixture",
+  "browserRequestsToGoogle": 0,
+  "contentChars": 86436,
+  "utf8Bytes": 86444,
+  "contentSha256": "843aceaab452cd46413270751a8a6fe01323fa3d88f63fae3d5a74de607bbc72",
+  "cases": [
+    {
+      "retainUntilRead": false,
+      "earlyDeleteSucceeded": true,
+      "existedAtSend": false,
+      "exactRead": false,
+      "readError": "NotFoundError"
+    },
+    {
+      "retainUntilRead": true,
+      "earlyDeleteSucceeded": false,
+      "existedAtSend": true,
+      "exactRead": true
+    }
+  ],
+  "demonstratesLateReadFailureAfterDeletion": true,
+  "status": "REPRODUCED_LOCAL_FILE_LIFETIME_FAILURE",
+  "boundary": "Chromium File API behavior only. Whether Gemini re-reads the local file after chip readiness requires a separate live test."
+}

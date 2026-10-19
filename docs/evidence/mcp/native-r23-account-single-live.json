@@ -1,0 +1,37 @@
+{
+  "checkedAt": "2026-10-16T14:20:22.861Z",
+  "runtimeRevision": 23,
+  "caller": "synthetic_loopback",
+  "browser": "real_Gemini_Web",
+  "ideExecutor": "NOT_TESTED",
+  "modelPolicy": "user_selected_in_web",
+  "turns": [
+    {
+      "accountId": "acc_98a4b2ec14ee3d16",
+      "stage": "tool",
+      "httpStatus": 200,
+      "elapsedMs": 18904,
+      "contextMode": "full",
+      "reused": false,
+      "promptChars": 9900,
+      "fullPromptChars": 9822,
+      "transportMessages": 1,
+      "phase": "completed",
+      "attemptId": "64eec338-2e51-43f9-bfb5-ea4781d59c16"
+    },
+    {
+      "accountId": "acc_98a4b2ec14ee3d16",
+      "stage": "function_response",
+      "httpStatus": 200,
+      "elapsedMs": 15732,
+      "contextMode": "patch",
+      "reused": true,
+      "promptChars": 1155,
+      "fullPromptChars": 10121,
+      "transportMessages": 1,
+      "phase": "completed",
+      "attemptId": "fb048b1e-65df-4abb-8524-ed7077c7ce46"
+    }
+  ],
+  "status": "PASS_SYNTHETIC_CALLER_AND_REAL_BROWSER"
+}

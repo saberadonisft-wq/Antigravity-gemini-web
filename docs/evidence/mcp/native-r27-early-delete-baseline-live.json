@@ -1,0 +1,165 @@
+{
+  "checkedAt": "2026-10-17T04:36:38.206Z",
+  "runtimeRevision": 27,
+  "caller": "synthetic_loopback",
+  "browser": "real_Gemini_Web",
+  "ideExecutor": "NOT_TESTED",
+  "modelPolicy": "user_selected_in_web",
+  "transport": "experimental_snapshot_above_28000_chars",
+  "sizes": [
+    {
+      "targetChars": 78642,
+      "turns": [
+        {
+          "stage": "tool",
+          "httpStatus": 200,
+          "elapsedMs": 17747,
+          "contextMode": "full",
+          "promptChars": 78642,
+          "fullPromptChars": 78564,
+          "phase": "completed",
+          "transportMessages": 1,
+          "trace": [
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "attachment",
+              "stage": "prepared",
+              "promptChars": 798,
+              "promptBytes": 798,
+              "promptSha256": "30c7d95bc61e18fc412b977d4fc27a153a998dca9784e91067a8f7f7d2bed597",
+              "elapsedMs": 0,
+              "attachment": {
+                "chars": 78642,
+                "utf8Bytes": 78654,
+                "sha256": "fa35437b00074124dd3d6b03f96186ccb34006df1d6c0ed349193fc59413e879"
+              }
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "attachment",
+              "stage": "completed",
+              "promptChars": 798,
+              "promptBytes": 798,
+              "promptSha256": "30c7d95bc61e18fc412b977d4fc27a153a998dca9784e91067a8f7f7d2bed597",
+              "elapsedMs": 15202,
+              "responseChars": 276,
+              "responseSha256": "557668726c8b546161cc0380536076ac13c205d96fc65edf9181e3c0647991bc",
+              "responseCategory": "native_envelope",
+              "submission": {
+                "inputChars": 798,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": true
+              },
+              "attachment": {
+                "chars": 78642,
+                "utf8Bytes": 78654,
+                "sha256": "fa35437b00074124dd3d6b03f96186ccb34006df1d6c0ed349193fc59413e879"
+              }
+            }
+          ]
+        },
+        {
+          "stage": "function_response",
+          "httpStatus": 200,
+          "elapsedMs": 6961,
+          "contextMode": "patch",
+          "promptChars": 1226,
+          "fullPromptChars": 78934,
+          "phase": "completed",
+          "transportMessages": 1,
+          "trace": [
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "text",
+              "stage": "prepared",
+              "promptChars": 1226,
+              "promptBytes": 1238,
+              "promptSha256": "4d18fbbde6df89bc7c4f610644d74f5280b84a9692de0d539df9fef7f7043ba4",
+              "elapsedMs": 0
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "text",
+              "stage": "completed",
+              "promptChars": 1226,
+              "promptBytes": 1238,
+              "promptSha256": "4d18fbbde6df89bc7c4f610644d74f5280b84a9692de0d539df9fef7f7043ba4",
+              "elapsedMs": 6829,
+              "responseChars": 138,
+              "responseSha256": "9d5ce0bd4065f903ff38efe64cf4466714bfa6acdad23f2ac0d01dc90274ba40",
+              "responseCategory": "native_envelope",
+              "submission": {
+                "inputChars": 1226,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": true
+              }
+            }
+          ]
+        },
+        {
+          "stage": "replace_delete_and_tool_update",
+          "httpStatus": 200,
+          "elapsedMs": 9435,
+          "contextMode": "patch",
+          "promptChars": 39168,
+          "fullPromptChars": 40795,
+          "phase": "completed",
+          "transportMessages": 1,
+          "trace": [
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "attachment",
+              "stage": "prepared",
+              "promptChars": 798,
+              "promptBytes": 798,
+              "promptSha256": "8d12d318c5e9f453b7d43e3ca09d0fa282e91d45e301ccae7be4f0c328c136cd",
+              "elapsedMs": 0,
+              "attachment": {
+                "chars": 39168,
+                "utf8Bytes": 39180,
+                "sha256": "964acc545327d50f8495ff439010d31e46585ad75bef6673c7510829f977f16f"
+              }
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "attachment",
+              "stage": "completed",
+              "promptChars": 798,
+              "promptBytes": 798,
+              "promptSha256": "8d12d318c5e9f453b7d43e3ca09d0fa282e91d45e301ccae7be4f0c328c136cd",
+              "elapsedMs": 9249,
+              "responseChars": 286,
+              "responseSha256": "57e531553f2c132638ec38a6a3faf7a566a65775d639f31a60b801dd19427811",
+              "responseCategory": "native_envelope",
+              "submission": {
+                "inputChars": 798,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": true
+              },
+              "attachment": {
+                "chars": 39168,
+                "utf8Bytes": 39180,
+                "sha256": "964acc545327d50f8495ff439010d31e46585ad75bef6673c7510829f977f16f"
+              }
+            }
+          ]
+        }
+      ],
+      "status": "PASS_SYNTHETIC_CALLER_AND_REAL_BROWSER",
+      "systemChars": 75740,
+      "markersMatch": true,
+      "followupMatch": true,
+      "replacementMatch": true
+    }
+  ],
+  "status": "PASS_SYNTHETIC_MATRIX"
+}

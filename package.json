@@ -24,20 +24,33 @@
     "mcp:status": "node tools/probes/mcp-smoke.mjs",
     "mcp:shared-status": "node tools/probes/mcp-shared-smoke.mjs",
     "mcp:live": "node tools/probes/mcp-smoke.mjs --live",
+    "native": "node packages/native-antigravity/dist/native-cli.js",
+    "native:accounts": "node packages/native-antigravity/dist/native-cli.js accounts",
+    "native:knowledge": "node packages/native-antigravity/dist/native-cli.js knowledge",
     "native:check": "node packages/native-antigravity/dist/native-cli.js check",
     "native:setup": "node packages/native-antigravity/dist/native-cli.js setup",
     "native:start": "node packages/native-antigravity/dist/native-cli.js start",
     "native:launch": "node packages/native-antigravity/dist/native-cli.js launch",
     "native:browser": "node packages/native-antigravity/dist/native-cli.js browser",
     "native:status": "node packages/native-antigravity/dist/native-cli.js status",
+    "native:cancel": "node packages/native-antigravity/dist/native-cli.js cancel",
+    "native:resume": "node packages/native-antigravity/dist/native-cli.js resume",
     "native:stop": "node packages/native-antigravity/dist/native-cli.js stop",
+    "native:g4:acceptance": "node tools/probes/g4/native-tool-acceptance.mjs",
     "native:restore": "node packages/native-antigravity/dist/native-cli.js restore",
     "launcher:demo": "npm run --workspace=@antigravity-gemini-web/launcher start -- --demo",
     "test:desktop": "npm run --workspace=@antigravity-gemini-web/launcher smoke:desktop",
-    "test:desktop-cache": "npm run --workspace=@antigravity-gemini-web/launcher smoke:cache"
+    "test:desktop-cache": "npm run --workspace=@antigravity-gemini-web/launcher smoke:cache",
+    "test:desktop-accounts": "npm run --workspace=@antigravity-gemini-web/launcher smoke:native-accounts",
+    "test:desktop-native-knowledge": "node apps/launcher/scripts/native-knowledge-smoke.mjs",
+    "test:desktop-native-lifecycle": "node apps/launcher/scripts/native-lifecycle-smoke.mjs"
   },
   "devDependencies": {
     "typescript": "^5.7.3",
     "@types/node": "^22.13.1"
+  },
+  "engines": {
+    "node": "^22.13.0 || >=24.0.0",
+    "npm": ">=10"
   }
 }

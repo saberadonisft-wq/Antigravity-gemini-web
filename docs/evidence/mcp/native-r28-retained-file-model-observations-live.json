@@ -1,0 +1,68 @@
+{
+  "checkedAt": "2026-10-18T05:15:05.151Z",
+  "runtimeRevision": 28,
+  "accountId": "acc_98a4b2ec14ee3d16",
+  "observations": [
+    {
+      "promptChars": 78642,
+      "reportedModel": "Argon",
+      "controls": [
+        {
+          "text": "Argon",
+          "testId": "bard-mode-menu-button",
+          "cls": "mdc-button mat-mdc-button-base mat-mdc-tooltip-trigger input-area-switch mat-mdc-button mat-unthemed lm-enabled",
+          "popup": "true"
+        }
+      ]
+    },
+    {
+      "promptChars": 145000,
+      "reportedModel": "Flash-Lite",
+      "controls": [
+        {
+          "text": "Flash-Lite",
+          "testId": "bard-mode-menu-button",
+          "cls": "mdc-button mat-mdc-button-base mat-mdc-tooltip-trigger input-area-switch mat-mdc-button mat-unthemed lm-enabled",
+          "popup": "true"
+        }
+      ]
+    },
+    {
+      "promptChars": 72347,
+      "reportedModel": "Flash-Lite",
+      "controls": [
+        {
+          "text": "Flash-Lite",
+          "testId": "bard-mode-menu-button",
+          "cls": "mdc-button mat-mdc-button-base mat-mdc-tooltip-trigger input-area-switch mat-mdc-button mat-unthemed lm-enabled",
+          "popup": "true"
+        }
+      ]
+    },
+    {
+      "promptChars": 261000,
+      "reportedModel": "Flash-Lite",
+      "controls": [
+        {
+          "text": "Flash-Lite",
+          "testId": "bard-mode-menu-button",
+          "cls": "mdc-button mat-mdc-button-base mat-mdc-tooltip-trigger input-area-switch mat-mdc-button mat-unthemed lm-enabled",
+          "popup": "true"
+        }
+      ]
+    },
+    {
+      "promptChars": 130347,
+      "reportedModel": "Flash-Lite",
+      "controls": [
+        {
+          "text": "Flash-Lite",
+          "testId": "bard-mode-menu-button",
+          "cls": "mdc-button mat-mdc-button-base mat-mdc-tooltip-trigger input-area-switch mat-mdc-button mat-unthemed lm-enabled",
+          "popup": "true"
+        }
+      ]
+    }
+  ],
+  "boundary": "Picker button labels observed after completed synthetic attachment requests. This does not establish full menu model names or effort for each turn."
+}

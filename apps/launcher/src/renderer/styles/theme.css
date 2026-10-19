@@ -278,6 +278,10 @@ input:focus, select:focus, textarea:focus {
 
 .app-sidebar {
   width: 240px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
   background: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -286,6 +290,7 @@ input:focus, select:focus, textarea:focus {
   gap: 20px;
   flex-shrink: 0;
 }
+.nav-link { min-height: 44px; }
 
 .app-content {
   flex: 1;
@@ -383,5 +388,37 @@ tr:hover td {
 .card { min-width: 0; overflow-wrap: anywhere; }
 .card table { max-width: 100%; table-layout: fixed; width: 100%; }
 .demo-banner { flex-wrap: wrap; gap: 8px; }
+
+.native-accounts { display: grid; gap: 16px; max-width: 1040px; }
+.native-accounts h2 { font-size: 22px; }
+.native-accounts h3 { font-size: 16px; }
+.native-accounts p { margin-top: 8px; color: var(--text-secondary); line-height: 1.6; }
+.native-account-header { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+.native-account-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.native-accounts button, .native-accounts input, .native-accounts summary { min-height: 44px; }
+.native-accounts input { min-width: 0; max-width: 100%; flex: 1 1 230px; font-size: 16px; }
+.native-accounts label { display: block; font-weight: 600; margin-bottom: 8px; }
+.native-account-list { display: grid; gap: 12px; }
+.native-account-feedback:empty { display: none; }
+.native-accounts .native-account-error { color: var(--danger-fg); }
+.native-accounts code { overflow-wrap: anywhere; font-size: 12px; }
+.native-account-recovery summary { cursor: pointer; font-weight: 600; display: list-item; padding-block: 10px; }
+.native-account-recovery summary:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 4px; }
+.native-account-recovery form, .native-account-recovery h3 { margin-top: 16px; }
+.native-account-recovery input { width: 100%; }
+.native-binding { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.native-turns { padding-left: 20px; margin-block: 12px; }
+.knowledge-targets { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
+.knowledge-targets select { min-height: 44px; width: 100%; font-size: 16px; }
+.native-knowledge .knowledge-choice { display: flex; align-items: flex-start; gap: 12px; min-height: 44px; margin-bottom: 0; cursor: pointer; }
+.native-knowledge .knowledge-choice input { flex: 0 0 20px; width: 20px; min-height: 20px; height: 20px; margin-top: 3px; }
+.knowledge-source-summary { display: block; margin-top: 6px; font-size: 14px; font-weight: 400; color: var(--text-secondary); }
+.knowledge-file-list { padding-left: 20px; margin-top: 8px; }
+.native-knowledge summary { cursor: pointer; padding-block: 10px; }
+@media (max-width: 1000px) { .knowledge-targets { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+  .native-account-actions > button { flex: 1 1 160px; }
+  .native-account-header > button { width: 100%; }
+}
 
 

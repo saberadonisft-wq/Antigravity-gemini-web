@@ -1,0 +1,66 @@
+{
+  "checkedAt": "2026-10-18T10:44:38.281517+00:00",
+  "sourceNativeRevision": 33,
+  "sourceBrowserWorker": 23,
+  "status": "PASS_P5_RESTART_CLI_ELECTRON_REAL_TTL_FIXTURE",
+  "tests": {
+    "native": {
+      "passed": 133,
+      "failed": 0,
+      "log": ".tmp/p5-lifecycle-r33-native-full.log"
+    },
+    "mcp": {
+      "passed": 49,
+      "failed": 0,
+      "log": ".tmp/p5-lifecycle-r33-mcp-full.log"
+    },
+    "contracts": {
+      "passed": 10,
+      "failed": 0,
+      "log": ".tmp/p5-lifecycle-r33-contracts-full.log"
+    },
+    "launcher": {
+      "passed": 41,
+      "failed": 0,
+      "log": ".tmp/p5-lifecycle-r33-launcher-verified.log"
+    }
+  },
+  "freshTestTotal": 233,
+  "workspaceBuild": "PASS",
+  "workspaceTypecheck": "PASS",
+  "lifecycleEvidence": "../p5-native-lifecycle/native-lifecycle.json",
+  "actualTtlMonotonicMs": 601435,
+  "actualTtlWallMs": 601450,
+  "quickFixtureTtl": "NOT_RUN",
+  "browser": "SYNTHETIC",
+  "ideExecutor": "NOT_TESTED",
+  "realGoogleRequests": 0,
+  "mainOwnerReadOnly": {
+    "runtimeRevision": 29,
+    "pid": 13592,
+    "active": 0,
+    "routingMode": "manual",
+    "automaticRoutingEnabled": false,
+    "failoverEnabled": false,
+    "contextModel": {
+      "model": "3.8 Flash"
+    },
+    "upload": false
+  },
+  "liveOwnerReloaded": false,
+  "context38NativeLoop": "PENDING_USER_GOOGLE_VERIFICATION",
+  "p6": "OPEN",
+  "p7": "OPEN",
+  "p8": "RUNBOOK_ADDED_GATES_OPEN",
+  "remoteCI": "NOT_RUN",
+  "sourceSha256": {
+    "packages/mcp-server/src/service.ts": "9e6650304027d8b9300081317037a97759a6f5f4a87723033aa1fc51f88b7271",
+    "packages/mcp-server/src/cli.ts": "26a4544c96b6c17c94bb2293129b4462ad96aa75319f908de6edf139500e7584",
+    "packages/native-antigravity/src/native-proxy.ts": "83b3d67837b0f95679bcdb494c6d702c5450ba3b9f9c0a389ad38e7a308564e4",
+    "apps/launcher/src/renderer/client/native-account-store.ts": "124e668beff04ef1f27ae4f9f42d9e2f1079e3146a240e5aa13290bda6437314",
+    "apps/launcher/src/main/native-lifecycle-desktop.ts": "22658130033b26871f05d45f83548ddaa975ebbd9f9144291a0f84fee7a9acf7",
+    "apps/launcher/scripts/native-lifecycle-smoke.mjs": "b3b6780cbad8382fc272e677abbcf682d47defa5d977a77504fb8f9b54c29e4a",
+    "tools/probes/fixtures/native-cli-loopback.mjs": "b08710f95d3b8f579cd2e3b0e89fbdcc2dfb1718eda9fd2837115e10351fa7be",
+    "tools/probes/fixtures/native-lifecycle-owner.mjs": "d0b1bc718ab72d9f60e525ec3fa37c43c8dd7c4a86f58b1f386520f1cc86bbc5"
+  }
+}

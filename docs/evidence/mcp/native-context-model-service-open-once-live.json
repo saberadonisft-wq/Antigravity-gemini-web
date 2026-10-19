@@ -1,0 +1,10 @@
+{
+  "checkedAt": "2026-10-18T05:39:56.932Z",
+  "accountId": "acc_98a4b2ec14ee3d16",
+  "runtimeRevision": 29,
+  "promptsSent": 0,
+  "status": "FAILED",
+  "stage": "open_browser",
+  "code": "BROWSER_NOT_READY",
+  "nativeRestored": true
+}

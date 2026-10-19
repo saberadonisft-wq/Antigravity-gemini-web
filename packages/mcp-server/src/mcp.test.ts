@@ -32,6 +32,46 @@ function output(result: unknown): Record<string, any> {
   return JSON.parse(value.content[0].text);
 }
 
+test("Expired results are withdrawn on every read API while physical receipts and Send fences survive",async t=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),"gemini-mcp-test-")),browser=controlledBrowser(),service=new GeminiMcpService(browser.adapter,path.join(root,"receipts.json"));
+  browser.adapter.pollResponse=async turnId=>({turnId,status:"completed",text:"expired cache fixture",completedAt:new Date().toISOString()});
+  t.after(async()=>{await service.close();removeOwnedFixture(root);});
+  for(const surface of ["result","receipt","status"] as const){
+    const id="expiry_read_"+surface;await service.submit(id,"synthetic "+surface);assert.equal((await service.result(id,1000)).status,"completed");
+    const originalNow=Date.now,advanced=originalNow()+600001;
+    try{
+      Date.now=()=>advanced;
+      if(surface==="result")await assert.rejects(service.result(id),{code:"OUTCOME_UNKNOWN"});
+      if(surface==="receipt")assert.equal((await service.inspectReceipt(id)).resultAvailable,false);
+      if(surface==="status")assert.equal((await service.status()).cachedResults,0);
+      const receipt=await service.inspectReceipt(id);assert.equal(receipt.found,true);assert.equal(receipt.replayAllowed,false);assert.equal(receipt.receipt?.phase,"terminal");
+      await assert.rejects(service.submit(id,"synthetic "+surface),{code:"OUTCOME_UNKNOWN"});
+    }finally{Date.now=originalNow;}
+  }
+  assert.equal(browser.stats.sends,3);assert.equal(browser.stats.opens,0);
+});
+
+test("Browser MCP can finish more than 128 requests without forgetting durable Send identities", { timeout: 20000 }, async t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-mcp-test-"));
+  const browser = controlledBrowser();
+  browser.adapter.pollResponse = async turnId => ({ turnId, status: "completed", text: "cached reply", completedAt: new Date().toISOString() });
+  const ledger = path.join(root, "receipts.json"), service = new GeminiMcpService(browser.adapter, ledger);
+  t.after(async () => { await service.close(); removeOwnedFixture(root); });
+  for (let index = 0; index < 140; index++) {
+    const id = "bounded_" + index;
+    await service.submit(id, "prompt " + index);
+    assert.equal((await service.result(id, 1000)).status, "completed");
+  }
+  await assert.rejects(service.submit("bounded_0", "prompt 0"), { code: "OUTCOME_UNKNOWN" });
+  await assert.rejects(service.submit("bounded_0", "changed"), { code: "CONFIG_CONFLICT" });
+  assert.equal((await service.submit("bounded_139", "prompt 139")).status, "completed");
+  assert.equal(browser.stats.sends, 140);
+  assert.ok((await service.status()).cachedResults <= 32);
+  const restarted = new GeminiMcpService(browser.adapter, ledger);
+  await assert.rejects(restarted.submit("bounded_0", "prompt 0"), { code: "OUTCOME_UNKNOWN" });
+  await restarted.close();
+});
+
 test("MCP initialize/discovery, durable dedup, polling and immutable result via actual protocol", async t => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-mcp-test-"));
   const browser = controlledBrowser();
@@ -42,7 +82,7 @@ test("MCP initialize/discovery, durable dedup, polling and immutable result via 
   t.after(async () => { await service.close(); await client.close(); await server.close(); removeOwnedFixture(root); });
   const [a, b] = InMemoryTransport.createLinkedPair();
   await server.connect(a); await client.connect(b);
-  assert.deepEqual((await client.listTools()).tools.map(t => t.name).sort(), ["gemini_cancel", "gemini_open_browser", "gemini_result", "gemini_status", "gemini_submit"]);
+  assert.deepEqual((await client.listTools()).tools.map(t => t.name).sort(), ["gemini_cancel", "gemini_open_browser", "gemini_receipt", "gemini_release_conversation", "gemini_result", "gemini_status", "gemini_submit"]);
   assert.equal(output(await client.callTool({ name: "gemini_status", arguments: {} })).nativeInference, "unverified");
   assert.equal(browser.stats.opens, 0);
   const prompt = "SECRET_TEST_PROMPT_does_not_belong_in_ledger";
@@ -55,11 +95,14 @@ test("MCP initialize/discovery, durable dedup, polling and immutable result via 
   browser.resolve({ turnId: "owned", status: "completed", text: "REAL_TEST_REPLY", completedAt: new Date().toISOString() });
   const result = output(await client.callTool({ name: "gemini_result", arguments: { request_id: args.request_id, wait_ms: 500 } }));
   assert.equal(result.text, "REAL_TEST_REPLY");
+  const metadata=output(await client.callTool({name:"gemini_receipt",arguments:{request_id:args.request_id}}));
+  assert.equal(metadata.receipt.phase,"terminal");assert.equal(metadata.replayAllowed,false);assert.equal(metadata.text,undefined);
   assert.equal(output(await client.callTool({ name: "gemini_cancel", arguments: { request_id: args.request_id } })).cancelled, false);
   assert.equal(fs.readFileSync(ledger, "utf8").includes(prompt), false);
   assert.equal(fs.readFileSync(ledger, "utf8").includes("REAL_TEST_REPLY"), false);
   const resumed = new GeminiMcpService(browser.adapter, ledger);
   await assert.rejects(resumed.submit(args.request_id, prompt), { code: "OUTCOME_UNKNOWN" });
+  await resumed.close();
   assert.equal(browser.stats.sends, 1);
   const invalid = await client.callTool({ name: "gemini_submit", arguments: { request_id: "request_0003", prompt: "x".repeat(MAX_BROWSER_PROMPT_CHARS + 1) } });
   assert.equal(invalid.isError, true);
@@ -112,9 +155,12 @@ test("Real stdio process initializes without Chrome, denies concurrent profile o
   const competitor = new Client({ name: "owned-competitor", version: "1" });
   const competitorTransport = new StdioClientTransport({ ...params, env: { ...params.env, AG_MCP_STATE_DIR: path.join(root, "another-state") } });
   try { await assert.rejects(competitor.connect(competitorTransport)); } finally { await competitor.close(); }
-  assert.equal((await client.listTools()).tools.length, 5);
+  assert.equal((await client.listTools()).tools.length, 7);
+  const absent=output(await client.callTool({name:"gemini_receipt",arguments:{request_id:"unseen_receipt_001"}}));
+  assert.equal(absent.found,false);assert.equal(absent.replayAllowed,false);
+  assert.ok(!fs.existsSync(path.join(root,"state","receipts.json.sqlite")),"Metadata lookup alone must not initialize storage or open Chrome");
   await client.close();
   const reconnect = new Client({ name: "owned-reconnect", version: "1" });
-  try { await reconnect.connect(new StdioClientTransport(params)); assert.equal((await reconnect.listTools()).tools.length, 5); }
+  try { await reconnect.connect(new StdioClientTransport(params)); assert.equal((await reconnect.listTools()).tools.length, 7); }
   finally { await reconnect.close(); }
 });

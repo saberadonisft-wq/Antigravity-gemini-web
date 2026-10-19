@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-10-17T04:23:47.343Z",
+  "http": "real_loopback",
+  "mcpService": "actual_service",
+  "store": "real_sqlite_wal",
+  "browser": "SYNTHETIC",
+  "ideExecutor": "NOT_TESTED",
+  "mode": "priority",
+  "modelPolicy": {
+    "model": "Fixture Model",
+    "effort": "Low"
+  },
+  "status": "PASS_PRIORITY_HTTP_MCP_SQLITE_FIXTURE",
+  "sameChatSerialized": true,
+  "duplicateCoalesced": true,
+  "twoAccountsConcurrent": true,
+  "routingConfigSurvivedRestart": true,
+  "oldRequestFencedAfterSwitch": true,
+  "originalReceiptOwnerVerified": true,
+  "unavailableModelRejectedBeforeSend": true,
+  "failoverEnabled": false,
+  "sendCountA": 1,
+  "sendCountB": 1
+}

@@ -1,0 +1,57 @@
+{
+  "checkedAt": "2026-10-16T08:39:24.873Z",
+  "runtimeRevision": 20,
+  "caller": "synthetic_loopback_client",
+  "browser": "real_Gemini_Web",
+  "ideExecutor": "NOT_TESTED",
+  "status": "PASS_NATIVE_PROTOCOL_AND_REAL_BROWSER",
+  "turns": [
+    {
+      "httpStatus": 200,
+      "elapsedMs": 19986,
+      "frames": 1,
+      "functionCalls": 1,
+      "textChars": 0,
+      "lastTurn": {
+        "requestId": "native_7f4db24f84339776a3c88589db5077f17bafac95349faeb1bc87f30ac1e4a7ce",
+        "promptChars": 2725,
+        "fullPromptChars": 2647,
+        "reused": false,
+        "contextMode": "full",
+        "contextReason": "new_scope_or_restart",
+        "patchOperations": 0,
+        "savedPromptChars": 0,
+        "toolDescriptionCharsSaved": 16,
+        "existingConversationRebind": false,
+        "phase": "completed",
+        "elapsedMs": 19879,
+        "firstTextMs": null,
+        "silentMs": 1820
+      }
+    },
+    {
+      "httpStatus": 200,
+      "elapsedMs": 8300,
+      "frames": 2,
+      "functionCalls": 0,
+      "textChars": 33,
+      "lastTurn": {
+        "requestId": "native_70b3b12ce6b0a539236fa8384c28184e89365ad23c5370f57f5557bfa638eea9",
+        "promptChars": 1142,
+        "fullPromptChars": 2977,
+        "reused": true,
+        "contextMode": "patch",
+        "contextReason": "existing_revision",
+        "patchOperations": 2,
+        "savedPromptChars": 1835,
+        "toolDescriptionCharsSaved": 16,
+        "existingConversationRebind": false,
+        "phase": "completed",
+        "elapsedMs": 8235,
+        "firstTextMs": 6714,
+        "silentMs": 1521
+      }
+    }
+  ],
+  "replyMatches": true
+}

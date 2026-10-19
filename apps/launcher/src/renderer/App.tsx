@@ -14,10 +14,12 @@ import { OnboardingView } from "./views/OnboardingView.js";
 import { SessionsView } from "./views/SessionsView.js";
 import { ActivityView } from "./views/ActivityView.js";
 import { SettingsView } from "./views/SettingsView.js";
+import { NativeAccountsView } from "./views/NativeAccountsView.js";
+import { NativeKnowledgeView } from "./views/NativeKnowledgeView.js";
 import { t, errorText } from "./i18n.js";
 import "./styles/theme.css";
 
-type ViewId = "overview" | "onboarding" | "sessions" | "activity" | "settings";
+type ViewId = "overview" | "onboarding" | "sessions" | "activity" | "settings" | "native_accounts" | "native_knowledge";
 
 export const App: React.FC<{ clientOverride?: LauncherClient }> = ({ clientOverride }) => {
   const [client, setClient] = useState<LauncherClient | null>(null);
@@ -166,6 +168,8 @@ export const App: React.FC<{ clientOverride?: LauncherClient }> = ({ clientOverr
           >
             {t(lang, "navSettings")}
           </button>
+          <button className={`nav-link ${currentView==="native_accounts"?"active":""}`} data-native-nav aria-current={currentView==="native_accounts"?"page":undefined} onClick={()=>setCurrentView("native_accounts")}>{lang==="vi"?"Tài khoản Web":"Web accounts"}</button>
+          <button className={`nav-link ${currentView==="native_knowledge"?"active":""}`} data-knowledge-nav aria-current={currentView==="native_knowledge"?"page":undefined} onClick={()=>setCurrentView("native_knowledge")}>{lang==="vi"?"Nguồn dự án":"Project references"}</button>
         </nav>
 
         <div style={{ marginTop: "auto", borderTop: "1px solid var(--border-color)", paddingTop: 14 }}>
@@ -217,7 +221,9 @@ export const App: React.FC<{ clientOverride?: LauncherClient }> = ({ clientOverr
         )}
 
         {/* View Router */}
-        <fieldset disabled={isDisconnected} className="view-controls">
+        <fieldset disabled={isDisconnected&&currentView!=="native_accounts"&&currentView!=="native_knowledge"} className="view-controls">
+        {currentView==="native_knowledge"&&<NativeKnowledgeView client={client} lang={lang}/>}
+        {currentView==="native_accounts"&&<NativeAccountsView client={client} lang={lang}/>}
         {currentView === "overview" && (
           <OverviewView
             client={client}

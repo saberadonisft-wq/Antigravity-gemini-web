@@ -1,0 +1,195 @@
+{
+  "checkedAt": "2026-10-16T15:18:37.154Z",
+  "runtimeRevision": 25,
+  "caller": "synthetic_loopback",
+  "browser": "real_Gemini_Web",
+  "ideExecutor": "NOT_TESTED",
+  "modelPolicy": "user_selected_in_web",
+  "transport": "experimental_snapshot_above_28000_chars",
+  "sizes": [
+    {
+      "targetChars": 78642,
+      "turns": [
+        {
+          "stage": "tool",
+          "httpStatus": 502,
+          "elapsedMs": 15055,
+          "contextMode": "full",
+          "promptChars": 78642,
+          "fullPromptChars": 78564,
+          "phase": "failed",
+          "code": "TOOL_REQUIRED",
+          "delivery": "unknown",
+          "transportMessages": 1,
+          "trace": [
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "attachment",
+              "stage": "prepared",
+              "promptChars": 798,
+              "promptBytes": 798,
+              "promptSha256": "1c7e13af6b7650ce29a8a732a2185a7b87af990a9fe161da99c0f08301c74e2a",
+              "elapsedMs": 0,
+              "attachment": {
+                "chars": 78642,
+                "utf8Bytes": 78654,
+                "sha256": "a9e941d125531e4fe47d19dbd431edf3498f98195e7d516bc07d9015f9b0ceb7"
+              }
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "attachment",
+              "stage": "completed",
+              "promptChars": 798,
+              "promptBytes": 798,
+              "promptSha256": "1c7e13af6b7650ce29a8a732a2185a7b87af990a9fe161da99c0f08301c74e2a",
+              "elapsedMs": 12719,
+              "responseChars": 59,
+              "responseSha256": "62f981219ea6e7738ea206872bbb2434b51c570e13788318212289171a15062d",
+              "responseCategory": "other",
+              "submission": {
+                "inputChars": 798,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": true
+              },
+              "attachment": {
+                "chars": 78642,
+                "utf8Bytes": 78654,
+                "sha256": "a9e941d125531e4fe47d19dbd431edf3498f98195e7d516bc07d9015f9b0ceb7"
+              }
+            }
+          ]
+        }
+      ],
+      "status": "FAILED",
+      "systemChars": 75740,
+      "error": "ERR_ASSERTION"
+    },
+    {
+      "targetChars": 145000,
+      "turns": [
+        {
+          "stage": "tool",
+          "httpStatus": 502,
+          "elapsedMs": 38471,
+          "contextMode": "full",
+          "promptChars": 145000,
+          "fullPromptChars": 144922,
+          "phase": "failed",
+          "code": "TOOL_REQUIRED",
+          "delivery": "unknown",
+          "transportMessages": 1,
+          "trace": [
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "attachment",
+              "stage": "prepared",
+              "promptChars": 798,
+              "promptBytes": 798,
+              "promptSha256": "0ec936ddf76e7a266b22d281f01d99a16cdc85d2705244714d089655e7f483f9",
+              "elapsedMs": 0,
+              "attachment": {
+                "chars": 145000,
+                "utf8Bytes": 145012,
+                "sha256": "c5b5daccde96f09c76f5b5a2cd0f4021b7fef89ea4a653d9a8b8261612229187"
+              }
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "attachment",
+              "stage": "completed",
+              "promptChars": 798,
+              "promptBytes": 798,
+              "promptSha256": "0ec936ddf76e7a266b22d281f01d99a16cdc85d2705244714d089655e7f483f9",
+              "elapsedMs": 38386,
+              "responseChars": 324,
+              "responseSha256": "dd2aa5397e1ccf81312b5c7f11143c3a47da09710eebca22baa7ca922980d570",
+              "responseCategory": "native_envelope",
+              "submission": {
+                "inputChars": 798,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": true
+              },
+              "attachment": {
+                "chars": 145000,
+                "utf8Bytes": 145012,
+                "sha256": "c5b5daccde96f09c76f5b5a2cd0f4021b7fef89ea4a653d9a8b8261612229187"
+              }
+            }
+          ]
+        }
+      ],
+      "status": "FAILED",
+      "systemChars": 142098,
+      "error": "ERR_ASSERTION"
+    },
+    {
+      "targetChars": 261000,
+      "turns": [
+        {
+          "stage": "tool",
+          "httpStatus": 502,
+          "elapsedMs": 30898,
+          "contextMode": "full",
+          "promptChars": 261000,
+          "fullPromptChars": 260922,
+          "phase": "failed",
+          "code": "TOOL_REQUIRED",
+          "delivery": "unknown",
+          "transportMessages": 1,
+          "trace": [
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "attachment",
+              "stage": "prepared",
+              "promptChars": 798,
+              "promptBytes": 798,
+              "promptSha256": "944a3035e11212b215e4e748c20732b4d7fd340734c5a8f765cca439a25fec09",
+              "elapsedMs": 0,
+              "attachment": {
+                "chars": 261000,
+                "utf8Bytes": 261012,
+                "sha256": "0a9aad7a42835062e85462943671d99ac38750b10ffc532f48e85216d97b7cce"
+              }
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "attachment",
+              "stage": "completed",
+              "promptChars": 798,
+              "promptBytes": 798,
+              "promptSha256": "944a3035e11212b215e4e748c20732b4d7fd340734c5a8f765cca439a25fec09",
+              "elapsedMs": 30785,
+              "responseChars": 69,
+              "responseSha256": "5236e7b23d92158c4984229c0d07367024d57dd81ec274a701a58d8d7f1bd010",
+              "responseCategory": "known_error_text",
+              "submission": {
+                "inputChars": 798,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": true
+              },
+              "attachment": {
+                "chars": 261000,
+                "utf8Bytes": 261012,
+                "sha256": "0a9aad7a42835062e85462943671d99ac38750b10ffc532f48e85216d97b7cce"
+              }
+            }
+          ]
+        }
+      ],
+      "status": "FAILED",
+      "systemChars": 258098,
+      "error": "ERR_ASSERTION"
+    }
+  ],
+  "status": "FAILED_OR_INCOMPLETE"
+}

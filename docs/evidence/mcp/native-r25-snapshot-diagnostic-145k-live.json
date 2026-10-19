@@ -1,0 +1,73 @@
+{
+  "checkedAt": "2026-10-16T15:22:48.216Z",
+  "runtimeRevision": 25,
+  "caller": "synthetic_loopback",
+  "browser": "real_Gemini_Web",
+  "ideExecutor": "NOT_TESTED",
+  "modelPolicy": "user_selected_in_web",
+  "transport": "experimental_snapshot_above_28000_chars",
+  "sizes": [
+    {
+      "targetChars": 145000,
+      "turns": [
+        {
+          "stage": "tool",
+          "httpStatus": 502,
+          "elapsedMs": 16535,
+          "contextMode": "full",
+          "promptChars": 145000,
+          "fullPromptChars": 144922,
+          "phase": "failed",
+          "code": "TOOL_REQUIRED",
+          "delivery": "unknown",
+          "transportMessages": 1,
+          "trace": [
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "attachment",
+              "stage": "prepared",
+              "promptChars": 798,
+              "promptBytes": 798,
+              "promptSha256": "d687e34f5c4481ea976b782a6941f236aabb63f8c61429142fab076567060a74",
+              "elapsedMs": 0,
+              "attachment": {
+                "chars": 145000,
+                "utf8Bytes": 145012,
+                "sha256": "ac319ccce0f72570e3721986ff6102c1502cd9777731038a5067d96480d1c306"
+              }
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "attachment",
+              "stage": "completed",
+              "promptChars": 798,
+              "promptBytes": 798,
+              "promptSha256": "d687e34f5c4481ea976b782a6941f236aabb63f8c61429142fab076567060a74",
+              "elapsedMs": 14618,
+              "responseChars": 69,
+              "responseSha256": "5236e7b23d92158c4984229c0d07367024d57dd81ec274a701a58d8d7f1bd010",
+              "responseCategory": "known_error_text",
+              "submission": {
+                "inputChars": 798,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": true
+              },
+              "attachment": {
+                "chars": 145000,
+                "utf8Bytes": 145012,
+                "sha256": "ac319ccce0f72570e3721986ff6102c1502cd9777731038a5067d96480d1c306"
+              }
+            }
+          ]
+        }
+      ],
+      "status": "FAILED",
+      "systemChars": 142098,
+      "error": "ERR_ASSERTION"
+    }
+  ],
+  "status": "FAILED_OR_INCOMPLETE"
+}

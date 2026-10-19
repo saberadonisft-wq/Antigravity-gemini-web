@@ -1,0 +1,71 @@
+{
+  "checkedAt": "2026-10-15T13:01:57.690Z",
+  "caller": "synthetic_loopback_protocol_client",
+  "browser": "real_Gemini_Web",
+  "ideUiCancel": "NOT_TESTED",
+  "modelSelection": {
+    "model": "4 Argon",
+    "effort": "Low"
+  },
+  "turns": [
+    {
+      "elapsedMs": 11087,
+      "firstTextMs": 10054,
+      "frames": 2,
+      "finish": "STOP",
+      "proxy": {
+        "requestId": "native_db267d0fe319dcd0260b2ddea64b3c5bc801ab8533f70134d43256d5bc64b3c3",
+        "promptChars": 10837,
+        "fullPromptChars": 10759,
+        "reused": false,
+        "phase": "completed",
+        "elapsedMs": 11091,
+        "firstTextMs": 10060,
+        "silentMs": 44
+      }
+    },
+    {
+      "elapsedMs": 13096,
+      "firstTextMs": 11880,
+      "frames": 2,
+      "finish": "STOP",
+      "proxy": {
+        "requestId": "native_d3f1667b0c04909e8fc7dad9ea95ec425a0eb3e0ab148ca0de89d9862413896b",
+        "promptChars": 1523,
+        "fullPromptChars": 10926,
+        "reused": true,
+        "phase": "completed",
+        "elapsedMs": 13096,
+        "firstTextMs": 11881,
+        "silentMs": 158
+      }
+    },
+    {
+      "elapsedMs": 6139,
+      "firstTextMs": 6138,
+      "frames": 2,
+      "finish": "OTHER",
+      "failure": "CANCELLED",
+      "proxy": {
+        "requestId": "native_e582de4eef5578ce62f39aea9fd27d6dcf8d7150d201d3c41b9a6f189c60e60a",
+        "promptChars": 1246,
+        "fullPromptChars": 1168,
+        "reused": false,
+        "phase": "failed",
+        "code": "CANCELLED",
+        "elapsedMs": 6129,
+        "firstTextMs": null,
+        "silentMs": 83
+      }
+    }
+  ],
+  "status": "PASS_PROTOCOL_AND_BROWSER",
+  "afterCancel": {
+    "checkedAt": "2026-10-15T13:03:48.063Z",
+    "activeRequestId": null,
+    "browserState": "ready",
+    "accountState": "signed_in",
+    "browserTurnStatus": "cancelled",
+    "retainedConversations": 1
+  }
+}

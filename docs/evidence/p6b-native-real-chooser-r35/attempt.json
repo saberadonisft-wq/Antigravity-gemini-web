@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-10-18T12:46:59.073191+00:00",
+  "status": "NOT_COMPLETED_REAL_CHOOSER_SELECTION",
+  "nativeRuntimeRevision": 35,
+  "electron": "REAL",
+  "osChooserOpenObserved": true,
+  "cancelCallbackObserved": true,
+  "cancelActor": "NOT_ESTABLISHED",
+  "selectionVerified": false,
+  "postCancelSourceCount": "NOT_MEASURED",
+  "lastComputerUseError": "element 230 is not available in cached app state for electron.exe",
+  "recovery": "Refreshed selection; target dialog was no longer observed. App input stopped.",
+  "ownedTestChildTerminated": true,
+  "ownedTempRootRemoved": true,
+  "realGooglePromptRequests": 0,
+  "mainBrowserNavigated": false,
+  "observedChooserEvents": [
+    {
+      "type": "open",
+      "at": "2026-10-18T12:06:56.374Z"
+    },
+    {
+      "type": "cancel",
+      "count": 0,
+      "at": "2026-10-18T12:07:14.923Z"
+    }
+  ]
+}

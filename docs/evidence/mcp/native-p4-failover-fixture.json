@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-18T06:15:23.903Z",
+  "runtimeRevision": 31,
+  "http": "real_loopback",
+  "mcpService": "actual_service",
+  "store": "real_sqlite_wal",
+  "browser": "SYNTHETIC",
+  "ideExecutor": "NOT_TESTED",
+  "status": "PASS_FINITE_FAILOVER_HTTP_MCP_SQLITE_FIXTURE",
+  "modelPolicy": {
+    "model": "Fixture Primary",
+    "effort": "Low"
+  },
+  "sendCountA": 0,
+  "sendCountB": 1,
+  "attemptOwnersPreserved": true,
+  "noSecondSendAfterRestart": true,
+  "resultsExpiredWithoutReplay": true,
+  "attemptBudgetSurvivedRestart": true,
+  "primaryModelUnchanged": true,
+  "realGoogleRequests": 0
+}

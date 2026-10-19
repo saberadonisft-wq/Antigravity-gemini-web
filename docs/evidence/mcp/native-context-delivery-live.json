@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-10-16T11:49:22.265Z",
+  "runtimeRevision": 21,
+  "caller": "synthetic_loopback_client",
+  "browser": "real_Gemini_Web",
+  "ideExecutor": "NOT_TESTED",
+  "syntheticSystemChars": 75731,
+  "status": "PASS_LONG_CONTEXT_TOOL_AND_DELTA_FOLLOW_UP",
+  "httpStatus": 200,
+  "elapsedMs": 55650,
+  "lastTurn": {
+    "requestId": "native_de6364051861d255637abfc17f63f080c0ac9c0dfd78ebd1738bbf81224da7b4",
+    "promptChars": 78642,
+    "fullPromptChars": 78564,
+    "reused": false,
+    "contextMode": "full",
+    "contextReason": "new_scope_or_restart",
+    "patchOperations": 0,
+    "savedPromptChars": 0,
+    "toolDescriptionCharsSaved": 0,
+    "existingConversationRebind": false,
+    "phase": "completed",
+    "transportMessages": 4,
+    "elapsedMs": 55582,
+    "firstTextMs": null,
+    "silentMs": 1681
+  },
+  "markersMatch": true,
+  "followup": {
+    "httpStatus": 200,
+    "elapsedMs": 18023,
+    "replyMatches": true,
+    "lastTurn": {
+      "requestId": "native_37a2ab9cd55b2658698fb33ba97e3fc4e512d2a0a4568d9e79a01a0bf65f5a41",
+      "promptChars": 1247,
+      "fullPromptChars": 78955,
+      "reused": true,
+      "contextMode": "patch",
+      "contextReason": "existing_revision",
+      "patchOperations": 2,
+      "savedPromptChars": 77708,
+      "toolDescriptionCharsSaved": 0,
+      "existingConversationRebind": false,
+      "phase": "completed",
+      "transportMessages": 1,
+      "elapsedMs": 17994,
+      "firstTextMs": 14880,
+      "silentMs": 1653
+    }
+  }
+}

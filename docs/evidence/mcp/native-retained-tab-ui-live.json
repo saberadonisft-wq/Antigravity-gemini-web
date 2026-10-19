@@ -1,0 +1,132 @@
+{
+  "checkedAt": "2026-10-15T18:37:01.220Z",
+  "status": "PASS_NATIVE_VIEW_FILE_BEFORE_AND_AFTER_ORIGINAL_TAB_CLOSED",
+  "runtimeRevision": 8,
+  "browserFingerprintVersion": 7,
+  "method": "Computer Use @oai/sky in Gemini Web Native Test; read-only proxy and shared MCP metadata",
+  "model": {
+    "model": "4 Argon",
+    "effort": "Low"
+  },
+  "ui": {
+    "checkedAt": "2026-10-15T18:37:01.220Z",
+    "first": {
+      "markerObserved": true,
+      "nativeToolReceiptObserved": true,
+      "workingVisible": false,
+      "errorVisible": false
+    },
+    "originalTabClosed": true,
+    "second": {
+      "markerObserved": true,
+      "workingVisible": false,
+      "errorVisible": false,
+      "nativeToolReceiptObserved": true
+    }
+  },
+  "originalTabClosure": {
+    "checkedAt": "2026-10-15T18:33:47.165Z",
+    "pageCount": 1
+  },
+  "firstFinalProxy": {
+    "requestId": "native_e10ffd548fa20e40c9dc11727175f60bd3b14df0ae320eb4ffc793ec766cdd01",
+    "promptChars": 2319,
+    "fullPromptChars": 71624,
+    "reused": true,
+    "phase": "completed",
+    "elapsedMs": 50808,
+    "firstTextMs": 50100,
+    "silentMs": 38
+  },
+  "finalProxy": {
+    "requestId": "native_35c989134c5047259bd04205fb0c0098377b1de49957a9b4aebd96c0fc5b30e4",
+    "promptChars": 73153,
+    "fullPromptChars": 73075,
+    "reused": false,
+    "phase": "completed",
+    "elapsedMs": 11216,
+    "firstTextMs": 9894,
+    "silentMs": 66
+  },
+  "counters": {
+    "catalog": 9,
+    "control": 60,
+    "nativeRequests": 5,
+    "browserRequests": 4,
+    "completed": 4,
+    "failed": 0,
+    "active": 0
+  },
+  "browserOutcomes": [
+    {
+      "requestId": "native_29673bec88e1db7d57752e2de0826a2d33c4e7dc0ad5e9677e63e61830627f54",
+      "status": "completed",
+      "conversationReused": false,
+      "verifiedModel": {
+        "model": "4 Argon",
+        "effort": "Low"
+      },
+      "responseType": "tool_call",
+      "toolName": "view_file",
+      "argumentKeys": [
+        "AbsolutePath",
+        "toolAction",
+        "toolSummary"
+      ],
+      "completedAt": "2026-10-15T18:32:03.340Z"
+    },
+    {
+      "requestId": "native_e10ffd548fa20e40c9dc11727175f60bd3b14df0ae320eb4ffc793ec766cdd01",
+      "status": "completed",
+      "conversationReused": true,
+      "verifiedModel": {
+        "model": "4 Argon",
+        "effort": "Low"
+      },
+      "responseType": "final",
+      "expectedSyntheticMarker": "NATIVE_FILE_READ_A_7C914E",
+      "completedAt": "2026-10-15T18:32:54.307Z"
+    },
+    {
+      "requestId": "native_676e8b7e0c8cc428f74d591554586c1467a07f2bd5cd61ecb08a66f7089215fb",
+      "status": "completed",
+      "conversationReused": true,
+      "verifiedModel": {
+        "model": "4 Argon",
+        "effort": "Low"
+      },
+      "responseType": "tool_call",
+      "toolName": "view_file",
+      "argumentKeys": [
+        "AbsolutePath",
+        "toolAction",
+        "toolSummary"
+      ],
+      "completedAt": "2026-10-15T18:35:50.615Z"
+    },
+    {
+      "requestId": "native_35c989134c5047259bd04205fb0c0098377b1de49957a9b4aebd96c0fc5b30e4",
+      "status": "completed",
+      "conversationReused": false,
+      "verifiedModel": {
+        "model": "4 Argon",
+        "effort": "Low"
+      },
+      "responseType": "final",
+      "expectedSyntheticMarker": "NATIVE_FILE_READ_B_85D2AF",
+      "completedAt": "2026-10-15T18:36:02.987Z"
+    }
+  ],
+  "browser": {
+    "state": "ready",
+    "activeRequestId": null,
+    "retainedConversations": 2
+  },
+  "limitations": [
+    "Only synthetic local text files were read through native view_file",
+    "No native file edit or shell-command acceptance in this run",
+    "Second tool call reused the retained context; its final response required a fresh full-context binding",
+    "No automatic replay of the user's failed request",
+    "No prompt, tool payload, account credential, cookie or control token stored in this artifact"
+  ]
+}

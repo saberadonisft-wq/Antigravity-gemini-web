@@ -1,0 +1,49 @@
+{
+  "checkedAt": "2026-10-18T10:33:40.602Z",
+  "runtimeRevision": 33,
+  "status": "PASS_REAL_PROCESS_CLI_ELECTRON_TTL_FIXTURE",
+  "browser": "SYNTHETIC",
+  "ideExecutor": "NOT_TESTED",
+  "staleRevisionRejected": true,
+  "actualOwnerCrash": true,
+  "ownerPidChanged": true,
+  "staleOwnerRejected": true,
+  "disconnectedUiLocked": true,
+  "cliDidNotStartMissingOwner": true,
+  "baselineRequestId": "native_b1b48c9a1ffc1f371f622a7df604d8e8af4fd17aeed34067945b022231623ba4",
+  "retryAfterRestartNoSend": true,
+  "originalAccountReceiptAfterSelectionChange": true,
+  "expiredLogin": true,
+  "modelUnavailableNoSend": true,
+  "identityObservationExpired": true,
+  "ttl": {
+    "status": "PASS",
+    "elapsedMonotonicMs": 601435,
+    "elapsedWallMs": 601450,
+    "syntheticSends": 2,
+    "physicalCount": 1,
+    "allOwnersVerified": true,
+    "ownerAccountIds": [
+      "acc_ac35b6848eed4792"
+    ],
+    "resultsAvailable": [
+      false
+    ],
+    "replayAllowed": false
+  },
+  "cliCalls": 12,
+  "cliSource": "production_dist",
+  "cliTransport": "owned_loopback_redirect_test_preloader",
+  "nativeProcessesRestarted": true,
+  "realMcpService": true,
+  "store": "real_sqlite_wal",
+  "syntheticSends": 2,
+  "syntheticOpens": 2,
+  "realGoogleRequests": 0,
+  "scenarios": [
+    "login_required",
+    "ready",
+    "model_unavailable",
+    "ready"
+  ]
+}

@@ -10,6 +10,7 @@ import { IpcSecurityBridge } from "./ipc-bridge.js";
 import { focusLauncherWindow } from "./window-lifecycle.js";
 import { AcceptanceControls, AcceptanceBrowser } from "./acceptance-controls.js";
 import { configureElectronStorage } from "./electron-storage.js";
+import { NativeOwnerClient } from "./native-owner-client.js";
 
 protocol.registerSchemesAsPrivileged([{ scheme: "app", privileges: { standard: true, secure: true, supportFetchAPI: true } }]);
 const launcherRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -80,7 +81,30 @@ if (!app.requestSingleInstanceLock()) {
         return result.canceled ? null : result.filePath ?? null;
       },
     });
-    bridge = new IpcSecurityBridge({ backend: runtime, allowedOrigins: ["app://local"], trustedSender: sender => registered.has(sender.id) });
+    const nativeAccountSmoke=smoke&&process.env.AG_NATIVE_ACCOUNTS_SMOKE==="1";
+    const nativeKnowledgeSmoke=nativeAccountSmoke&&process.env.AG_NATIVE_KNOWLEDGE_SMOKE==="1";
+    const nativeRealChooser=nativeKnowledgeSmoke&&process.env.AG_NATIVE_KNOWLEDGE_REAL_CHOOSER==="1";
+    const smokeOwnerFile=nativeAccountSmoke?path.join(smokeSandbox!,"native-owner.json"):undefined;
+    const nativeAccounts=smokeOwnerFile?new NativeOwnerClient(smokeOwnerFile,JSON.parse(fs.readFileSync(smokeOwnerFile,"utf8")).endpoint):mode==="live"&&!smoke?new NativeOwnerClient():undefined;
+    let knowledgeDialogOpen=false;
+    bridge = new IpcSecurityBridge({ backend: runtime, nativeAccounts,nativeKnowledge:nativeAccounts,
+      onImportKnowledge:nativeAccounts?async intent=>{
+        if(knowledgeDialogOpen)throw {code:"BUSY"};knowledgeDialogOpen=true;
+        try{
+          const status=await nativeAccounts.getNativeKnowledge();
+          if(status.ownerId!==intent.expectedOwnerId)throw {code:"STALE_AUTHORITY"};
+          if(status.revision!==intent.expectedRevision)throw {code:"CONFIG_CONFLICT"};
+          if(!status.experimentalEnabled)throw {code:"SOURCE_EXPERIMENT_DISABLED"};
+          if(!status.canMutate)throw {code:"BUSY"};
+          // Test-only chooser grant; renderer never controls these filesystem paths.
+          const recordChooser=(type:string,count?:number)=>{if(nativeRealChooser)fs.appendFileSync(path.join(smokeSandbox!,"knowledge-real-chooser-events.jsonl"),JSON.stringify({type,count,at:new Date().toISOString()})+"\n",{mode:0o600});};
+          recordChooser("open");
+          const selected=nativeKnowledgeSmoke&&!nativeRealChooser?JSON.parse(fs.readFileSync(path.join(smokeSandbox!,"knowledge-dialog.json"),"utf8")):await dialog.showOpenDialog(window!,{title:(await runtime!.getSnapshot()).settings.language==="en"?"Select project reference files":"Chọn file tham chiếu dự án",properties:["openFile","multiSelections","dontAddToRecent"]});
+          recordChooser(selected.canceled?"cancel":"selected",selected.filePaths?.length??0);
+          if(selected.canceled||!selected.filePaths?.length)throw {code:"CANCELLED"};
+          return await nativeAccounts.importSelectedKnowledgeFiles(intent,selected.filePaths);
+        }finally{knowledgeDialogOpen=false;}
+      }:undefined,allowedOrigins: ["app://local"], trustedSender: sender => registered.has(sender.id) });
     ipcMain.on("launcher:preload-ready", (event, flags) => {
       try {
         bridge!.validateContext({ sender: event.sender, isMainFrame: !!event.senderFrame && event.senderFrame === event.sender.mainFrame, origin: event.senderFrame?.url ?? "" });
@@ -93,7 +117,7 @@ if (!app.requestSingleInstanceLock()) {
       origin: event.senderFrame?.url ?? "",
     }, ...args));
     window = new BrowserWindow({
-      width: 1280, height: 800, minWidth: 800, minHeight: 600, show: !smoke,
+      width: 1280, height: 800, minWidth: 800, minHeight: 600, show: !smoke||nativeRealChooser,
       webPreferences: { preload: path.join(launcherRoot, "dist/preload/index.cjs"), contextIsolation: true, nodeIntegration: false, sandbox: true, webSecurity: true, backgroundThrottling: false },
     });
     registered.add(window.webContents.id);
@@ -108,6 +132,19 @@ if (!app.requestSingleInstanceLock()) {
     content.on("destroyed", () => { registered.delete(content.id); bridge!.disposeSender(content.id); });
     const target = "app://local/index.html?mode=" + mode;
     await window.loadURL(target);
+    if(nativeAccountSmoke){
+      if(nativeRealChooser){
+        window.setTitle("Native Knowledge - Real Chooser Acceptance");
+        const { runNativeKnowledgeRealChooser }=await import("./native-knowledge-real-chooser.js");await runNativeKnowledgeRealChooser(window,smokeSandbox!);
+      }else if(nativeKnowledgeSmoke){
+        const { runNativeKnowledgeDesktop }=await import("./native-knowledge-desktop.js");await runNativeKnowledgeDesktop(window,runtime,smokeSandbox!);
+      }else if(process.env.AG_NATIVE_LIFECYCLE_SMOKE==="1"){
+        const { runNativeLifecycleDesktop }=await import("./native-lifecycle-desktop.js");await runNativeLifecycleDesktop(window,smokeSandbox!);
+      }else{
+        const { runNativeAccountsDesktop }=await import("./native-accounts-desktop.js");await runNativeAccountsDesktop(window,runtime,smokeSandbox!);
+      }
+      window.close();return;
+    }
     if (smoke) {
       const { runDesktopSmoke } = await import("./desktop-smoke.js");
       await runDesktopSmoke(window, runtime, bridge, () => preloadSecurity);

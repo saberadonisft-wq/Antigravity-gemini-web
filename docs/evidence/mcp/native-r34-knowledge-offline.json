@@ -1,0 +1,68 @@
+{
+  "checkedAt": "2026-10-18T11:29:33.216404+00:00",
+  "sourceNativeRevision": 34,
+  "sourceBrowserWorker": 23,
+  "status": "PASS_P6A_LOCAL_CLI_FIXTURE_P6_IN_PROGRESS",
+  "defaultKnowledgeExperimental": false,
+  "codeGraphPresent": false,
+  "tests": {
+    "native": {
+      "passed": 154,
+      "failed": 0,
+      "log": ".tmp/p6-r34-native-full.log"
+    },
+    "contracts": {
+      "passed": 10,
+      "failed": 0,
+      "log": ".tmp/p6-r34-contracts-full.log"
+    },
+    "launcher": {
+      "passed": 41,
+      "failed": 0,
+      "log": ".tmp/p6-r34-launcher-full.log"
+    }
+  },
+  "newKnowledgeCases": 21,
+  "workspaceBuild": "PASS .tmp/p6-r34-build.log",
+  "workspaceTypecheck": "PASS .tmp/p6-r34-typecheck.log",
+  "cliFixture": "docs/evidence/mcp/native-r34-knowledge-cli-fixture.json",
+  "mainOwnerObservation": {
+    "checkedAt": "2026-10-18T11:29:32.525Z",
+    "runtimeRevision": 29,
+    "active": 0,
+    "routingMode": "manual",
+    "contextModelSelection": {
+      "model": "3.8 Flash"
+    },
+    "browserControlInvoked": false,
+    "restarted": false
+  },
+  "realGooglePromptRequests": 0,
+  "realIdeExecutor": "NOT_TESTED",
+  "externalAdapters": "NOT_VERIFIED_METADATA_ONLY",
+  "launcherKnowledgeUi": "NOT_IMPLEMENTED",
+  "liveContext38ToPrimary": "AWAITING_USER_VERIFICATION",
+  "sourceSha256": {
+    "packages/contracts/src/knowledge.ts": "0cc77de69ec5715bb0e251c12e637cf0d4cdb13ad5d0e81ec4cc0a2b4886ffdb",
+    "packages/contracts/src/index.ts": "2adf8acd2dd1687b19e7257c7289479af747c842eb7b2130d57ea51fd58e21ae",
+    "packages/native-antigravity/src/knowledge-files.ts": "37d19a0ae8c93ec1a8ae1fe0e1f7f4ee92578f9f5522df8d66a247a295fe6c31",
+    "packages/native-antigravity/src/knowledge-registry.ts": "e8773ccb66e110986e8f7a6afcce508fc83a8e56cb98136253cac2bb84baa6c1",
+    "packages/native-antigravity/src/knowledge-registry.test.ts": "924f01836371169c48aa17da7ea80e2da7b800eab50b34adf6ae2a736027d219",
+    "packages/native-antigravity/src/knowledge-native.test.ts": "fc2214791d401953e6b6afe6a63392983b4be9b6420487450935ea89f62e0c70",
+    "packages/native-antigravity/src/native-proxy.ts": "b323655afbcc4ac57b4c2866c727c1ec8644ae2507a5450d2ceccb20c5485133",
+    "packages/native-antigravity/src/native-protocol.ts": "a224c5119ad292a8d28582d4bd3ab7a671e841123b46c33c80665efd5c290ac1",
+    "packages/native-antigravity/src/native-cli.ts": "54a96ddbfca56625730cc175cd156c0988ffbaed33a03990395e201132ed57df",
+    "packages/native-antigravity/src/conversation-state.ts": "da96145419ccf83add97beb74a7f5ce7138f0a46b7b8f90c45957a662683bbfa",
+    "tools/probes/native-knowledge-fixture.mjs": "28f342b8ae0dbb24d65edc323f501960dca6b59f95ea349148c43948669172e1",
+    "tools/probes/fixtures/native-lifecycle-owner.mjs": "02c0819b5735b37503be9fec18efb655589db4af8332915fea47dea74edb72a9",
+    "tools/probes/fixtures/native-cli-loopback.mjs": "b08710f95d3b8f579cd2e3b0e89fbdcc2dfb1718eda9fd2837115e10351fa7be",
+    "tools/probes/native-ledger-live-inspect.mjs": "83120bd7c4622eb3be29c3e20a434a32007b41661f24834e3baf2f782d4ae394",
+    "package.json": "e410f4b07e907ab30d9523003dba0aef81d63773ef23ce66ee13f81e623f08b0",
+    "README.md": "91e0f4ce0846f6f794fc13ea1026adf3bad4f494d65828c2c00d17a27fb4460b",
+    "docs/NATIVE_SETUP.md": "3df4567807533c7ef8f4bd44f58d62163104c03d7df662034770fb2ffa5afa62",
+    "docs/NATIVE_KNOWLEDGE.md": "a40c1509b14afac3874e2d463fc9d697dd772b39112e2b170e6efdf3dea07274",
+    "docs/NATIVE_UPGRADE_PLAN.md": "56feb890873753af0befb4e1c989fe3188874dd81a55607c792d6352d1ecd3cb",
+    "docs/adr/0011-native-project-knowledge.md": "f45b48998f5fd460868c53a4eb23f8bf93144b3c4f75784f3187336655184950",
+    "docs/evidence/g4-native-p6a-project-knowledge.md": "e762371c448614a506e4433376e5fc828c4ee4bc1d87f7a0253ff6e6d24afc5c"
+  }
+}

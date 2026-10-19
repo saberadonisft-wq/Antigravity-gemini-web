@@ -1,8 +1,8 @@
 # MCP cho Gemini Web và tác vụ IDE
 
-Cập nhật 15/10/2026. Người dùng chọn ưu tiên Gemini Web gọi công cụ của đúng tác vụ IDE như repo tham khảo. Google custom connector chưa nghiệm thu. Provider native mới đã PASS chat và view_file thật mà không cần connector này; xem [NATIVE_SETUP](NATIVE_SETUP.md). Đây là phần tiếp tục G4, chưa G5.
+Cập nhật 18/10/2026. Người dùng chọn ưu tiên Gemini Web gọi công cụ của đúng tác vụ IDE như repo tham khảo. Google custom connector chưa nghiệm thu. Provider native đã có bằng chứng chat và view_file thật ở các revision trước; xem [NATIVE_SETUP](NATIVE_SETUP.md) để biết giới hạn nghiệm thu hiện tại. Source mới có browser 7 + host 4 = 11 tools, gồm `gemini_release_conversation` và tra cứu metadata `gemini_receipt`. Các số 5/5, 9 tools bên dưới là snapshot discovery cũ. Worker fingerprint 22 bổ sung capture/restore model tạm cho context 3.8; status công bố `temporaryModelSelectionSupported`, `modelRestorePending` và chẩn đoán xác minh lưu lượng Google. Đây là phần tiếp tục G4, chưa G5.
 
-Phạm vi gateway: **chỉ kiểm tra local trước**. Sau build, chạy `npm run test:mcp` (25 tests: 8 baseline, 10 OAuth gateway, 2 client-routing, 3 shared-runtime và 2 native-browser regressions); chưa cần domain/tunnel hoặc Google custom app. [Hướng dẫn local](MCP_GATEWAY_SETUP.md), [runtime dùng chung](adr/0007-shared-mcp-runtime.md).
+Phạm vi gateway: **chỉ kiểm tra local trước**. Sau build, chạy `npm run test:mcp` để kiểm tra gateway, shared runtime, receipts/ledger, context model và retained/progress/cancellation; chưa cần domain/tunnel hoặc Google custom app. Số test của các báo cáo cũ là snapshot tại revision tương ứng. [Hướng dẫn local](MCP_GATEWAY_SETUP.md), [runtime dùng chung](adr/0007-shared-mcp-runtime.md).
 
 ## Hai server và ranh giới
 
@@ -17,6 +17,7 @@ Agent Antigravity của tác vụ
   │    ide_tool_inventory / ide_tool_call / ide_tool_result / ide_turn_complete
   └─ private stdio → gemini-web-browser
        gemini_status / gemini_open_browser / gemini_submit / gemini_result / gemini_cancel
+       gemini_release_conversation
 ```
 
 MCP HTTP chỉ nhận tool phía web; không cho phía web giả kết quả host hoặc tạo task. Công cụ native vẫn do agent IDE gọi với cơ chế approval hiện hành. Broker không tự đọc file, patch file hay chạy shell. Vì chưa có API gọi trực tiếp executor của task từ bên ngoài, adapter hiện là **host-agent pump**: agent IDE nhận yêu cầu từ broker rồi thực thi tool thật. Nó vẫn cần agent/model của IDE, chưa thay model native và chưa có cơ sở tuyên bố tiết kiệm quota IDE.
@@ -57,6 +58,8 @@ Gọi gemini_status. Chỉ báo trạng thái quan sát được; không tạo t
 ```
 
 Server không mở Chrome trong lúc khởi động hoặc khi gọi status. Gọi `gemini_open_browser` khi muốn mở browser. Profile đúng của launcher: `%USERPROFILE%\.gemini\antigravity-gemini-web-live\app_data\browser_profile`, CDP port `9223`. MCP clients và CLI dùng shared stdio có thể chia sẻ cùng runtime owner. Probe tự khởi tạo driver trực tiếp vẫn cần quyền sở hữu profile độc lập; không chạy driver thứ hai vào profile đang dùng hoặc sao chép cookie.
+
+Native provider runtime revision 4 chủ động gọi `gemini_open_browser` khi launch hoặc trước generation nếu browser chưa ready. Đây là hành động của native provider; `gemini_status` vẫn không tự mở browser. [Bằng chứng cold startup và phản hồi thật](evidence/g4-native-autostart-validation.md).
 
 ### Lỗi `owned by another process` / `initialize ... EOF`
 
@@ -100,3 +103,9 @@ Chỉ khi chuỗi này có trace native thật mới ghi native MCP E2E PASS. Te
 Rollback: xóa hai entries tương ứng trong cấu hình global và workspace, rồi refresh MCP. Bản global trước đăng ký được giữ trong file `mcp_config.json.backup-*` cùng thư mục. Không cần thay binary hoặc xóa dữ liệu browser.
 
 Nguồn: [repo tham khảo](https://github.com/miuuyy/codex-chatgpt-web/blob/main/docs/architecture.md), [Antigravity MCP](https://antigravity.google/docs/mcp), [MCP TypeScript SDK](https://ts.sdk.modelcontextprotocol.io/server).
+
+## Physical receipt metadata (source worker 18)
+
+Browser MCP source mới thêm `gemini_receipt` để đọc metadata bền vững mà không mở Chrome. Bộ browser tools mới có 7 công cụ; kết quả discovery 7/7 đã được kiểm thử qua stdio fixture, chưa phải xác nhận UI IDE hiện tại đã refresh worker mới. `gemini_receipt` không khôi phục model text và không cho phép replay.
+
+Worker 18 dùng SQLite tích hợp, yêu cầu Node 22.13+ trong nhánh 22.x hoặc Node 24+. Migration giữ tất cả receipt v1, backup byte gốc và marker khiến runtime cũ từ chối. Nâng cấp không coi restart là cách xóa receipt. [Chi tiết kiểm thử và ranh giới runtime](evidence/g4-native-p4-physical-ledger.md).

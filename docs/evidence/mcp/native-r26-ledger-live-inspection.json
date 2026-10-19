@@ -1,0 +1,22 @@
+{
+  "checkedAt": "2026-10-17T04:03:22.564Z",
+  "runtimeRevision": 26,
+  "pid": 1680,
+  "accountId": "acc_98a4b2ec14ee3d16",
+  "identityEpoch": 1,
+  "identityObservedAt": "2026-10-17T04:02:28.586Z",
+  "ledgerFormat": 2,
+  "legacyCount": 135,
+  "totalReceipts": 135,
+  "backupSha256": "0225b8df9d2fd45ac970584dbc32ecf59d57b34298dd75ca2b0dcdcbbdc6614b",
+  "matchesPriorCopy": true,
+  "allLegacyHashesAndPhasesPreserved": true,
+  "noLegacyOwnerInferred": true,
+  "journalMode": "wal",
+  "integrity": "ok",
+  "inspectionReadOnly": true,
+  "browserRequestsByProbe": 0,
+  "uploadExperimental": false,
+  "status": "PASS_LIVE_RECEIPT_MIGRATION_INSPECTION",
+  "boundary": "Real account verification and metadata migration only; no live native tool loop, failover or second-account acceptance."
+}

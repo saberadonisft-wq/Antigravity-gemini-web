@@ -28,7 +28,8 @@ try {
   if (/Unable to move the cache|Unable to create cache|Gpu Cache Creation failed/i.test(output)) {
     console.error(output); throw new Error("Chromium cache startup failed.");
   }
-  const evidence = path.resolve(root, "../../docs/evidence/g4-desktop-smoke");
+  const evidenceArgument=process.argv.find(argument=>argument.startsWith("--evidence="))?.slice("--evidence=".length);
+  const evidence = evidenceArgument?path.resolve(evidenceArgument):path.resolve(root, "../../docs/evidence/g4-desktop-smoke");
   fs.mkdirSync(evidence, { recursive: true });
   const lifecycle = JSON.parse(fs.readFileSync(path.join(temporary, "desktop-lifecycle.json"), "utf8"));
   if (!lifecycle.pendingClose || !lifecycle.noLateExport || lifecycle.subscriptionsAfterClose !== 0) throw new Error("Lifecycle evidence incomplete.");

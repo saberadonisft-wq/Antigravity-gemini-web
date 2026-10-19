@@ -1,0 +1,11 @@
+{
+  "checkedAt": "2026-10-18T07:11:08.874Z",
+  "kind": "SYNTHETIC_ISOLATED_CLOCK_OFFSET",
+  "offsetMs": 600001,
+  "receiptRetained": true,
+  "resultAvailable": false,
+  "resultStatus": "OUTCOME_UNKNOWN",
+  "syntheticSends": 1,
+  "realGoogleRequests": 0,
+  "status": "PASS_EXPIRED_READ_FENCE"
+}

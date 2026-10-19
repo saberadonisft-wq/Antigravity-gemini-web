@@ -1,0 +1,77 @@
+{
+  "checkedAt": "2026-10-18T05:32:56.770Z",
+  "runtimeRevision": 29,
+  "caller": "synthetic_loopback",
+  "browser": "real_Gemini_Web",
+  "ideExecutor": "NOT_TESTED",
+  "modelPolicy": "user_selected_in_web",
+  "contextModelSelection": {
+    "model": "3.8 Flash"
+  },
+  "transport": "text_and_fragments",
+  "sizes": [
+    {
+      "targetChars": 10000,
+      "turns": [
+        {
+          "stage": "tool",
+          "httpStatus": 502,
+          "elapsedMs": 11212,
+          "contextMode": "full",
+          "promptChars": 10000,
+          "fullPromptChars": 9922,
+          "phase": "failed",
+          "code": "MODEL_UNAVAILABLE",
+          "delivery": "not_sent",
+          "transportMessages": 2,
+          "trace": [
+            {
+              "messageIndex": 1,
+              "messageCount": 2,
+              "kind": "fragment",
+              "stage": "prepared",
+              "promptChars": 10609,
+              "promptBytes": 10621,
+              "promptSha256": "ef2b191e370e3ca3194040156b56f97a5c56cb058f51d9bed13a116d1b4d20d7",
+              "elapsedMs": 0,
+              "modelSelection": {
+                "model": "3.8 Flash"
+              }
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 2,
+              "kind": "fragment",
+              "stage": "failed",
+              "promptChars": 10609,
+              "promptBytes": 10621,
+              "promptSha256": "ef2b191e370e3ca3194040156b56f97a5c56cb058f51d9bed13a116d1b4d20d7",
+              "elapsedMs": 10986,
+              "modelSelection": {
+                "model": "3.8 Flash"
+              }
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 2,
+              "kind": "fragment",
+              "stage": "failed",
+              "promptChars": 10609,
+              "promptBytes": 10621,
+              "promptSha256": "ef2b191e370e3ca3194040156b56f97a5c56cb058f51d9bed13a116d1b4d20d7",
+              "elapsedMs": 10987,
+              "code": "MODEL_UNAVAILABLE",
+              "modelSelection": {
+                "model": "3.8 Flash"
+              }
+            }
+          ]
+        }
+      ],
+      "status": "FAILED",
+      "systemChars": 7098,
+      "error": "ERR_ASSERTION"
+    }
+  ],
+  "status": "FAILED_OR_INCOMPLETE"
+}

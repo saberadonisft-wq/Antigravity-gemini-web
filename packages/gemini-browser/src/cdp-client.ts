@@ -186,5 +186,40 @@ export class CdpClient {
       return null;
     }
   }
+
+  static async confirmTargetClosed(debugPort: number, targetId: string, budgetMs = 2500): Promise<void> {
+    const deadline = performance.now() + budgetMs;
+    while (performance.now() < deadline) {
+      const response = await fetch(`http://127.0.0.1:${debugPort}/json/list`, { signal: AbortSignal.timeout(Math.max(1, Math.floor(Math.min(1000, deadline - performance.now())))) });
+      if (!response.ok) throw Error("Browser closure could not be inspected.");
+      const targets = await response.json() as CdpTarget[];
+      if (Array.isArray(targets) && !targets.some(target => target.id === targetId)) return;
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    throw Error("Owned target did not close within its cleanup budget.");
+  }
+
+  /** Close one known owned page without depending on any other page staying open. */
+  static async closeOwnedTarget(debugPort: number, targetId: string, budgetMs = 5000): Promise<void> {
+    const deadline = performance.now() + budgetMs;
+    const remaining = () => {
+      const value = Math.floor(deadline - performance.now());
+      if (value < 1) throw Error("Owned target cleanup budget expired.");
+      return value;
+    };
+    const version = await fetch(`http://127.0.0.1:${debugPort}/json/version`, { signal: AbortSignal.timeout(Math.min(2000, remaining())) });
+    if (!version.ok) throw Error("Browser control endpoint is unavailable.");
+    const endpoint = new URL((await version.json() as { webSocketDebuggerUrl: string }).webSocketDebuggerUrl);
+    if (endpoint.protocol !== "ws:" || endpoint.hostname !== "127.0.0.1" || endpoint.port !== String(debugPort) || !endpoint.pathname.startsWith("/devtools/browser/") || endpoint.username || endpoint.password || endpoint.search || endpoint.hash) throw Error("Browser control endpoint is invalid.");
+    const control = new CdpClient(endpoint.href);
+    try {
+      await control.connect(Math.min(2000, remaining()));
+      const targets = await control.send<{ targetInfos: Array<{ targetId: string }> }>("Target.getTargets", {}, Math.min(2000, remaining()));
+      if (targets.targetInfos.some(target => target.targetId === targetId)) {
+        await control.send("Target.closeTarget", { targetId }, Math.min(2000, remaining()));
+      }
+      await CdpClient.confirmTargetClosed(debugPort, targetId, remaining());
+    } finally { control.close(); }
+  }
 }
 

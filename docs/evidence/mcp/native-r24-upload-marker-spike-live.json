@@ -1,0 +1,35 @@
+{
+  "checkedAt": "2026-10-16T14:54:28.745Z",
+  "nativeRuntimeRevision": 24,
+  "browserWorkerFingerprint": 16,
+  "caller": "exclusive_driver_spike",
+  "browser": "real_Gemini_Web",
+  "ideExecutor": "NOT_TESTED",
+  "nativeSnapshotToolLoop": "NOT_TESTED",
+  "accountId": "acc_98a4b2ec14ee3d16",
+  "modelSelection": "user_selected_in_web",
+  "modelObservation": "NOT_OBSERVED_BY_SELECTOR",
+  "ownedFreshTab": true,
+  "snapshot": {
+    "chars": 80102,
+    "utf8Bytes": 80114,
+    "sha256": "16629c56d786163a9b22da8eac1cd1c4ed1eb6e4bc46e560cbbcdb42fb7b46e5"
+  },
+  "attachmentReady": true,
+  "retrieval": {
+    "browserStatus": "completed",
+    "elapsedMs": 33515,
+    "responseChars": 127,
+    "responseSha256": "4177a349ba8c7c654895ea170eb82a338759f5733868bbcbbe12140d451df435",
+    "submission": {
+      "inputChars": 307,
+      "readbackVerified": true,
+      "sendClickAttempted": true,
+      "acceptanceObserved": true
+    },
+    "markersMatch": true
+  },
+  "localTemporaryFileRemoved": true,
+  "nativeRestored": true,
+  "status": "PASS_UPLOAD_MARKER_RETRIEVAL"
+}

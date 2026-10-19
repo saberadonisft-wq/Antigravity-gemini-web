@@ -1,0 +1,32 @@
+{
+  "checkedAt": "2026-10-16T12:38:51.231Z",
+  "runtimeRevision": 22,
+  "caller": "synthetic_loopback_client",
+  "browser": "real_Gemini_Web",
+  "ideExecutor": "NOT_TESTED",
+  "syntheticSystemChars": 75731,
+  "status": "FAILED",
+  "httpStatus": 200,
+  "elapsedMs": 12402,
+  "lastTurn": {
+    "requestId": "native_5693cc77bb0215ec5c26a5100f89c09fa22020c8240be4183193f611efa5d8a3",
+    "promptChars": 78642,
+    "fullPromptChars": 78564,
+    "reused": false,
+    "contextMode": "full",
+    "contextReason": "new_scope_or_restart",
+    "patchOperations": 0,
+    "savedPromptChars": 0,
+    "toolDescriptionCharsSaved": 0,
+    "existingConversationRebind": false,
+    "phase": "failed",
+    "transportMessages": 4,
+    "code": "CONTEXT_FRAGMENT_ACK_FAILED",
+    "delivery": "unknown",
+    "baseRetained": false,
+    "elapsedMs": 12392,
+    "firstTextMs": null,
+    "silentMs": 659
+  },
+  "error": "ASSERTION_FAILED"
+}

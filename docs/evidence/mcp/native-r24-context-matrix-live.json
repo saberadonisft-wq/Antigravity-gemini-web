@@ -1,0 +1,340 @@
+{
+  "checkedAt": "2026-10-16T14:35:31.198Z",
+  "runtimeRevision": 24,
+  "caller": "synthetic_loopback",
+  "browser": "real_Gemini_Web",
+  "ideExecutor": "NOT_TESTED",
+  "modelPolicy": "user_selected_in_web",
+  "sizes": [
+    {
+      "targetChars": 28000,
+      "turns": [
+        {
+          "stage": "tool",
+          "httpStatus": 502,
+          "elapsedMs": 20027,
+          "contextMode": "full",
+          "promptChars": 28000,
+          "fullPromptChars": 27922,
+          "phase": "failed",
+          "code": "SEND_NOT_CONSUMED",
+          "delivery": "unknown",
+          "transportMessages": 1,
+          "trace": [
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "text",
+              "stage": "prepared",
+              "promptChars": 28000,
+              "promptBytes": 28012,
+              "promptSha256": "ea7eb6ee15a5ca5475f3738c0339b1bd8059ed9c5ed4d40d7f60f3c8c5d6766f",
+              "elapsedMs": 0
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "text",
+              "stage": "failed",
+              "promptChars": 28000,
+              "promptBytes": 28012,
+              "promptSha256": "ea7eb6ee15a5ca5475f3738c0339b1bd8059ed9c5ed4d40d7f60f3c8c5d6766f",
+              "elapsedMs": 17820,
+              "submission": {
+                "inputChars": 28000,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": false
+              }
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 1,
+              "kind": "text",
+              "stage": "failed",
+              "promptChars": 28000,
+              "promptBytes": 28012,
+              "promptSha256": "ea7eb6ee15a5ca5475f3738c0339b1bd8059ed9c5ed4d40d7f60f3c8c5d6766f",
+              "elapsedMs": 17821,
+              "code": "SEND_NOT_CONSUMED"
+            }
+          ]
+        }
+      ],
+      "status": "FAILED",
+      "systemChars": 25098,
+      "error": "ERR_ASSERTION"
+    },
+    {
+      "targetChars": 78642,
+      "turns": [
+        {
+          "stage": "tool",
+          "httpStatus": 502,
+          "elapsedMs": 26580,
+          "contextMode": "full",
+          "promptChars": 78642,
+          "fullPromptChars": 78564,
+          "phase": "failed",
+          "code": "CONTEXT_FRAGMENT_ACK_FAILED",
+          "delivery": "unknown",
+          "transportMessages": 4,
+          "trace": [
+            {
+              "messageIndex": 1,
+              "messageCount": 4,
+              "kind": "fragment",
+              "stage": "prepared",
+              "promptChars": 27609,
+              "promptBytes": 27613,
+              "promptSha256": "e1f9b8017b5a1bf349df3ca917d625e902d13a1187aa862816a8797756a0bd87",
+              "elapsedMs": 0
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 4,
+              "kind": "fragment",
+              "stage": "completed",
+              "promptChars": 27609,
+              "promptBytes": 27613,
+              "promptSha256": "e1f9b8017b5a1bf349df3ca917d625e902d13a1187aa862816a8797756a0bd87",
+              "elapsedMs": 21041,
+              "responseChars": 49,
+              "responseSha256": "596df7d2da32353d65aefde68349d0387b41c6a0d2ac26336fa182c05e2a128c",
+              "ackMatches": true,
+              "submission": {
+                "inputChars": 27609,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": true
+              }
+            },
+            {
+              "messageIndex": 2,
+              "messageCount": 4,
+              "kind": "fragment",
+              "stage": "prepared",
+              "promptChars": 27609,
+              "promptBytes": 27613,
+              "promptSha256": "8021b419280d4020e61f2070b93a36b8b9dd15a23d1c73cb5c06e151ff749bf5",
+              "elapsedMs": 0
+            },
+            {
+              "messageIndex": 2,
+              "messageCount": 4,
+              "kind": "fragment",
+              "stage": "completed",
+              "promptChars": 27609,
+              "promptBytes": 27613,
+              "promptSha256": "8021b419280d4020e61f2070b93a36b8b9dd15a23d1c73cb5c06e151ff749bf5",
+              "elapsedMs": 5389,
+              "responseChars": 69,
+              "responseSha256": "5236e7b23d92158c4984229c0d07367024d57dd81ec274a701a58d8d7f1bd010",
+              "ackMatches": false,
+              "submission": {
+                "inputChars": 27609,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": true
+              }
+            },
+            {
+              "messageIndex": 2,
+              "messageCount": 4,
+              "kind": "fragment",
+              "stage": "failed",
+              "promptChars": 27609,
+              "promptBytes": 27613,
+              "promptSha256": "8021b419280d4020e61f2070b93a36b8b9dd15a23d1c73cb5c06e151ff749bf5",
+              "elapsedMs": 5389,
+              "code": "CONTEXT_FRAGMENT_ACK_FAILED"
+            }
+          ]
+        }
+      ],
+      "status": "FAILED",
+      "systemChars": 75740,
+      "error": "ERR_ASSERTION"
+    },
+    {
+      "targetChars": 145000,
+      "turns": [
+        {
+          "stage": "tool",
+          "httpStatus": 502,
+          "elapsedMs": 34114,
+          "contextMode": "full",
+          "promptChars": 145000,
+          "fullPromptChars": 144922,
+          "phase": "failed",
+          "code": "SEND_NOT_CONSUMED",
+          "delivery": "unknown",
+          "transportMessages": 7,
+          "trace": [
+            {
+              "messageIndex": 1,
+              "messageCount": 7,
+              "kind": "fragment",
+              "stage": "prepared",
+              "promptChars": 27609,
+              "promptBytes": 27613,
+              "promptSha256": "0cb2ca0e23c1bfdec9cda88dce2572746e3a9bc9e3d0820d87e4a886484eb20a",
+              "elapsedMs": 0
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 7,
+              "kind": "fragment",
+              "stage": "completed",
+              "promptChars": 27609,
+              "promptBytes": 27613,
+              "promptSha256": "0cb2ca0e23c1bfdec9cda88dce2572746e3a9bc9e3d0820d87e4a886484eb20a",
+              "elapsedMs": 17993,
+              "responseChars": 49,
+              "responseSha256": "69bb1ddbeb788e235d91b8748255cea61a206ace5511c2a14b775617eb5b9ecd",
+              "ackMatches": true,
+              "submission": {
+                "inputChars": 27609,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": true
+              }
+            },
+            {
+              "messageIndex": 2,
+              "messageCount": 7,
+              "kind": "fragment",
+              "stage": "prepared",
+              "promptChars": 27609,
+              "promptBytes": 27609,
+              "promptSha256": "e0ce7a4f08d9c86779231e69d80927f4a3408b518506480dc46aefc9a4000d22",
+              "elapsedMs": 0
+            },
+            {
+              "messageIndex": 2,
+              "messageCount": 7,
+              "kind": "fragment",
+              "stage": "failed",
+              "promptChars": 27609,
+              "promptBytes": 27609,
+              "promptSha256": "e0ce7a4f08d9c86779231e69d80927f4a3408b518506480dc46aefc9a4000d22",
+              "elapsedMs": 15964,
+              "submission": {
+                "inputChars": 27609,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": false
+              }
+            },
+            {
+              "messageIndex": 2,
+              "messageCount": 7,
+              "kind": "fragment",
+              "stage": "failed",
+              "promptChars": 27609,
+              "promptBytes": 27609,
+              "promptSha256": "e0ce7a4f08d9c86779231e69d80927f4a3408b518506480dc46aefc9a4000d22",
+              "elapsedMs": 15964,
+              "code": "SEND_NOT_CONSUMED"
+            }
+          ]
+        }
+      ],
+      "status": "FAILED",
+      "systemChars": 142098,
+      "error": "ERR_ASSERTION"
+    },
+    {
+      "targetChars": 261000,
+      "turns": [
+        {
+          "stage": "tool",
+          "httpStatus": 502,
+          "elapsedMs": 37539,
+          "contextMode": "full",
+          "promptChars": 261000,
+          "fullPromptChars": 260922,
+          "phase": "failed",
+          "code": "CONTEXT_FRAGMENT_ACK_FAILED",
+          "delivery": "unknown",
+          "transportMessages": 11,
+          "trace": [
+            {
+              "messageIndex": 1,
+              "messageCount": 11,
+              "kind": "fragment",
+              "stage": "prepared",
+              "promptChars": 27610,
+              "promptBytes": 27614,
+              "promptSha256": "6832ef86cecba2c094355cff783666c1fae37b1e107533486e56328fea231118",
+              "elapsedMs": 0
+            },
+            {
+              "messageIndex": 1,
+              "messageCount": 11,
+              "kind": "fragment",
+              "stage": "completed",
+              "promptChars": 27610,
+              "promptBytes": 27614,
+              "promptSha256": "6832ef86cecba2c094355cff783666c1fae37b1e107533486e56328fea231118",
+              "elapsedMs": 20460,
+              "responseChars": 49,
+              "responseSha256": "bd2f28c80f7294fa296779d900a67e19151c53ed838ec35629c923b2a2225a60",
+              "ackMatches": true,
+              "submission": {
+                "inputChars": 27610,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": true
+              }
+            },
+            {
+              "messageIndex": 2,
+              "messageCount": 11,
+              "kind": "fragment",
+              "stage": "prepared",
+              "promptChars": 27610,
+              "promptBytes": 27610,
+              "promptSha256": "76dc2d562aedba695fc5945aaa24263b97a0847d8baded425e9913fc258eabdf",
+              "elapsedMs": 0
+            },
+            {
+              "messageIndex": 2,
+              "messageCount": 11,
+              "kind": "fragment",
+              "stage": "completed",
+              "promptChars": 27610,
+              "promptBytes": 27610,
+              "promptSha256": "76dc2d562aedba695fc5945aaa24263b97a0847d8baded425e9913fc258eabdf",
+              "elapsedMs": 16849,
+              "responseChars": 91,
+              "responseSha256": "7a07b9990c3925397f2fbff399148216aca225f1c8217c9bd635c7050eb551ee",
+              "ackMatches": false,
+              "submission": {
+                "inputChars": 27610,
+                "readbackVerified": true,
+                "sendClickAttempted": true,
+                "acceptanceObserved": true
+              }
+            },
+            {
+              "messageIndex": 2,
+              "messageCount": 11,
+              "kind": "fragment",
+              "stage": "failed",
+              "promptChars": 27610,
+              "promptBytes": 27610,
+              "promptSha256": "76dc2d562aedba695fc5945aaa24263b97a0847d8baded425e9913fc258eabdf",
+              "elapsedMs": 16849,
+              "code": "CONTEXT_FRAGMENT_ACK_FAILED"
+            }
+          ]
+        }
+      ],
+      "status": "FAILED",
+      "systemChars": 258098,
+      "error": "ERR_ASSERTION"
+    }
+  ],
+  "status": "FAILED_OR_INCOMPLETE"
+}

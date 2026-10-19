@@ -1,0 +1,59 @@
+{
+  "checkedAt": "2026-10-16T12:41:46.623Z",
+  "runtimeRevision": 22,
+  "caller": "synthetic_loopback_client",
+  "browser": "real_Gemini_Web",
+  "ideExecutor": "NOT_TESTED",
+  "status": "PASS_NATIVE_PROTOCOL_AND_REAL_BROWSER",
+  "turns": [
+    {
+      "httpStatus": 200,
+      "elapsedMs": 23736,
+      "frames": 1,
+      "functionCalls": 1,
+      "textChars": 0,
+      "lastTurn": {
+        "requestId": "native_e050454da93020c31ee1fae08e7c25dcadf015a6c09e1c0c6a314d6027ce7479",
+        "promptChars": 2725,
+        "fullPromptChars": 2647,
+        "reused": false,
+        "contextMode": "full",
+        "contextReason": "new_scope_or_restart",
+        "patchOperations": 0,
+        "savedPromptChars": 0,
+        "toolDescriptionCharsSaved": 16,
+        "existingConversationRebind": false,
+        "phase": "completed",
+        "transportMessages": 1,
+        "elapsedMs": 23694,
+        "firstTextMs": null,
+        "silentMs": 652
+      }
+    },
+    {
+      "httpStatus": 200,
+      "elapsedMs": 22431,
+      "frames": 2,
+      "functionCalls": 0,
+      "textChars": 33,
+      "lastTurn": {
+        "requestId": "native_6fc9e3991297fb815e80bf367928bca0e46d18f7169b5c641f7428ccb7b8e893",
+        "promptChars": 1142,
+        "fullPromptChars": 2977,
+        "reused": true,
+        "contextMode": "patch",
+        "contextReason": "existing_revision",
+        "patchOperations": 2,
+        "savedPromptChars": 1835,
+        "toolDescriptionCharsSaved": 16,
+        "existingConversationRebind": false,
+        "phase": "completed",
+        "transportMessages": 1,
+        "elapsedMs": 22417,
+        "firstTextMs": 20456,
+        "silentMs": 651
+      }
+    }
+  ],
+  "replyMatches": true
+}

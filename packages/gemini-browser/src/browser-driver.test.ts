@@ -6,7 +6,69 @@ import path from "node:path";
 import { removeFixtureProfile } from "./fixture-cleanup.js";
 import net from "node:net";
 import { GeminiDomFixtureServer } from "./fixture-server.js";
-import { LiveGeminiBrowserAdapter } from "./index.js";
+import { LiveGeminiBrowserAdapter, GeminiBrowserDriver } from "./index.js";
+import { createHash } from "node:crypto";
+
+test("Google traffic verification is an explicit user action without allowing the challenge origin for prompts", async () => {
+  const adapter = new LiveGeminiBrowserAdapter();
+  let url = "https://www.google.com/sorry/index?continue=PRIVATE_SYNTHETIC_QUERY";
+  Object.assign(adapter.driver, { cdp: { isConnected: true }, inspectDom: async () => ({ url, isAllowedSurface: false, accountState: "unknown", hasComposer: false }) });
+  const status = await adapter.checkStatus();
+  assert.equal(status.browserState, "needs_user_action"); assert.equal(status.error?.code, "BROWSER_USER_ACTION_REQUIRED");
+  assert.equal(status.error?.detail, "google_traffic_verification"); assert.ok(!JSON.stringify(status).includes("PRIVATE_SYNTHETIC_QUERY"));
+  assert.deepEqual(adapter.driver.allowedOrigins, []);
+  url = "https://www.google.com.evil.invalid/sorry/index";
+  assert.equal((await adapter.checkStatus()).browserState, "closed");
+});
+
+test("Strict profile identity rejects an occupied CDP port belonging to another profile without changing its tabs", { timeout: 20000 }, async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-driver-test-profile-"));
+  const fixture = new GeminiDomFixtureServer({ signedIn: true }); await fixture.start();
+  const port = await getFreePort(), options = { targetUrl: fixture.url, userDataDir: directory, debugPort: port, headless: true, fixtureMode: true, allowedOrigins: [fixture.url], requireProfileIdentity: true };
+  const owner = new GeminiBrowserDriver(options), wrong = new GeminiBrowserDriver({ ...options, userDataDir: directory + "-another" }), joining = new GeminiBrowserDriver(options);
+  t.after(async () => { try { await wrong.close(); await joining.close(); await owner.close(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
+  assert.equal(await owner.launchOrAttach(), true);
+  const loadedUntil = performance.now() + 5000;
+  while (performance.now() < loadedUntil) {
+    const dom = await owner.inspectDom();
+    if (dom.hasComposer && dom.accountState === "signed_in") break;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  assert.equal(await owner.waitForComposerReady(), true, JSON.stringify(await owner.inspectDom()));
+  await owner.cdp!.evaluate("document.querySelector('[contenteditable]').innerText = 'preserved draft'");
+  const targets = await owner.cdp!.send("Target.getTargets");
+  await assert.rejects(wrong.launchOrAttach(), /another or unverified browser profile/);
+  assert.equal(wrong.isConnected, false); assert.equal(wrong.isOwnedProcess, false);
+  assert.equal(await owner.cdp!.evaluate("document.querySelector('[contenteditable]').innerText"), "preserved draft");
+  const pageIds = (value: { targetInfos: Array<{ type: string; targetId: string }> }) => value.targetInfos.filter(target => target.type === "page").map(target => target.targetId).sort();
+  assert.deepEqual(pageIds(await owner.cdp!.send("Target.getTargets")), pageIds(targets));
+  assert.equal(await joining.launchOrAttach(), true); assert.equal(joining.isOwnedProcess, false);
+});
+
+test("An account changed after input is rejected before the actual Send click; a verified account can continue", { timeout: 20000 }, async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-driver-test-profile-"));
+  const fixture = new GeminiDomFixtureServer({ signedIn: true, streamDelayMs: 2 });
+  await fixture.start();
+  const live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
+  t.after(async () => { try { await live.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
+  assert.equal((await live.openBrowser()).opened, true);
+  const fingerprint = createHash("sha256").update("testuser@example.com").digest("hex");
+  const input = live.driver.inputPrompt.bind(live.driver);
+  live.driver.inputPrompt = async (text, check) => {
+    const result = await input(text, check);
+    await live.driver.cdp!.evaluate(`document.querySelector('[data-test-id="user-avatar"]').setAttribute('aria-label', 'Google Account: another@example.com')`);
+    return result;
+  };
+  await assert.rejects(live.submitPrompt("identity-before-send", "Synthetic identity probe", { expectedAccountFingerprint: fingerprint }), { code: "ACCOUNT_IDENTITY_CHANGED", delivery: "not_sent", submissionDiagnostic: { inputChars: "Synthetic identity probe".length, readbackVerified: true, sendClickAttempted: false, acceptanceObserved: false } });
+  assert.equal(await live.driver.cdp!.evaluate("document.querySelectorAll('.user-query').length"), 0);
+  assert.equal((await live.driver.inspectDom()).responseCount, 0);
+  live.driver.inputPrompt = input;
+  await live.driver.cdp!.evaluate(`document.querySelector('[data-test-id="user-avatar"]').setAttribute('aria-label', 'Google Account: testuser@example.com')`);
+  const accepted = await live.submitPrompt("identity-corrected", "Verified synthetic continuation", { expectedAccountFingerprint: fingerprint });
+  assert.deepEqual(accepted.submissionDiagnostic, { inputChars: "Verified synthetic continuation".length, readbackVerified: true, sendClickAttempted: true, acceptanceObserved: true });
+  assert.equal((await live.pollResponse("identity-corrected", { deadlineMs: 5000 })).status, "completed");
+  assert.equal(await live.driver.cdp!.evaluate("document.querySelectorAll('.user-query').length"), 1);
+});
 
 function getFreePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -18,6 +80,26 @@ function getFreePort(): Promise<number> {
     srv.on("error", reject);
   });
 }
+
+test("Composer readiness waits through a terminal response's editor transition and supports cancellation before Send", { timeout: 20000 }, async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-driver-test-profile-"));
+  const fixture = new GeminiDomFixtureServer({ signedIn: true, streamDelayMs: 2, composerReadyDelayMs: 1500 });
+  await fixture.start();
+  const live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
+  t.after(async () => { try { await live.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
+  assert.equal((await live.openBrowser()).opened, true);
+  await live.submitPrompt("ready-first", "first");
+  assert.equal((await live.pollResponse("ready-first", { deadlineMs: 5000 })).status, "completed");
+  assert.equal(await live.driver.cdp!.evaluate("document.querySelector('[contenteditable]').getAttribute('aria-busy')"), "true");
+  await live.submitPrompt("ready-second", "second");
+  assert.equal((await live.driver.inspectDom()).responseCount, 2);
+  assert.equal((await live.pollResponse("ready-second", { deadlineMs: 5000 })).status, "completed");
+  await live.driver.cdp!.evaluate("document.querySelector('[contenteditable]').setAttribute('aria-busy', 'true')");
+  let checks = 0;
+  await assert.rejects(live.driver.inputPrompt("must not be entered", () => { if (++checks >= 3) throw Error("cancel readiness"); }), /cancel readiness/);
+  assert.equal((await live.driver.inspectDom()).responseCount, 2);
+  assert.equal((await live.driver.inspectDom()).composerChars, 0);
+});
 
 
 test("Browser driver lifecycle on owned DOM fixture: 3 turns (text, markdown, code block), cancel, and cleanup", { timeout: 60000 }, async (t) => {
@@ -97,4 +179,92 @@ test("Browser driver lifecycle on owned DOM fixture: 3 turns (text, markdown, co
 
   const response4 = await adapter.pollResponse("turn-4", { deadlineMs: 3000 });
   assert.equal(response4.status, "cancelled");
+});
+
+test("Response completion waits past missing Stop and partial JSON for the newest answer's stable feedback row", { timeout: 25000 }, async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-driver-test-profile-"));
+  const fixture = new GeminiDomFixtureServer({ signedIn: true });
+  let live: LiveGeminiBrowserAdapter | undefined;
+  t.after(async () => { try { await live?.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
+  await fixture.start();
+  live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
+  await live.openBrowser();
+  assert.equal((await live.checkStatus()).browserState, "ready");
+  const cdp = live.driver.cdp!;
+  const partial = '{"nonce":"937bdcdd13038b8a3ba0e990705cdb4f';
+  const full = JSON.stringify({ nonce: "a".repeat(48), type: "tool_call", name: "view_file", args: { AbsolutePath: "D:/fixture.txt" } });
+  await cdp.evaluate(`(() => {
+    const history = document.getElementById('conversation');
+    history.innerHTML = '<div class="model-response"><div class="model-response-text">old answer</div><button aria-label="Good response">old feedback</button></div><div class="model-response" id="current-answer"><div class="model-response-text"><pre><code></code></pre><button aria-label="Copy code">Copy</button></div><div id="completion-row" style="display:none"><button aria-label="localized feedback"><mat-icon fonticon="thumb_up"></mat-icon></button></div></div>';
+    document.querySelector('#current-answer code').textContent = ${JSON.stringify(partial)};
+  })()`);
+  const initial = await live.driver.inspectDom();
+  assert.equal(initial.responseCount, 2);
+  assert.equal(initial.isGenerating, false);
+  assert.equal(initial.hasResponseCompletion, false, "Previous feedback, Copy and hidden action rows cannot complete this answer.");
+  let settled = false;
+  const polling = live.driver.pollForResponse(1, 5000).then(result => { settled = true; return result; });
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  assert.equal(settled, false, "Even stable partial JSON with no Stop button must remain pending.");
+  await cdp.evaluate(`(() => {
+    const stop = document.createElement('button'); stop.id = 'localized-stop'; stop.setAttribute('aria-label', 'Dừng câu trả lời'); stop.textContent = 'Stop'; document.body.appendChild(stop);
+    document.querySelector('#current-answer code').textContent = ${JSON.stringify(full)};
+    document.getElementById('completion-row').style.display = 'block';
+  })()`);
+  assert.equal((await live.driver.inspectDom()).isGenerating, true, "A visible localized Stop is detected even after a hidden Stop match.");
+  await new Promise(resolve => setTimeout(resolve, 800));
+  assert.equal(settled, false, "Feedback cannot finish an answer while generation is active.");
+  await cdp.evaluate("document.getElementById('localized-stop').remove()");
+  const result = await polling;
+  assert.equal(result.completed, true);
+  assert.deepEqual(result.codeBlocks, [full]);
+  assert.equal(JSON.parse(result.codeBlocks![0]).type, "tool_call");
+  await cdp.evaluate("document.getElementById('completion-row').style.display = 'none'");
+  assert.equal((await live.driver.pollForResponse(1, 350)).completed, false, "A missing terminal marker times out without claiming completion.");
+});
+
+test("Trusted editor input updates the editor model exactly and blocks Send after asynchronous clipping", { timeout: 25000 }, async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-driver-test-profile-"));
+  const fixture = new GeminiDomFixtureServer({ signedIn: true });
+  let live: LiveGeminiBrowserAdapter | undefined;
+  t.after(async () => { try { await live?.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
+  await fixture.start();
+  live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
+  await live.openBrowser(); assert.equal((await live.checkStatus()).browserState, "ready");
+  const cdp = live.driver.cdp!;
+  await cdp.evaluate(`(() => {
+    const editor = document.getElementById('composerInput');
+    editor.addEventListener('input', event => { if (event.isTrusted) window.fixtureEditorModel = editor.innerText; });
+    document.getElementById('sendBtn').addEventListener('click', event => { if (!event.isTrusted) event.stopImmediatePropagation(); }, true);
+  })()`);
+  const text = '<native_context_json>\n' + JSON.stringify({ text: "Fixture tiếng Việt 😀 ".repeat(900), tools: ["verify_context"] }) + '\n</native_context_json>';
+  assert.equal(await live.driver.inputPrompt(text), true);
+  assert.equal(await cdp.evaluate("window.fixtureEditorModel"), text);
+  await live.submitPrompt("trusted-click-fixture", "Trusted input and click required");
+  assert.equal((await live.pollResponse("trusted-click-fixture", { deadlineMs: 5000 })).status, "completed");
+  await cdp.evaluate(`document.getElementById('composerInput').addEventListener('input', () => setTimeout(() => { document.getElementById('composerInput').innerText = 'CLIPPED'; }, 0))`);
+  await assert.rejects(live.submitPrompt("clipped-fixture", text), { code: "INPUT_FAILED" });
+  assert.equal(await cdp.evaluate("document.querySelectorAll('.user-query').length"), 1);
+  assert.equal((await live.driver.inspectDom()).responseCount, 1);
+});
+
+test("A virtualized answer count still acknowledges Send and polls the new response by identity", { timeout: 20000 }, async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-driver-test-profile-"));
+  const fixture = new GeminiDomFixtureServer({ signedIn: true, streamDelayMs: 10 });
+  let live: LiveGeminiBrowserAdapter | undefined;
+  t.after(async () => { try { await live?.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
+  await fixture.start();
+  live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
+  await live.openBrowser(); assert.equal((await live.checkStatus()).browserState, "ready");
+  await live.driver.cdp!.evaluate(`(() => {
+    document.getElementById('conversation').innerHTML = '<div class="model-response" id="old-answer"><div class="model-response-text">OLD ANSWER</div><button aria-label="Good response">Feedback</button></div>';
+    document.getElementById('sendBtn').addEventListener('click', () => document.getElementById('old-answer').remove(), { capture: true, once: true });
+    const stop = document.getElementById('stopBtn'); stop.className = ''; stop.setAttribute('aria-label', 'Unknown localized control'); stop.style.display = 'none';
+  })()`);
+  assert.equal((await live.driver.inspectDom()).responseCount, 1);
+  await live.submitPrompt("virtualized-fixture", "Synthetic next turn");
+  const result = await live.pollResponse("virtualized-fixture", { deadlineMs: 5000 });
+  assert.equal(result.status, "completed");
+  assert.ok(result.text.includes("Turn 1 text response"));
+  assert.equal((await live.driver.inspectDom()).responseCount, 1);
 });

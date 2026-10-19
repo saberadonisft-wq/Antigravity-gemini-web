@@ -1,5 +1,27 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { NativeRoutingSettingsSchema } from "./routing.js";
+import { NativeManagementRequestSchema } from "./native-management.js";
+
+test("Native account controls require current owner/revision and cannot accept paths or broad URLs",()=>{
+  const authority={expectedOwnerId:"2ecf209e-6dfa-4f05-9099-edc4252d7cca",expectedRevision:3};
+  assert.ok(NativeManagementRequestSchema.safeParse({action:"status"}).success);
+  assert.ok(NativeManagementRequestSchema.safeParse({action:"add",displayName:"Secondary",...authority}).success);
+  for(const value of [{action:"add",displayName:"Secondary"},{action:"add",displayName:"Secondary",profilePath:"C:/caller",...authority},{action:"use",accountId:"acc_fixture",...authority,expectedOwnerId:"old"},{action:"resume",url:"https://gemini.google.com/app/owned?query=1",...authority},{action:"resume",url:"https://other.invalid/app/owned",...authority},{action:"unbind",taskScope:"a".repeat(64),...authority}])assert.equal(NativeManagementRequestSchema.safeParse(value).success,false);
+});
+
+test("Failover is opt-in, requires a fixed automatic policy and has finite attempt/time bounds",()=>{
+  assert.equal(NativeRoutingSettingsSchema.parse({}).failover,undefined);
+  const enabled=NativeRoutingSettingsSchema.parse({mode:"priority",modelSelection:{model:"Fixture"},failover:{enabled:true}});
+  assert.equal(enabled.failover?.maxAttempts,2);assert.equal(enabled.failover?.deadlineMs,60000);
+  for(const settings of [
+    {mode:"manual",failover:{enabled:true}},
+    {mode:"priority",failover:{enabled:true}},
+    {mode:"priority",modelSelection:{model:"Fixture"},failover:{enabled:true,maxAttempts:5}},
+    {mode:"priority",modelSelection:{model:"Fixture"},failover:{enabled:true,deadlineMs:120001}},
+    {mode:"priority",modelSelection:{model:"Fixture"},failover:{enabled:true,automaticQuotaGuess:true}},
+  ])assert.equal(NativeRoutingSettingsSchema.safeParse(settings).success,false);
+});
 import {
   SCHEMA_VERSION,
   ControlCommandSchema,

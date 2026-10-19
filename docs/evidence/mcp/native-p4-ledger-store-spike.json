@@ -1,0 +1,36 @@
+{
+  "checkedAt": "2026-10-16T15:31:42.268Z",
+  "platform": "win32",
+  "node": "24.18.0",
+  "sqliteVersion": "3.53.1",
+  "syntheticOnly": true,
+  "browserRequests": 0,
+  "count": 512,
+  "sqlite": {
+    "mode": "WAL",
+    "synchronous": "FULL",
+    "threePhaseWriteMs": 179,
+    "lookupAllMs": 1
+  },
+  "indexedAppendLog": {
+    "fsyncPerPhase": true,
+    "threePhaseWriteMs": 400,
+    "lookupAllMs": 363,
+    "files": 512
+  },
+  "crashes": [
+    {
+      "barrier": "before_commit",
+      "recoveredReceipt": false,
+      "integrity": "ok"
+    },
+    {
+      "barrier": "after_commit",
+      "recoveredReceipt": true,
+      "integrity": "ok"
+    }
+  ],
+  "choice": "sqlite_wal",
+  "status": "PASS_WINDOWS_STORE_SPIKE",
+  "boundary": "Process termination recovery, not power-loss or filesystem hardware failure."
+}

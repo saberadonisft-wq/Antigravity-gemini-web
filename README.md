@@ -2,9 +2,13 @@
 
 Dự án nghiên cứu và tích hợp Gemini Web làm nguồn suy luận trong chat native của Antigravity IDE, bảo toàn luồng executor và quyền công cụ của IDE.
 
-**Trạng thái hiện tại (15/10/2026):** đã triển khai native provider cho **Antigravity IDE 2.5.5** bằng proxy loopback và profile riêng. **Chat native → Gemini Web thật → trả lời**, cùng **native view_file → kết quả → Gemini trả lời đúng bytes file**, đã PASS. [Chạy bản native](docs/NATIVE_SETUP.md). Sửa file/chạy test, cancellation và compaction native có phạm vi nghiệm thu riêng.
+**Trạng thái hiện tại (16/10/2026):** đã triển khai native provider cho **Antigravity IDE 2.5.5** bằng proxy loopback và profile riêng. **Chat native → Gemini Web thật → trả lời**, cùng **native view_file → kết quả → Gemini trả lời đúng bytes file**, đã PASS. [Chạy bản native](docs/NATIVE_SETUP.md). Chat tiếp nối và nút Cancel đã kiểm chứng trực tiếp trên native UI; sửa file/chạy test và compaction native có phạm vi nghiệm thu riêng.
 
-**Độ trễ còn cần khắc phục:** lượt người dùng gửi “alo” sau đó đã TIMEOUT ở browser adapter với 0 ký tự phản hồi. Bản này vẫn gửi đầy đủ context vào chat mới mỗi generation và chờ output hoàn tất; chưa có giữ phiên/delta, stream native hoặc chọn model/effort Web tự động. [Ghi nhận sự cố](docs/evidence/mcp/native-latency-incident.json). Các ca PASS ở trên không chứng nhận độ ổn định hoặc hiệu năng tổng quát.
+**Bản native revision 12:** build monorepo đã PASS. Proxy lưu metadata riêng tư để khởi động lại rồi gắn lại đúng tab; lượt đầu sau khôi phục gửi full snapshot, sau đó tiếp tục append/patch. Một số mô tả tool chuẩn được rút gọn trong prompt, còn schema đầy đủ vẫn validate local. Batch tool chỉ bật tường minh qua `AG_NATIVE_BATCH_TOOL_CALLS=1`, giới hạn ở đọc `view_file`. Soft resync chỉ giữ base khi có bằng chứng lỗi xảy ra trước Send. Test suite chưa chạy lại cho revision 12 và các thay đổi chưa nghiệm thu live; giữ **4 Argon / Low** theo cấu hình.
+
+**Bằng chứng trước revision 12:** 226/226 tests local PASS trên snapshot trước các thay đổi mới. Native chat, đọc file, stream/cancel, resume URL và tối ưu delta có các giới hạn nghiệm thu được ghi tại [NATIVE_SETUP](docs/NATIVE_SETUP.md). Bộ sửa file/chạy lệnh G4-B chưa nghiệm thu; script fixture mới có `prepare`/`verify` để người dùng đối chiếu receipt IDE, file thật và kết quả checker. Revision 12 build sạch nhưng chưa chạy test suite, không có bằng chứng live mới và không được xem là G4-B PASS.
+
+**Native đọc file:** revision 8 đã PASS hai vòng `view_file` → functionResponse → final trên IDE/Gemini Web thật, gồm lượt tiếp nối sau khi đóng tab Gemini ban đầu. IDE hiển thị đúng hai marker chỉ có trong file và receipt native tương ứng; 4 browser requests completed, 0 failed. [Bằng chứng](docs/evidence/g4-native-retained-tab-validation.md). Sửa file/chạy lệnh vẫn chưa nghiệm thu trong lần này.
 
 **MCP:** đã có browser MCP, host-task broker, reverse HTTP MCP và **OAuth gateway kiểm chứng local** (DCR, owner consent, PKCE, refresh/revoke). **3 lượt browser chat Google thật qua MCP PASS**. Chưa deploy HTTPS public hoặc nối reverse connector với Gemini thật. [Cài MCP](docs/MCP_SETUP.md), [chạy gateway](docs/MCP_GATEWAY_SETUP.md). Host-agent pump vẫn cần agent IDE; native provider mới là đường riêng, không phụ thuộc Google reverse connector.
 
@@ -23,7 +27,7 @@ Sau cài lại IDE, đã bật/đăng ký lại và xác nhận trực tiếp tr
   - **Launch Hook (`machineLanguageServerBinaryPath`):** **PASS**. Prototype `antigravity_shim.exe` (C# .NET 4.8) khởi chạy thành công trong Antigravity IDE v1.107.0 (profile cô lập): IDE (PID 10168) → `antigravity_shim.exe` (PID 4716) → `language_server_windows_x64.exe` (PID 19824). Chuyển tiếp 100% tham số, quản lý lifecycle bằng Windows Job Object và xử lý Win32 broken pipe.
   - **Standalone/shim inference, snapshot G2/G3:** **UNRESOLVED / NOT_TESTED**. Probes khi đó chưa phát hiện listening port và chưa RPC. Provider mới dùng endpoint Cloud Code của IDE đã vượt qua chat/read-file acceptance; xem [hướng dẫn native](docs/NATIVE_SETUP.md).
 - **G2-C / G3-B (Cổng Trình duyệt Gemini Web):**
-  - **Browser package:** **24/24 tests PASS**, gồm fresh-tab isolation, cây tiến trình Windows thật và các regression trước. Có reservation trước await, coalesced submit/poll/cancel, terminal bất biến, cleanup epoch, outcome unknown không resend và surface allowlist. Fixture acceptance độc lập với Google live.
+  - **Browser package:** Có fresh-tab isolation, retained target, verified model/effort, DOM progress, cancellation và cây tiến trình Windows thật. Reservation trước await, terminal bất biến, cleanup epoch, outcome unknown không resend và surface allowlist được giữ. Fixture acceptance độc lập với Google live.
   - **Live Gemini Web:** **PASS 3 browser turns qua MCP** trên profile launcher đã signed-in. Custom MCP app chiều Gemini gọi host vẫn NOT_OBSERVED/NOT_TESTED; xem [MCP validation](docs/evidence/g4-mcp-validation.md).
 - **Native live hiện tại:** chat và view_file roundtrip PASS. Ma trận sửa file/chạy test/cancel chưa hoàn tất; Google reverse connector vẫn chưa kết nối nhưng không chặn provider native mới. Chưa G5.
 
@@ -31,7 +35,7 @@ Sau cài lại IDE, đã bật/đăng ký lại và xác nhận trực tiếp tr
 
 ## 1. Cấu trúc Monorepo
 
-Dự án sử dụng npm workspaces (`Node.js >= 22`, `npm >= 10`):
+Dự án sử dụng npm workspaces (`Node.js 22.13+ (22.x) hoặc 24+`, `npm >= 10`):
 
 - [`packages/contracts`](packages/contracts): Nguồn chuẩn duy nhất định nghĩa Zod schemas, TypeScript types, discriminated unions cho command/ack/events, và interface `LauncherClient` (v0.1).
 - [`packages/runtime`](packages/runtime): Runtime control thử nghiệm, client/resync, `RuntimeFacade`, và G3 context/journal/session coordinator. Coordinator gọi preflight/journal; native chat orchestration chưa có. Live snapshot loại bỏ metadata mô phỏng và chặn commands chưa có provider.
@@ -132,3 +136,29 @@ Demo thuần browser: `npm run dev --workspace=@antigravity-gemini-web/launcher`
   - [ADR 0001: Hợp đồng UI-Runtime v0.1 và Fake Runtime](docs/adr/0001-g1-contracts-and-fake-runtime.md)
 
 Repo tham khảo: [miuuyy/codex-chatgpt-web](https://github.com/miuuyy/codex-chatgpt-web) (snapshot `889f291d06339400a8b9c2941473f65cd47d4830`). Tái sử dụng mã phải giữ attribution/license tương ứng.
+
+
+
+cd D:\Antigravity-gemini-web
+npm run native:launch
+
+
+Multi-account native (từ revision 23; source hiện revision 36 / browser worker 23): mở và đăng nhập từng profile bằng `npm run native -- account:browser "Tên account"`, rồi chạy `npm run native -- account:verify "Tên account"` trước khi dùng. Chọn account bằng `account:use`; xem [hướng dẫn native](docs/NATIVE_SETUP.md) và [trạng thái nghiệm thu P1/P2](docs/evidence/g4-native-p1-p2-safety-validation.md). Hai tài khoản thật và executor IDE vẫn cần nghiệm thu riêng.
+
+Theo yêu cầu ngày 18/10, CLI mặc định dùng **3.8 Flash chỉ để nạp context ban đầu**, rồi khôi phục model/Thinking level chính trước COMMIT. Các lượt patch tiếp theo dùng model chính. Có thể tắt bước tách model bằng `$env:AG_NATIVE_CONTEXT_MODEL = 'off'` trước khi khởi động proxy. [Chi tiết và giới hạn nghiệm thu](docs/evidence/g4-native-context-bootstrap-model.md): menu Web đã pass chọn/khôi phục không Send; luồng native mới chưa pass live vì còn lỗi capture và sau đó Google yêu cầu xác minh lưu lượng. Runtime đang chạy revision 29; bản sửa context revision 30 (có trong source 36) chưa nạp trong lúc chờ người dùng xác minh.
+
+P3 upload snapshot vẫn thử nghiệm, mặc định tắt. Revision 28 đã pass đủ ba bước native ở 145k và 261k; 78k follow-up và 28k cold startup còn lỗi nên chưa đạt gate 10 vòng. Xem [báo cáo P3 cùng các mẫu pass/fail](docs/evidence/g4-native-p3-context-transport-spike.md).
+
+Source 32 thêm mục **Tài khoản Web** trong launcher: thêm profile, mở đăng nhập, kiểm tra danh tính, chọn/tạm ngưng tài khoản, theo dõi lượt đang chạy, hủy và đánh dấu nối hội thoại. Thao tác đi qua native owner API; launcher không tạo pool riêng. [P5 và giới hạn nghiệm thu](docs/evidence/g4-native-p5-account-management.md). Runtime 29 đang giữ cửa sổ Google xác minh nên chưa nạp UI/API mới.
+
+P4 đã có store physical receipt SQLite và tra cứu sau restart trong source mới; 2.100 lượt fixture cùng migration toàn bộ 2.048 receipt cũ đã pass. Ngày 17/10 runtime revision 27 / worker 19 đã verify Default Account và giữ đủ ledger thật 135 receipt; kiểm tra read-only pass, không gửi prompt. Live vẫn manual; các mode tự động chỉ có sau cờ thử nghiệm, source 31 đã có failover hữu hạn chỉ khi có bằng chứng chưa Send, mặc định tắt; HTTP + MCP + SQLite fixture đã pass, chưa nghiệm thu hai account Web thật. [Bằng chứng failover](docs/evidence/g4-native-p4-failover.md). [Trạng thái router](docs/evidence/g4-native-p4-routing.md). Xem [bằng chứng và phần P4 còn lại](docs/evidence/g4-native-p4-physical-ledger.md).
+
+Khôi phục account, binding, receipt, model restoration và rollback bằng cấu hình: [Native recovery runbook](docs/NATIVE_RECOVERY_RUNBOOK.md). Source 33 thu hồi cache hết TTL cả ở đường đọc; việc hết kết quả RAM không xóa fence hoặc cho phép Send lại. Runtime đang giữ cửa sổ Google vẫn chưa reload.
+
+Source 35 có **Nguồn dự án** trong launcher và CLI, mặc định tắt. Import file qua chooser của main hoặc GitHub checkout local qua CLI, xem filenames/hash/commit/overlay, kiểm tra/refresh snapshot và gắn nguồn riêng theo chat/account/epoch. File stale bị loại; không đổi request ID để gửi lại. Electron/IPC/HTTP fixture và hồi quy desktop đã pass; browser và chooser grant giả lập, chưa phải Web/IDE thật. [Hướng dẫn](docs/NATIVE_KNOWLEDGE.md), [báo cáo và ảnh UI](docs/evidence/g4-native-p6b-project-knowledge-ui.md). Gem/Notebook/Drive/GitHub Web vẫn chỉ đăng ký metadata chưa xác minh; P6 còn các adapter Web và gate chất lượng/live.
+
+Source 36 sửa cleanup của backend gắn account: release thành công bỏ ownership metadata, BUSY vào queue đúng owner và giữ yêu cầu preserve mạnh hơn. Thêm giới hạn metadata/cached worker handles, health `backendResources` và shutdown terminal. Probe pool tổng hợp 10.000 vòng đã có before/after; đây chưa phải soak RAM nhiều MCP/Chrome thật. [Bằng chứng P8a và các gate còn mở](docs/evidence/g4-native-p8a-pool-lifecycle.md).
+
+Checkpoint ngày 19/10: build/typecheck/lint và **406 test toàn workspace đã PASS**, cùng fixture CLI/MCP/SQLite và Electron. [Báo cáo kiểm thử, phạm vi commit và phần còn lại](docs/evidence/native-r36-commit-validation.md). Các gate Web/IDE thật, P6/P7 và độ bền P8 vẫn được giữ trong kế hoạch.
+
+Đợt source 33 đã chạy CLI/Electron với process crash/restart và TTL thật khoảng 601 giây, giữ đúng receipt/fence; browser trong bài thử được giả lập. [Kết quả và ranh giới](docs/evidence/g4-native-p5-lifecycle-cache-expiry.md).
