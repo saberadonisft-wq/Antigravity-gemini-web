@@ -300,6 +300,8 @@ Source 37 / worker 24 đã triển khai policy opt-in `8|16|off`, mặc định 
 
 P8e kiểm thử cold metadata backup/restore và module rollback **36 → 37 → crash → restore → 36 → 37** bằng baseline `4e28d7a` build độc lập. Native HTTP, MCP service và SQLite thật trong child fixture, browser giả lập; backup cũ/hỏng bị từ chối không đổi dữ liệu, WAL `accepted` sau crash và fence v2 còn nguyên, Resume tường minh chỉ gửi follow-up mới. Có 5 logical fence/4 physical receipt/4 Send tổng hợp, không trùng. [Báo cáo và giới hạn](evidence/g4-native-p8e-baseline-recovery.md). Chưa nghiệm thu rollback stdio/shared-owner/Chrome, crash giữa các bước restore nhiều thư mục, Windows restart hoặc production repair; các gate đó vẫn mở.
 
+P8f chạy lại **36 → 38 → crash → cold restore → 36 → 38** sau khi thêm dependency ZIP. Hai checkout có `npm ci` và full build độc lập, lockfile khác nhau được ghi riêng; probe từ chối compiled/source/installed-lock bị sửa và thư mục orphan mất `.git`. State fixture giữ đủ 5 logical fence/4 physical receipt, 4 Send tổng hợp và 0 trùng; mọi writer đã thoát. [Bằng chứng cho production commit `2804560`](evidence/g4-native-p8f-independent-lock-recovery.md). Đây vẫn là module/HTTP/MCP-service/SQLite fixture với browser giả lập; không đóng các gate runtime/browser/Windows/IDE còn mở phía trên.
+
 Phạm vi:
 
 - Chạy toàn bộ kiểm thử phù hợp với các package thay đổi, build/typecheck/lint; kiểm tra migration schema, backward compatibility và IPC/contracts drift.

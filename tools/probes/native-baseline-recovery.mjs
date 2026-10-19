@@ -7,19 +7,22 @@ import { fork, execFileSync } from "node:child_process";
 import { randomUUID, createHash } from "node:crypto";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { DatabaseSync } from "node:sqlite";
-import { NativeRequestLedger } from "../../packages/native-antigravity/dist/request-ledger.js";
-import { PhysicalReceiptStore } from "../../packages/mcp-server/dist/receipt-store.js";
-import { compileNativeTurn, WEB_MODEL, sha256 } from "../../packages/native-antigravity/dist/native-protocol.js";
+import { verifyRecoveryBuild } from "./native-recovery-build.mjs";
 
 const repo = fileURLToPath(new URL("../../", import.meta.url));
 const arg = (name, fallback) => process.argv.find(value => value.startsWith(name + "="))?.slice(name.length + 1) ?? fallback;
-const baseline = fs.realpathSync(arg("--baseline-dir", path.join(repo, ".tmp/p8-baseline-r36-a946b6c")));
-assert.equal(path.dirname(baseline).toLowerCase(), fs.realpathSync(path.join(repo, ".tmp")).toLowerCase());
-assert.match(path.basename(baseline), /^p8-baseline-r36-/);
-const baselineCommit = execFileSync("git", ["-C", baseline, "rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+assert.ok(arg("--baseline-dir") && arg("--current-dir"), "Prepare both isolated builds with native-recovery-build.mjs first");
+const baseline = fs.realpathSync(arg("--baseline-dir")), current = fs.realpathSync(arg("--current-dir"));
+assert.notEqual(baseline.toLowerCase(), current.toLowerCase());
+const baselineBuild = verifyRecoveryBuild(repo, baseline, "baseline"), currentBuild = verifyRecoveryBuild(repo, current, "current");
+const baselineCommit = baselineBuild.commit;
 assert.equal(baselineCommit.slice(0, 7), "4e28d7a");
-assert.equal(execFileSync("git", ["-C", baseline, "status", "--porcelain"], { encoding: "utf8" }).trim(), "");
-assert.equal(fs.realpathSync(path.join(baseline, "node_modules/@antigravity-gemini-web/contracts")).toLowerCase(), fs.realpathSync(path.join(baseline, "packages/contracts")).toLowerCase());
+assert.equal(currentBuild.commit, execFileSync("git", ["-C", repo, "rev-parse", "HEAD"], { encoding: "utf8" }).trim());
+const { NativeRequestLedger } = await import(pathToFileURL(path.join(current,"packages/native-antigravity/dist/request-ledger.js")));
+const { PhysicalReceiptStore } = await import(pathToFileURL(path.join(current,"packages/mcp-server/dist/receipt-store.js")));
+const { compileNativeTurn, WEB_MODEL, sha256 } = await import(pathToFileURL(path.join(current,"packages/native-antigravity/dist/native-protocol.js")));
+const { NATIVE_RUNTIME_REVISION: currentRevision } = await import(pathToFileURL(path.join(current,"packages/native-antigravity/dist/native-proxy.js")));
+assert.equal(currentRevision, currentBuild.runtimeRevision); assert.ok(currentRevision >= 38);
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "launcher-smoke-native-lifecycle-recovery-"));
 const fixtureSource = fs.readFileSync(path.join(repo, "tools/probes/fixtures/native-lifecycle-owner.mjs"), "utf8");
 const nativeHome = path.join(root, "home/.gemini/antigravity-gemini-web-live/app_data/native-route");
@@ -149,13 +152,12 @@ async function reconcile(owner, id) {
 }
 
 try {
-  assert.equal(digest(fs.readFileSync(path.join(baseline, "package-lock.json"))), digest(fs.readFileSync(path.join(repo, "package-lock.json"))), "Baseline/current dependency lockfiles differ");
   let owner = await start(baseline, 36);
   assert.equal((await native(owner, "baseline_A")).status, 200); assert.equal(sends(), 1);
   assert.throws(() => snapshot("live_writer_refused"), /metadata writer is still live/);
   assert.equal((await native(owner, "baseline_A")).status, 200); assert.equal(sends(), 1);
   await stop(owner); const old = snapshot("baseline_36"); assert.equal(verify(old).physical.length, 1);
-  owner = await start(repo, 37); await blocked(owner, "baseline_A");
+  owner = await start(current, currentRevision); await blocked(owner, "baseline_A");
   assert.equal((await native(owner, "upgrade_B")).status, 200); assert.equal(sends(), 2); await stop(owner);
   const accounts = JSON.parse(fs.readFileSync(path.join(nativeHome, "accounts.json"), "utf8")).accounts;
   const ledger = new NativeRequestLedger(path.join(nativeHome, "native-turn-ledger"));
@@ -164,18 +166,18 @@ try {
   ledger.notSent(v2, { delivery: "not_sent", code: "MODEL_UNAVAILABLE", phase: "checkpoint", observedAt: new Date().toISOString() });
   v2 = ledger.nextAttempt(v2, accounts[1].accountId, accounts[1].identityEpoch); ledger.unknown(v2);
   const v2bytes = fs.readFileSync(path.join(nativeHome, "native-turn-ledger", v2id.slice(7, 9), v2id + ".json"));
-  const latest = snapshot("upgraded_37"); assert.equal(verify(latest).logical.length, 3);
+  const latest = snapshot("upgraded_" + currentRevision); assert.equal(verify(latest).logical.length, 3);
   const beforeReject = liveInventory(); assert.throws(() => restore(old), /RESTORE_WOULD_DROP_OR_REWIND_METADATA/); assert.deepEqual(liveInventory(), beforeReject);
   const corrupt = owned(path.join(root, "snapshots/corrupt")); fs.cpSync(latest, corrupt, { recursive: true });
   const corruptFile = Object.keys(JSON.parse(fs.readFileSync(path.join(corrupt, "manifest.json"), "utf8")).hashes.native).find(name => name.startsWith("native-turn-ledger/"));
   fs.appendFileSync(path.join(corrupt, "native", corruptFile), "corruption");
   assert.throws(() => restore(corrupt), /BACKUP_CHECKSUM_MISMATCH/); assert.deepEqual(liveInventory(), beforeReject);
-  owner = await start(repo, 37, true);
+  owner = await start(current, currentRevision, true);
   const uncertain = native(owner, "crash_C").then(() => "unexpected_response", () => "connection_lost");
   const barrierDeadline = performance.now() + 10000;
   while (!events().some(event => event.type === "synthetic_response_barrier")) { assert.ok(performance.now() < barrierDeadline, "Accepted-response crash barrier deadline"); await new Promise(resolve => setTimeout(resolve, 10)); }
   assert.equal(sends(), 3); await stop(owner, true); assert.equal(await uncertain, "connection_lost");
-  const crash = snapshot("crashed_37_with_wal");
+  const crash = snapshot("crashed_" + currentRevision + "_with_wal");
   const walFiles = Object.keys(JSON.parse(fs.readFileSync(path.join(crash, "manifest.json"), "utf8")).hashes.mcp).filter(name => name.endsWith(".sqlite-wal"));
   assert.ok(walFiles.length && walFiles.some(name => fs.statSync(path.join(crash, "mcp", name)).size > 0));
   const recovered = restore(crash); assert.equal(recovered.physical.length, 3); assert.equal(recovered.logical.length, 4);
@@ -189,17 +191,18 @@ try {
   const resume = await fetch(owner.endpoint + "/__native/resume", { method: "POST", headers: { "x-native-control-token": owner.controlToken, "content-type": "application/json" }, body: JSON.stringify({ url: "https://gemini.google.com/app/synthetic_recovery_stopped", nextTurn: true }), signal: AbortSignal.timeout(5000) });
   assert.equal(resume.status, 200); assert.equal((await resume.json()).promptSent, false); assert.equal(sends(), 3);
   assert.equal((await native(owner, "rollback_fresh_D")).status, 200); assert.equal(sends(), 4); await stop(owner);
-  owner = await start(repo, 37); for (const text of ["baseline_A", "upgrade_B", "crash_C", "seeded_v2_fence", "rollback_fresh_D"]) await blocked(owner, text); await stop(owner);
-  const final = verify(snapshot("final_reupgrade_37")); assert.equal(final.logical.length, 5); assert.equal(final.physical.length, 4);
-  evidence = { checkedAt: new Date().toISOString(), status: "PASS_COLD_RESTORE_AND_36_37_36_37_ROLLBACK", baselineCommit, baselineDependencies: "ISOLATED_NPM_CI_LOCKFILE_IGNORE_SCRIPTS", baselineBuild: "FULL_WORKSPACE", starts, snapshots,
+  owner = await start(current, currentRevision); for (const text of ["baseline_A", "upgrade_B", "crash_C", "seeded_v2_fence", "rollback_fresh_D"]) await blocked(owner, text); await stop(owner);
+  const final = verify(snapshot("final_reupgrade_" + currentRevision)); assert.equal(final.logical.length, 5); assert.equal(final.physical.length, 4);
+  evidence = { checkedAt: new Date().toISOString(), status: `PASS_COLD_RESTORE_AND_36_${currentRevision}_36_${currentRevision}_ROLLBACK`, baselineCommit, currentCommit:currentBuild.commit, currentRuntimeRevision:currentRevision, dependencyInstallations: "TWO_INDEPENDENT_NPM_CI_LOCKFILE_IGNORE_SCRIPTS", builds: "TWO_FULL_WORKSPACE_BUILDS", starts, snapshots,
     realHttp: true, realMcpServiceAndSqlite: true, browser: "SYNTHETIC", realGooglePromptRequests: 0, realChromeProcesses: 0, realIdeExecutor: "NOT_TESTED", windowsRestart: "NOT_TESTED",
     syntheticSends: sends(), duplicateSends: 0, currentFenceCount: final.logical.length, currentPhysicalReceipts: final.physical.length, v2AttemptHistoryAndDeadlineBytesPreserved: true,
     liveWriterBackupRejected: true, oldBackupRejectedWithoutMutation: true, corruptBackupRejectedWithoutMutation: true, coldWalRestore: true, crashedAcceptedReceiptRetained: true, unknownChatBlockedUntilExplicitResume: true, explicitResumeAddsNoSend: true, newRequestAfterRollbackCompleted: true,
     testHarness: "CURRENT_SYNTHETIC_HARNESS_IMPORTS_PINNED_BUILD_MODULES_BASELINE_SOURCES_UNMODIFIED",
-    dependencyLockSha256: digest(fs.readFileSync(path.join(baseline, "package-lock.json"))),
+    dependencyLocks: Object.fromEntries([["baseline",baselineBuild],["current",currentBuild]].map(([label,build])=>[label,{commit:build.commit,runtimeRevision:build.runtimeRevision,packageLockSha256:build.sha256["package-lock.json"],installedLockSha256:build.sha256["node_modules/.package-lock.json"],installExitCode:build.installExitCode,buildExitCode:build.buildExitCode}])),
+    dependencyLocksDiffer: baselineBuild.sha256["package-lock.json"]!==currentBuild.sha256["package-lock.json"],
     scope: "OWNED_FIXTURE_ONLY_NO_PRODUCTION_REPAIR_OR_MULTI_DIRECTORY_ATOMICITY", backupExcludesControlTokensAndChromeProfiles: true,
-    sourceSha256: { probe: digest(fs.readFileSync(fileURLToPath(import.meta.url))), fixture: digest(fs.readFileSync(path.join(repo, "tools/probes/fixtures/native-lifecycle-owner.mjs"))) },
-    compiled: Object.fromEntries([["baseline36", baseline], ["current37", repo]].map(([label, build]) => [label, Object.fromEntries(["native-antigravity/dist/native-proxy.js", "native-antigravity/dist/request-ledger.js", "mcp-server/dist/service.js", "mcp-server/dist/receipt-store.js"].map(name => [name, digest(fs.readFileSync(path.join(build, "packages", name)))]))])),
+    sourceSha256: { probe: digest(fs.readFileSync(fileURLToPath(import.meta.url))), preparation: digest(fs.readFileSync(fileURLToPath(new URL("./native-recovery-build.mjs",import.meta.url)))), fixture: digest(fs.readFileSync(path.join(repo, "tools/probes/fixtures/native-lifecycle-owner.mjs"))) },
+    compiled: Object.fromEntries([["baseline36", baseline], ["current"+currentRevision, current]].map(([label, build]) => [label, Object.fromEntries(["native-antigravity/dist/native-proxy.js", "native-antigravity/dist/request-ledger.js", "mcp-server/dist/service.js", "mcp-server/dist/receipt-store.js"].map(name => [name, digest(fs.readFileSync(path.join(build, "packages", name)))]))])),
   };
 } catch (error) { evidence = { checkedAt: new Date().toISOString(), status: "FAIL", errorType: error.name, starts, snapshots, syntheticSends: sends(), realGooglePromptRequests: 0 }; throw error; }
 finally {

@@ -1,0 +1,101 @@
+{
+  "checkedAt": "2026-10-19T09:52:56.479Z",
+  "status": "PASS_COLD_RESTORE_AND_36_38_36_38_ROLLBACK",
+  "baselineCommit": "4e28d7aa7e01853420a643141a9603b40379b6cb",
+  "currentCommit": "2804560d4fa61c49c1633b5d8d90dedba7a983d2",
+  "currentRuntimeRevision": 38,
+  "dependencyInstallations": "TWO_INDEPENDENT_NPM_CI_LOCKFILE_IGNORE_SCRIPTS",
+  "builds": "TWO_FULL_WORKSPACE_BUILDS",
+  "starts": [
+    {
+      "runtimeRevision": 36,
+      "holdResponse": false
+    },
+    {
+      "runtimeRevision": 38,
+      "holdResponse": false
+    },
+    {
+      "runtimeRevision": 38,
+      "holdResponse": true
+    },
+    {
+      "runtimeRevision": 36,
+      "holdResponse": false
+    },
+    {
+      "runtimeRevision": 38,
+      "holdResponse": false
+    }
+  ],
+  "snapshots": [
+    "baseline_36",
+    "upgraded_38",
+    "crashed_38_with_wal",
+    "final_reupgrade_38"
+  ],
+  "realHttp": true,
+  "realMcpServiceAndSqlite": true,
+  "browser": "SYNTHETIC",
+  "realGooglePromptRequests": 0,
+  "realChromeProcesses": 0,
+  "realIdeExecutor": "NOT_TESTED",
+  "windowsRestart": "NOT_TESTED",
+  "syntheticSends": 4,
+  "duplicateSends": 0,
+  "currentFenceCount": 5,
+  "currentPhysicalReceipts": 4,
+  "v2AttemptHistoryAndDeadlineBytesPreserved": true,
+  "liveWriterBackupRejected": true,
+  "oldBackupRejectedWithoutMutation": true,
+  "corruptBackupRejectedWithoutMutation": true,
+  "coldWalRestore": true,
+  "crashedAcceptedReceiptRetained": true,
+  "unknownChatBlockedUntilExplicitResume": true,
+  "explicitResumeAddsNoSend": true,
+  "newRequestAfterRollbackCompleted": true,
+  "testHarness": "CURRENT_SYNTHETIC_HARNESS_IMPORTS_PINNED_BUILD_MODULES_BASELINE_SOURCES_UNMODIFIED",
+  "dependencyLocks": {
+    "baseline": {
+      "commit": "4e28d7aa7e01853420a643141a9603b40379b6cb",
+      "runtimeRevision": 36,
+      "packageLockSha256": "4b7b6af54fba1791f81db3945d13393fcf8f90a8bb52cbcf945d93c3b7f618c8",
+      "installedLockSha256": "78ba9af52a64776121b143832bf949a1e5b52cfb037eaa9c7847a2aa5009741e",
+      "installExitCode": 0,
+      "buildExitCode": 0
+    },
+    "current": {
+      "commit": "2804560d4fa61c49c1633b5d8d90dedba7a983d2",
+      "runtimeRevision": 38,
+      "packageLockSha256": "41c721a4a65619af5cbba325bbe3b70dbed90b78cd2f70a23ffe45f37a04f686",
+      "installedLockSha256": "662e9c2a71a7ee3f5df099952049daae0b031cb53d0172ccf9447cfef2933c57",
+      "installExitCode": 0,
+      "buildExitCode": 0
+    }
+  },
+  "dependencyLocksDiffer": true,
+  "scope": "OWNED_FIXTURE_ONLY_NO_PRODUCTION_REPAIR_OR_MULTI_DIRECTORY_ATOMICITY",
+  "backupExcludesControlTokensAndChromeProfiles": true,
+  "sourceSha256": {
+    "probe": "5e4fe7cb0ed73d1e22ae66fba57eb385f1f490ddcec9b513fef4599a355bb422",
+    "preparation": "d7ae4b757add273a0bb7982ae6009ab3a245e3617695abe262a8578af58a8a10",
+    "fixture": "e99e8f2945a5d42956ecdb685aa965c8ebcfb08c167ec15ed218289390402b7f"
+  },
+  "compiled": {
+    "baseline36": {
+      "native-antigravity/dist/native-proxy.js": "af3c0731dfd3924ec252a06c6e092c751771ed8d231175be5184a19c23885f68",
+      "native-antigravity/dist/request-ledger.js": "d7305910c5b5046ece21b70d56f8e84f00ddf207d514204a7db613b81f9e3b13",
+      "mcp-server/dist/service.js": "684ddebafe46e89e3c1314cd06793d25f8ae6d7b65f1597415757c81d84cc2ad",
+      "mcp-server/dist/receipt-store.js": "afd2c07fe39b0af6ff6c83f28235f05f7008ea839752f698c3b8421ef8b75ece"
+    },
+    "current38": {
+      "native-antigravity/dist/native-proxy.js": "001ba0871e2b3724747a69e812a733bfc3197f47c40a0b12990eb671999be386",
+      "native-antigravity/dist/request-ledger.js": "d7305910c5b5046ece21b70d56f8e84f00ddf207d514204a7db613b81f9e3b13",
+      "mcp-server/dist/service.js": "ce32c3e78dbb87a1ecf022173cff9128f2926113a934f47e6fb35a0892939760",
+      "mcp-server/dist/receipt-store.js": "afd2c07fe39b0af6ff6c83f28235f05f7008ea839752f698c3b8421ef8b75ece"
+    }
+  },
+  "fixtureWritersExited": true,
+  "tempRootRemoved": true,
+  "tempRootPolicy": "PRESERVED_ON_FAILURE_REMOVED_ON_PASS"
+}

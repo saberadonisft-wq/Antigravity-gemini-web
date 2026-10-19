@@ -32,6 +32,8 @@ Directory replacement is deliberately offline and sequential, with displaced sta
 
 ## Reproduce
 
+The commands below describe the original `51d2542` probe interface. Current source requires separately prepared baseline/current builds and both directory arguments; use the [P8f reproduction steps](g4-native-p8f-independent-lock-recovery.md) for Native 38 and later. The historical results above are unchanged.
+
 Prepare a fresh ignored worktree and require each install/build command to succeed:
 
 ```powershell

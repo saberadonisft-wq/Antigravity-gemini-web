@@ -1,0 +1,13 @@
+{
+  "checkedAt": "2026-10-19T09:52:53.068Z",
+  "status": "PASS_RECOVERY_BUILD_AUTHORITY",
+  "wrongRoleRejected": true,
+  "compiledMutationRejected": true,
+  "installedLockMutationRejected": true,
+  "trackedSourceMutationRejected": true,
+  "orphanParentFallbackRejected": true,
+  "originalBuildsReverified": true,
+  "independentDifferentLockfiles": true,
+  "startedNativeOwners": 0,
+  "realGooglePromptRequests": 0
+}

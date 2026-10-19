@@ -127,6 +127,8 @@ npm run native:status
 
 Không checkout/start một bản cũ chưa chứng minh hiểu ledger hiện tại. Logical ledger có v1/v2, physical store SQLite v2 và các journal có phiên bản riêng; một bản cũ chỉ có cache RAM có thể không giữ được các fence mới. [Cold restore và rollback module 36 ↔ 37](evidence/g4-native-p8e-baseline-recovery.md) đã PASS trên state fixture riêng, có WAL sau crash, chặn backup cũ/ảnh hỏng và giữ deadline/lịch sử attempt v2. Chat chưa rõ kết quả vẫn cần Resume tường minh; request cũ không được phát lại. Đây chưa phải nghiệm thu rollback stdio/shared-owner/browser hoặc dữ liệu production, không phải công cụ merge/repair tự động. Các baseline khác và rollback đầy đủ vẫn là gate P8.
 
+Đối với source 38 tại `2804560`, [P8f 36 ↔ 38](evidence/g4-native-p8f-independent-lock-recovery.md) đã chạy với hai dependency tree cài/build độc lập và lockfile khác nhau. Probe hiện cần cả `--baseline-dir` và `--current-dir` có receipt từ `native-recovery-build.mjs`; không dùng thư mục dư sau cleanup hoặc bản compiled bị sửa. Bằng chứng này chỉ áp dụng đúng các commit đã ghi, không tự mở rộng sang release tương lai hoặc profile thật.
+
 ## Nguồn tham chiếu dự án (source 35)
 
 `npm run native:knowledge` hoặc màn hình **Nguồn dự án** đọc source/binding metadata; không gửi prompt. CLI vẫn cần native owner hợp lệ. Hủy chooser không tạo nguồn, không tự mở lại dialog và không import lại. Lỗi/mất kết nối/owner thay đổi khóa source mutations cho đến khi có status mới; không đổi sang demo hoặc tự tạo worker.
