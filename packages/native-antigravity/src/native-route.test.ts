@@ -10,6 +10,7 @@ import { configureIsolatedProfile } from "./installation.js";
 import type { NativeBrowserBackend } from "./browser-backend.js";
 import { applyContextPatch, wireValue } from "./context-patch.js";
 import { hasValidUnicode } from "./unicode.js";
+import { nativeBrowserTransport } from "./browser-transport.js";
 
 test("Native SSE never emits lone surrogates even inside a partial string; valid Unicode repair streams losslessly", { timeout: 5000 }, async t => {
   const f = await fixture(t, async (_id, prompt, _signal, options) => {
@@ -252,7 +253,7 @@ function temporary(t: TestContext) {
   });
   return root;
 }
-async function fixture(t: TestContext, generate: NativeBrowserBackend["generate"], generationTimeoutMs = 3000, stallTimeoutMs?: number) {
+async function fixture(t: TestContext, generate: NativeBrowserBackend["generate"], generationTimeoutMs = 3000, stallTimeoutMs?: number, contextModelSelection?: { model: string; effort?: string }) {
   const root = temporary(t);
   const calls: Array<{ origin: string; route: string; headers: Record<string, string> }> = [];
   const control: ControlTransport = async (origin, route, _body, headers) => {
@@ -260,7 +261,7 @@ async function fixture(t: TestContext, generate: NativeBrowserBackend["generate"
     return { status: 200, contentType: "application/json", body: Buffer.from(JSON.stringify(route.endsWith("loadCodeAssist")
       ? { paidTier: { usesGcpTos: false } } : { models: { native: { model: "MODEL_PLACEHOLDER_M650", displayName: "Native" } }, agentModelSorts: [{ groups: [{ modelIds: ["native"] }] }] })) };
   };
-  const proxy = await startNativeProxy({ port: 0, stateDirectory: root, control, backend: { generate, close: async () => {} }, controlToken: "owned-control", generationTimeoutMs, stallTimeoutMs });
+  const proxy = await startNativeProxy({ port: 0, stateDirectory: root, control, backend: { generate, close: async () => {} }, controlToken: "owned-control", generationTimeoutMs, stallTimeoutMs, contextModelSelection });
   t.after(() => proxy.close());
   const url = "http://127.0.0.1:" + proxy.port;
   const post = (route: string, body: unknown, extra?: Record<string, string>, signal?: AbortSignal) => fetch(url + route, { method: "POST", headers: { authorization: "Bearer fixture-only", "content-type": "application/json", ...extra }, body: JSON.stringify(body), signal });
@@ -410,6 +411,26 @@ test("Native provider leaves model and thinking level under the user's control i
   assert.equal(response.status, 200); assert.equal(receivedSelection, undefined);
   const health = await (await fetch(f.url + "/__native/health")).json();
   assert.equal(health.modelSelection, null); assert.equal(health.modelSelectionMode, "user_selected_in_web");
+});
+
+test("Context staging model is limited to full loads; short append and patch go directly to the primary model", { timeout: 10000 }, async t => {
+  const contextModel = { model: "3.8 Flash" }, observed: Array<{ mode: string; model: unknown; messages: number; chars: number }> = [];
+  const initial = request("INITIAL_CONTEXT_".repeat(2400)), append = structuredClone(initial);
+  append.request.contents.push({ role: "model", parts: [{ text: "ok" }] }, { role: "user", parts: [{ text: "FOLLOWUP_CONTEXT_".repeat(750) }] });
+  const patch = structuredClone(append); patch.request.systemInstruction.parts[0].text += " Updated host rule.";
+  const replacement = { model: WEB_MODEL, sessionId: initial.sessionId, request: { contents: [{ role: "user", parts: [{ text: "Compact host history" }] }] } };
+  const fresh: any = request("Fresh task without a stable session identity"); delete fresh.sessionId;
+  const f = await fixture(t, async (_id, prompt, _signal, options) => {
+    const context = JSON.parse(prompt.split("<native_context_json>\n")[1].split("\n</native_context_json>")[0]);
+    const messages = nativeBrowserTransport(prompt, options?.conversation?.revision, options?.conversation?.baseRevision, !!options?.contextModelSelection);
+    observed.push({ mode: context.mode ?? "full", model: options?.contextModelSelection, messages: messages.length, chars: prompt.length });
+    return reply(prompt, { type: "final", text: "ok" });
+  }, 3000, undefined, contextModel);
+  for (const body of [initial, append, patch, replacement, fresh]) assert.equal((await f.post("/v1internal:generateContent", body)).status, 200);
+  assert.deepEqual(observed.map(value => value.mode), ["full", "append", "patch", "replace", "full"]);
+  assert.deepEqual(observed.map(value => value.model), [contextModel, undefined, undefined, undefined, contextModel]);
+  assert.ok(observed[1]!.chars < 28000); assert.deepEqual(observed.slice(1, 4).map(value => value.messages), [1, 1, 1]);
+  assert.ok(observed[0]!.messages > 1 && observed[4]!.messages > 1);
 });
 
 test("HTTP context updates retain one lease, reconstruct host state and reject revoked tools without resending", { timeout: 10000 }, async t => {

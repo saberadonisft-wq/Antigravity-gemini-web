@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-19T10:42:21.7914064Z",
+  "baselineCommit": "e03c19b3fe6c3021a9a035fcf824975a8c8b4b30",
+  "nativeRevision": 40,
+  "browserWorkerFingerprint": 25,
+  "scope": "HTTP model-scope regression and Native suite; no live Google execution",
+  "validation": {
+    "nativeBuild": "pass",
+    "nativeTests": 188,
+    "failed": 0,
+    "cancelled": 0,
+    "skipped": 0,
+    "rootTypecheck": "pass",
+    "rootLint": "pass",
+    "fullRepositorySuiteRerun": false,
+    "redTestBeforeReplacementCaseAdded": true,
+    "liveAcceptance": "pending",
+    "secondaryGoogleSignIn": "rejected_user_confirmed",
+    "mainRestartPerformed": false
+  },
+  "artifacts": [
+    {
+      "path": "packages/native-antigravity/src/native-proxy.ts",
+      "sha256": "f7f0ed2d96c8f8f2d4ccf0d10531a2f0672ecb5e879ef5ec4c54eace5ab2185e"
+    },
+    {
+      "path": "packages/native-antigravity/src/native-route.test.ts",
+      "sha256": "ad3f7ede1f7fe282b07fc07d46533efc09c906a215f8406b8e57ff7f4526777f"
+    },
+    {
+      "path": "tools/probes/native-ledger-live-inspect.mjs",
+      "sha256": "d074cedef2ad4f541df1233cfe6a38dd663a6370f797ed944ef76727ad42f012"
+    },
+    {
+      "path": "packages/native-antigravity/dist/native-proxy.js",
+      "sha256": "038402229f17917d141a22887f6617d711e6ea2533bd5fdb9e45c97a8094be9f"
+    },
+    {
+      "path": "packages/native-antigravity/dist/native-route.test.js",
+      "sha256": "4b8b0cb634e943a8dddf54c311b0651abac0216de942104be7073f7050888ba7"
+    },
+    {
+      "path": ".tmp/r40-regression-before.log",
+      "sha256": "6a484be99e0505bc1e7c8f236f2cfa20e97d31869a031b8142eaf24ecc3aaf42"
+    },
+    {
+      "path": ".tmp/r40-regression-after.log",
+      "sha256": "14c5f21ac5c2195fdb447244ce31b0e3caef14650b1a9a1accaab92ea00bfe4d"
+    },
+    {
+      "path": ".tmp/r40-native-tests.log",
+      "sha256": "f4475268d69b4ff3b42ef3d1e12643f36c83e11653c183cb478605f2a020d661"
+    },
+    {
+      "path": ".tmp/r40-build.log",
+      "sha256": "f9038346e9fa2a7443e6da9c8e219baca66511f171390377c02907f108aad848"
+    },
+    {
+      "path": ".tmp/r40-typecheck.log",
+      "sha256": "03c0bfdcbdf2f17cb4ab7038c48a8a728ccf1dd421fe18b068145b613f9dc719"
+    },
+    {
+      "path": ".tmp/r40-lint.log",
+      "sha256": "de95fc18b2de8fe14754bc89dfedfe333aaf32359d2dfeec11a8097b810e7cf6"
+    }
+  ]
+}

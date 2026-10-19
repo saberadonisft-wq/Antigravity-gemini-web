@@ -1,6 +1,6 @@
 # Chạy bản để tự test
 
-Source Native **39 / browser worker 25**. Đây là bản thử nghiệm; các test fixture không thay cho nghiệm thu tài khoản Google và executor IDE thật. Chỉ dùng một Native owner cho cùng bộ profile/state.
+Source Native **40 / browser worker 25**. Đây là bản thử nghiệm; các test fixture không thay cho nghiệm thu tài khoản Google và executor IDE thật. Chỉ dùng một Native owner cho cùng bộ profile/state.
 
 ## Chạy
 
@@ -18,9 +18,11 @@ cd D:\Antigravity-gemini-web
 npm run launcher
 ```
 
-Chạy `npm run native:status` để kiểm tra owner đang chạy có `runtimeRevision: 39`. Nếu còn bản cũ, chờ hết lượt rồi dừng owner bằng `npm run native:stop` trước khi chạy lại. Không xóa profile, receipt hoặc fence để vượt lỗi. Worker cũ có cấu hình khác phải được dừng theo [runbook](NATIVE_RECOVERY_RUNBOOK.md); không dùng chung một profile giữa hai owner.
+Chạy `npm run native:status` để kiểm tra owner đang chạy có `runtimeRevision: 40`. Nếu còn bản cũ, chờ hết lượt rồi dừng owner bằng `npm run native:stop` trước khi chạy lại. Không xóa profile, receipt hoặc fence để vượt lỗi. Worker cũ có cấu hình khác phải được dừng theo [runbook](NATIVE_RECOVERY_RUNBOOK.md); không dùng chung một profile giữa hai owner.
 
 Đăng nhập/xác minh Google trong cửa sổ profile được mở. Giữ model chính bạn muốn dùng trên Web. Context đầu mặc định chọn `3.8 Flash`, rồi khôi phục model chính trước COMMIT; nếu account không có lựa chọn đó thì trả lỗi, không âm thầm thay model. Luồng hai model vẫn cần bạn nghiệm thu thật. Các lượt lỗi/unknown cũ không tự chạy lại.
+
+Bản 40 sửa lỗi lượt append vẫn bị chuyển sang staging 3.8 và yêu cầu ACK dù prompt ngắn. Append/patch/replace dùng model chính; cập nhật dài vẫn có thể cần chia fragment và ACK. [Bằng chứng](evidence/g4-native-r40-context-model-scope.md). Khi Secondary bị Google từ chối đăng nhập, giữ nguyên Default và chỉ chọn Default để smoke test nếu vẫn đăng nhập được. Không coi Secondary đã sẵn sàng cho test A ↔ B.
 
 ## Test nhanh trong chat native của IDE
 

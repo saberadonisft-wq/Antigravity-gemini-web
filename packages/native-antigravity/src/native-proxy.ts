@@ -22,7 +22,7 @@ import { KnowledgeRequestSchema } from "@antigravity-gemini-web/contracts";
 const PROD = "https://cloudcode-pa.googleapis.com";
 const DAILY = "https://daily-cloudcode-pa.googleapis.com";
 export const NATIVE_PROXY_PORT = 9236;
-export const NATIVE_RUNTIME_REVISION = 39;
+export const NATIVE_RUNTIME_REVISION = 40;
 /**
  * The picker identifier is deliberately distinct from WEB_MODEL (the internal
  * bridge route) and from MODEL_PLACEHOLDER_M* (the IDE enum).  Antigravity
@@ -659,7 +659,7 @@ export async function startNativeProxy(options: NativeProxyOptions) {
             conversation: attempt.plan ? { key: attempt.plan.key, revision: attempt.plan.revision, baseRevision: attempt.plan.baseRevision, resumeUrl:attempt.resumeUrl } : undefined,
             snapshotAttachment: options.snapshotAttachment, responseNonce: compiled.nonce,
             modelSelection:turnModelSelection, maxDurationMs: maximum, stallTimeoutMs: idleBudget,
-            contextModelSelection:attempt.plan?.mode === "patch" ? undefined : options.contextModelSelection,
+            contextModelSelection:(attempt.plan?.mode ?? "full") === "full" ? options.contextModelSelection : undefined,
             onSubmissionStarted: () => { requireActiveAttempt();if (!submissionStarted) requestLedger.submitted(attempt.reservation); submissionStarted = true; detail.phase = "submitting"; },
             onTransportPlan: messageCount => { if(activeAttempt())detail.transportMessages = messageCount; },
             onTransportTrace: trace => {

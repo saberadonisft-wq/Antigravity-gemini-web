@@ -1,6 +1,6 @@
 # Khôi phục Native Gemini Web
 
-Tài liệu vận hành cho source Native **39 / browser worker 25**, gồm các thủ tục từ source 33 về sau. Đây là một phần P8; chưa chứng nhận toàn bộ migration, rollback, Windows restart hoặc soak. Đối chiếu [kế hoạch](NATIVE_UPGRADE_PLAN.md), [P4 ledger](evidence/g4-native-p4-physical-ledger.md) và [P5](evidence/g4-native-p5-account-management.md) trước khi kết luận hệ thống đã nghiệm thu.
+Tài liệu vận hành cho source Native **40 / browser worker 25**, gồm các thủ tục từ source 33 về sau. Đây là một phần P8; chưa chứng nhận toàn bộ migration, rollback, Windows restart hoặc soak. Đối chiếu [kế hoạch](NATIVE_UPGRADE_PLAN.md), [P4 ledger](evidence/g4-native-p4-physical-ledger.md) và [P5](evidence/g4-native-p5-account-management.md) trước khi kết luận hệ thống đã nghiệm thu.
 
 Source 37 có [tùy chọn semi-space Node](NATIVE_NODE_MEMORY.md), mặc định tắt. Khi bật, worker phải xác nhận đúng startup flag; config conflict không được xử lý bằng tự động kill worker, xóa profile/fences hoặc replay request. Thay cấu hình cần quy trình dừng/khởi động khi nhàn rỗi. Giữ cửa sổ Google đang chờ người dùng xác minh.
 
