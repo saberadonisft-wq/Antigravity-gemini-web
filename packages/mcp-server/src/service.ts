@@ -9,6 +9,8 @@ import { NativeReceiptOwnerSchema, type NativeReceiptOwner, type NativeSnapshotA
 import type { GeminiBrowserAdapter, PromptTurnResponse, BrowserProgress, BrowserConversationLease, BrowserModelSelection } from "@antigravity-gemini-web/gemini-browser";
 import { z } from "zod";
 import { ModelSelectionDiagnosticSchema, BrowserSubmissionDiagnosticSchema, type BrowserSubmissionDiagnostic } from "@antigravity-gemini-web/contracts";
+import type { McpNodeSemiSpace } from "@antigravity-gemini-web/contracts";
+import { describeNodeMemoryPolicy } from "./node-memory.js";
 
 // Single Web messages must fit the verified 32k editor cap, including framing.
 export const MAX_BROWSER_PROMPT_CHARS = 28000;
@@ -48,7 +50,7 @@ export class GeminiMcpService {
       if (turn.settled && !turn.changed.size && (this.turns.size > MAX_CACHED_RESULTS || Date.now() - this.settledAt.get(turn)! >= RESULT_TTL_MS)) this.turns.delete(id);
     }
   }
-  constructor(public readonly browser: GeminiBrowserAdapter, ledgerFile: string) {
+  constructor(public readonly browser: GeminiBrowserAdapter, ledgerFile: string, private readonly nodeSemiSpaceMiB: McpNodeSemiSpace = null) {
     this.receipts = new PhysicalReceiptStore(ledgerFile);
     this.modelRestore = new ModelRestoreJournal(ledgerFile + ".model-restore.json");
   }
@@ -65,6 +67,7 @@ export class GeminiMcpService {
     const status = await this.browser.checkStatus();
     return {
       browserState: status.browserState, accountState: status.accountState,
+      nodeMemory: describeNodeMemoryPolicy(this.nodeSemiSpaceMiB),
       browserActionRequired:status.error?.code === "BROWSER_USER_ACTION_REQUIRED" && status.error.detail === "google_traffic_verification" ? "google_traffic_verification" : undefined,
       accountIdentity: status.accountIdentity,
       activeRequestId: this.busy ?? null, transport: "stdio", route: "mcp_browser_tool",

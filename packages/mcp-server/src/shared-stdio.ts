@@ -6,6 +6,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { acquireOwnership } from "./ownership.js";
 import { digest, secret, sameSecret, readPrivateFile, writePrivateFile } from "./gateway-state.js";
+import { mcpNodeMemoryArgs, type McpNodeSemiSpace } from "@antigravity-gemini-web/contracts";
+import { assertNodeMemoryStartup } from "./node-memory.js";
 
 export interface SharedRuntime { createServer(): McpServer; close(): Promise<void> }
 export interface SharedOptions {
@@ -14,6 +16,7 @@ export interface SharedOptions {
   fingerprint: string;
   createRuntime(): Promise<SharedRuntime>;
   onClosing?(): void;
+  nodeSemiSpaceMiB?: McpNodeSemiSpace;
 }
 const Descriptor = z.object({ version: z.literal(1), pid: z.number().int().positive(), port: z.number().int().min(1).max(65535), token: z.string().regex(/^[\w-]{43}$/), scopeHash: z.string().regex(/^[a-f0-9]{64}$/), fingerprint: z.string().regex(/^[a-f0-9]{64}$/) }).strict();
 const normalize = (value: string) => process.platform === "win32" ? value.toLowerCase() : value;
@@ -44,6 +47,7 @@ function frame(socket: Socket, timeout: number): Promise<Record<string, unknown>
 
 /** One process owns resources; each authenticated local connection gets its own MCP protocol instance. */
 export async function startSharedRuntime(options: SharedOptions) {
+  assertNodeMemoryStartup(options.nodeSemiSpaceMiB ?? null);
   const owner = await acquireOwnership(options.scope);
   let runtime: SharedRuntime;
   try { runtime = await options.createRuntime(); }
@@ -139,7 +143,7 @@ async function startOrConnect(options: SharedOptions): Promise<Socket> {
         try { probe = await acquireOwnership(options.scope); } catch {}
         if (probe) {
           await closeListener(probe);
-          const child = spawn(process.execPath, [process.argv[1], "--shared-service"], { env: process.env, detached: true, windowsHide: true, stdio: "ignore" });
+          const child = spawn(process.execPath, [...mcpNodeMemoryArgs(options.nodeSemiSpaceMiB ?? null), process.argv[1], "--shared-service"], { env: process.env, detached: true, windowsHide: true, stdio: "ignore" });
           child.on("error", () => {}); child.unref(); spawned = true;
         }
       }

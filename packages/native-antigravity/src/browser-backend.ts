@@ -4,6 +4,7 @@ import { NativeRouteError, object, sha256, type JsonObject } from "./native-prot
 import { nativeBrowserTransport, nativeSnapshotTransport, MAX_WEB_MESSAGE_CHARS, transportReplyCategory } from "./browser-transport.js";
 import { ensureNativeBrowserReady } from "./browser-readiness.js";
 import { ModelSelectionDiagnosticSchema, BrowserSubmissionDiagnosticSchema, NativeTransportTraceSchema, WebModelSelectionSchema, type NativeTransportTrace, type NativeReceiptOwner,type AccountRecord } from "@antigravity-gemini-web/contracts";
+import { parseMcpNodeSemiSpace, mcpNodeMemoryArgs, McpNodeMemoryStatusSchema, type McpNodeSemiSpace } from "@antigravity-gemini-web/contracts";
 
 export interface NativeBrowserProgress { revision: number; text: string; codeBlocks?: string[]; stage?: string }
 export interface NativeCancellationObservation { confirmed: boolean; reason?: string }
@@ -60,13 +61,16 @@ export class McpNativeBrowserBackend implements NativeBrowserBackend {
   private client = new Client({ name: "gemini-native-provider", version: "0.1.0" });
   private connection?: Promise<void>;
   private retained = new Set<string>();
-  constructor(private readonly cliPath: string, private readonly envOverrides?: Record<string, string>, private readonly expectedIdentityFingerprint?: string) {}
+  private readonly nodeSemiSpaceMiB: McpNodeSemiSpace;
+  constructor(private readonly cliPath: string, private readonly envOverrides?: Record<string, string>, private readonly expectedIdentityFingerprint?: string) {
+    this.nodeSemiSpaceMiB = parseMcpNodeSemiSpace(envOverrides?.AG_MCP_NODE_SEMI_SPACE_MB ?? process.env.AG_MCP_NODE_SEMI_SPACE_MB);
+  }
   private connect(): Promise<void> {
     if (this.connection) return this.connection;
     const client = this.client;
     const pending = client.connect(new StdioClientTransport({
-      command: process.execPath, args: [this.cliPath], stderr: "pipe",
-      env: { ...process.env, AG_MCP_TARGET_CLIENT: "any", ...(this.envOverrides ?? {}) },
+      command: process.execPath, args: [...mcpNodeMemoryArgs(this.nodeSemiSpaceMiB), this.cliPath], stderr: "pipe",
+      env: { ...process.env, AG_MCP_TARGET_CLIENT: "any", ...(this.envOverrides ?? {}), AG_MCP_NODE_SEMI_SPACE_MB: this.nodeSemiSpaceMiB === null ? "off" : String(this.nodeSemiSpaceMiB) },
     }), { timeout: 10000 }).then(() => undefined);
     this.connection = pending;
     void pending.catch(() => {
@@ -85,10 +89,15 @@ export class McpNativeBrowserBackend implements NativeBrowserBackend {
     try { value = JSON.parse(content.find(part => part.type === "text")?.text ?? ""); } catch {}
     if (!object(value)) throw new NativeRouteError("BROWSER_PROTOCOL_ERROR", "Browser broker returned an invalid result.", 502);
     if (result.isError) throw new NativeRouteError(typeof value.code === "string" ? value.code : "BROWSER_UNAVAILABLE", "Browser broker rejected the native request. Inspect browser status; do not resend uncertain requests.", 503);
+    if (name === "gemini_status" && this.nodeSemiSpaceMiB !== null) {
+      const memory = McpNodeMemoryStatusSchema.safeParse(value.nodeMemory);
+      if (!memory.success || memory.data.status !== "applied" || memory.data.requestedSemiSpaceMiB !== this.nodeSemiSpaceMiB || memory.data.explicitCliSemiSpaceMiB !== this.nodeSemiSpaceMiB) throw new NativeRouteError("BROWSER_RUNTIME_UPDATE_REQUIRED", "The shared browser owner has not verified the requested Node startup policy. No browser action was started.", 503);
+    }
     return value;
   }
   async openBrowser(_accountId?: string) {
     await this.connect();
+    if (this.nodeSemiSpaceMiB !== null) await this.call("gemini_status", {});
     return this.call("gemini_open_browser", {});
   }
   async prepare(signal: AbortSignal) {

@@ -1,0 +1,132 @@
+{
+  "checkedAt": "2026-10-19T05:21:42.227475+00:00",
+  "nativeRuntimeRevision": 37,
+  "browserWorkerVersion": 24,
+  "baselineCommit": "01fc501ca5b909c98a64760c857bbe8dfc9fce7a",
+  "status": "PASS_LOCAL_AND_OWNED_PROCESS_POLICY_ACCEPTANCE",
+  "defaultPolicy": "off",
+  "allowedSemiSpaceMiB": [
+    8,
+    16
+  ],
+  "policyIsTotalMemoryLimit": false,
+  "checks": {
+    "build": "PASS",
+    "typecheck": "PASS",
+    "lint": "PASS",
+    "focusedNewTests": 9,
+    "workspace": {
+      "packages": [
+        {
+          "package": "contracts",
+          "tests": 12,
+          "pass": 12,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        {
+          "package": "gemini-browser",
+          "tests": 47,
+          "pass": 47,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        {
+          "package": "mcp-server",
+          "tests": 52,
+          "pass": 52,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        {
+          "package": "model-bridge",
+          "tests": 4,
+          "pass": 4,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        {
+          "package": "native-antigravity",
+          "tests": 171,
+          "pass": 171,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        {
+          "package": "runtime",
+          "tests": 80,
+          "pass": 80,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        },
+        {
+          "package": "launcher",
+          "tests": 49,
+          "pass": 49,
+          "fail": 0,
+          "cancelled": 0,
+          "skipped": 0,
+          "todo": 0
+        }
+      ],
+      "total": 415
+    }
+  },
+  "mainObservation": {
+    "checkedAt": "2026-10-19T05:20:22.090Z",
+    "health": "UNAVAILABLE_ON_TWO_READS",
+    "browserAction": "NONE",
+    "restart": "NONE",
+    "descriptorProcess": "ABSENT",
+    "livenessErrorCode": "ESRCH"
+  },
+  "realGooglePromptRequests": 0,
+  "realIdeExecutor": "NOT_TESTED",
+  "realChromeMemory": "NOT_TESTED",
+  "realAccountSwitch": "NOT_TESTED",
+  "fullPlan": "IN_PROGRESS",
+  "sourceSha256": {
+    "README.md": "016253f86196e11ca48a8761af2adad2fe436e777840419333464bbd5d057c0e",
+    "docs/MCP_SETUP.md": "9a3f42e5cadf7601111ea37bbf37c2dc5c340d57093613a33c93f908848324fb",
+    "docs/NATIVE_NODE_MEMORY.md": "68a7ca95c39ea10ac1e0973ba08648ae6ce6ea4a2a84480d88e9983e362bd0a2",
+    "docs/NATIVE_RECOVERY_RUNBOOK.md": "6c8eb3c91d7e40cac80f3b55c30393c4b0f8515b920aa9c059a902662aea8c75",
+    "docs/NATIVE_SETUP.md": "81b3da9a05bf4bcc6613a74f7fdb5f0b888b457d13a55b9722ef4f38cb722685",
+    "docs/NATIVE_UPGRADE_PLAN.md": "65d0c372c7d3abfd9ffb9ba4e4108f919c5191d4b1374d064a0e0a7768cbf405",
+    "docs/evidence/g4-native-p8d-node-memory-policy.md": "4b93fac2327fe8454cf8b752702cbf98690faa15b359b15153ecb06b7545b068",
+    "packages/contracts/src/index.ts": "df445fb1a0dae0aebc81b3dd3fdc3febca9dff9e04007c84ee204187988aca31",
+    "packages/contracts/src/node-memory.test.ts": "4cb330a26ef646dd3e4a4e65f269323154f1a797569d5417b76a7cd2020593ef",
+    "packages/contracts/src/node-memory.ts": "43a67c88369723b2331b7cfaf454eaa4c6ce16e3bdb8139ce83155636fea4b47",
+    "packages/mcp-server/src/cli.ts": "eda334a80fc4a448610406cf93477140570f639c8456002cb07d03604c159b13",
+    "packages/mcp-server/src/node-memory.test.ts": "67cb571fcaca17347c70917f95bda84b9d3d51b824e7a5a523da6e1c96d3044d",
+    "packages/mcp-server/src/node-memory.ts": "3048d313b364c7a4819d3095ce666a7b66732fe5ce00dea83dbf03f30f588df2",
+    "packages/mcp-server/src/service.ts": "b79c3dec54270eed8f3f07d4d224328e6f6ec201b65d55d7a4af3758ef2f9dbe",
+    "packages/mcp-server/src/shared-stdio.ts": "b0c809cbd7f7acd5c922b1cd4a6a76f5644c9a3628be3d2a3bbbb742a1fb9324",
+    "packages/mcp-server/src/testing/node-memory-startup-fixture.ts": "c82779748457a9249cf6049fe96f9b93efb6f5f7b93dab2cf5f70f98656ac9fc",
+    "packages/native-antigravity/src/browser-backend-pool.ts": "608e8a57d825b18edb392a3d4a43f80e0bc86ecc32cc18e6a36f7c082548d517",
+    "packages/native-antigravity/src/browser-backend.ts": "e73e1b5138b9e33f612101d6c99ec76c1b611bc42ee48d32fe61dbe201e55d63",
+    "packages/native-antigravity/src/native-proxy.ts": "e25c405bf80449b6a3e3350e8f5249f3cf99555881e659072016716fff1257d9",
+    "packages/native-antigravity/src/node-memory.test.ts": "8ff20140fd46186d5b1182a9ac7638250e96fb1ff9bfc9d3138bdd3e6fb2230c",
+    "tools/probes/native-ledger-live-inspect.mjs": "b14e42df8223758be73741f05a0e945b38314ef066027ee0af86906127f96dec"
+  },
+  "compiledSha256": {
+    "packages/contracts/dist/node-memory.js": "30ad745f3dca3e5c9ff4658a0dd9bfc5bb67957f51ee39c7dac17de3f08a0fa3",
+    "packages/mcp-server/dist/node-memory.js": "e9a891bd91db179e597e406d515e0171a2fb08693400b80f6a1bf2100f768625",
+    "packages/mcp-server/dist/cli.js": "6abadc6f9aeb5bc870b9b6ac02b57344e5362f8e252c45112a1b2510d13b1e6a",
+    "packages/mcp-server/dist/shared-stdio.js": "6121200a46ac3727f7d1762f347546b0498eac0653f195073e5487009d026d2d",
+    "packages/mcp-server/dist/service.js": "ce32c3e78dbb87a1ecf022173cff9128f2926113a934f47e6fb35a0892939760",
+    "packages/native-antigravity/dist/browser-backend.js": "5e73faf460907d25217c3fa9aab257f7bde60c6de1697dc7e233c9ba53c4334c",
+    "packages/native-antigravity/dist/browser-backend-pool.js": "01680f75a1ea833b9942606b5556b7b01313d4e960af52ee6b5286a86afcbe7b"
+  }
+}

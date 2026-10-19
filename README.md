@@ -2,7 +2,7 @@
 
 Dự án nghiên cứu và tích hợp Gemini Web làm nguồn suy luận trong chat native của Antigravity IDE, bảo toàn luồng executor và quyền công cụ của IDE.
 
-**Trạng thái hiện tại (16/10/2026):** đã triển khai native provider cho **Antigravity IDE 2.5.5** bằng proxy loopback và profile riêng. **Chat native → Gemini Web thật → trả lời**, cùng **native view_file → kết quả → Gemini trả lời đúng bytes file**, đã PASS. [Chạy bản native](docs/NATIVE_SETUP.md). Chat tiếp nối và nút Cancel đã kiểm chứng trực tiếp trên native UI; sửa file/chạy test và compaction native có phạm vi nghiệm thu riêng.
+**Trạng thái source (19/10/2026):** Native **37 / browser worker 24** có tài khoản cách ly, receipt/fence bền vững, quản lý nguồn dự án và tùy chọn semi-space Node mặc định tắt. [Chạy bản native](docs/NATIVE_SETUP.md), [cấu hình bộ nhớ](docs/NATIVE_NODE_MEMORY.md). Bằng chứng chat/view_file/stream/cancel trên Web và IDE thật thuộc các revision trước. Luồng context 3.8 → model chính đang chờ Google xác minh; hai tài khoản thật, executor đầy đủ và các gate P6–P8 chưa hoàn tất. Các đoạn revision cũ dưới đây được giữ làm lịch sử kiểm chứng.
 
 **Bản native revision 12:** build monorepo đã PASS. Proxy lưu metadata riêng tư để khởi động lại rồi gắn lại đúng tab; lượt đầu sau khôi phục gửi full snapshot, sau đó tiếp tục append/patch. Một số mô tả tool chuẩn được rút gọn trong prompt, còn schema đầy đủ vẫn validate local. Batch tool chỉ bật tường minh qua `AG_NATIVE_BATCH_TOOL_CALLS=1`, giới hạn ở đọc `view_file`. Soft resync chỉ giữ base khi có bằng chứng lỗi xảy ra trước Send. Test suite chưa chạy lại cho revision 12 và các thay đổi chưa nghiệm thu live; giữ **4 Argon / Low** theo cấu hình.
 

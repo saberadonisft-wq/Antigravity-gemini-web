@@ -6,12 +6,14 @@ import { GeminiMcpService } from "./service.js";
 import { createGeminiMcpServer } from "./server.js";
 import { isMcpClientAllowed, serveFilteredClient } from "./client-filter.js";
 import { runSharedStdio, runtimeFingerprint } from "./shared-stdio.js";
+import { parseMcpNodeSemiSpace } from "@antigravity-gemini-web/contracts";
 
 if (!process.argv.includes("--shared-service") && !await isMcpClientAllowed()) { await serveFilteredClient("gemini-web-browser"); process.exit(0); }
 const root = path.join(os.homedir(), ".gemini", "antigravity-gemini-web-live", "app_data");
 const profile = path.resolve(process.env.AG_MCP_BROWSER_PROFILE ?? path.join(root, "browser_profile"));
 const state = path.resolve(process.env.AG_MCP_STATE_DIR ?? path.join(root, "mcp"));
 const port = Number(process.env.AG_MCP_DEBUG_PORT ?? 9223);
+const nodeSemiSpaceMiB = parseMcpNodeSemiSpace(process.env.AG_MCP_NODE_SEMI_SPACE_MB);
 const chromePath = process.env.AG_MCP_CHROME_PATH ?? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw Error("Invalid CDP port");
 const [nodeMajor,nodeMinor] = process.versions.node.split(".").map(Number);
@@ -19,11 +21,12 @@ if (nodeMajor < 22 || nodeMajor === 23 || (nodeMajor === 22 && nodeMinor < 13) |
 try {
   await runSharedStdio({
     scope: `browser:${profile}`, descriptorFile: path.join(profile, "browser-stdio-owner.json"),
-    fingerprint: runtimeFingerprint({ version: 23, profile, state, port, chromePath }),
+    fingerprint: runtimeFingerprint({ version: 24, profile, state, port, chromePath, nodeSemiSpaceMiB: nodeSemiSpaceMiB ?? 0 }),
+    nodeSemiSpaceMiB,
     createRuntime: async () => {
       fs.mkdirSync(state, { recursive: true }); fs.mkdirSync(profile, { recursive: true });
       const browser = new LiveGeminiBrowserAdapter({ userDataDir: profile, debugPort: port, chromePath, headless: false, requireProfileIdentity: true });
-      const service = new GeminiMcpService(browser, path.join(state, "receipts.json"));
+      const service = new GeminiMcpService(browser, path.join(state, "receipts.json"), nodeSemiSpaceMiB);
       return { createServer: () => createGeminiMcpServer(service), close: () => service.close() };
     }
   });

@@ -20,7 +20,7 @@ import { KnowledgeRequestSchema } from "@antigravity-gemini-web/contracts";
 const PROD = "https://cloudcode-pa.googleapis.com";
 const DAILY = "https://daily-cloudcode-pa.googleapis.com";
 export const NATIVE_PROXY_PORT = 9236;
-export const NATIVE_RUNTIME_REVISION = 36;
+export const NATIVE_RUNTIME_REVISION = 37;
 /**
  * The picker identifier is deliberately distinct from WEB_MODEL (the internal
  * bridge route) and from MODEL_PLACEHOLDER_M* (the IDE enum).  Antigravity

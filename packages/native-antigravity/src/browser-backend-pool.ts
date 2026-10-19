@@ -4,6 +4,7 @@ import type { AccountRegistry } from "./account-registry.js";
 import { observedAccountFingerprint } from "./browser-readiness.js";
 import { canonical, NativeRouteError, type JsonObject } from "./native-protocol.js";
 import type { AccountRecord } from "@antigravity-gemini-web/contracts";
+import { parseMcpNodeSemiSpace } from "@antigravity-gemini-web/contracts";
 
 const workerConfig = (account: AccountRecord) => canonical({ profile: account.profilePath, state: account.statePath, port: account.debugPort, fingerprint: account.identityFingerprint, epoch: account.identityEpoch });
 const MAX_CACHED_WORKERS=32,MAX_CONVERSATION_OWNERS=256,MAX_PENDING_RELEASES_PER_ACCOUNT=256;
@@ -14,6 +15,7 @@ export class NativeBrowserBackendPool implements NativeBrowserBackend {
   private pendingReleases=new Map<string,Map<string,boolean>>();
   private draining=new Set<string>();
   private closing=false;private closed=false;private shutdown?:Promise<void>;
+  private readonly nodeSemiSpaceMiB = parseMcpNodeSemiSpace(process.env.AG_MCP_NODE_SEMI_SPACE_MB);
   constructor(public readonly registry: AccountRegistry, private readonly cliPath: string, private readonly backendFactory?: (account: AccountRecord) => NativeBrowserBackend) {}
 
   getBackend(accountId?: string): { account: AccountRecord; backend: NativeBrowserBackend } {
@@ -27,7 +29,7 @@ export class NativeBrowserBackendPool implements NativeBrowserBackend {
     if (!entry) {
       if(this.backends.size>=MAX_CACHED_WORKERS)throw new NativeRouteError("RESOURCE_LIMIT","Cached account workers reached their bound; no new worker was created.",503);
       const backend = this.backendFactory ? this.backendFactory(account) : new McpNativeBrowserBackend(this.cliPath, {
-        AG_MCP_BROWSER_PROFILE: account.profilePath, AG_MCP_STATE_DIR: account.statePath, AG_MCP_DEBUG_PORT: String(account.debugPort),
+        AG_MCP_BROWSER_PROFILE: account.profilePath, AG_MCP_STATE_DIR: account.statePath, AG_MCP_DEBUG_PORT: String(account.debugPort), AG_MCP_NODE_SEMI_SPACE_MB: this.nodeSemiSpaceMiB === null ? "off" : String(this.nodeSemiSpaceMiB),
       }, account.identityFingerprint ?? "");
       entry = { config, backend }; this.backends.set(account.accountId, entry);
     }
@@ -110,7 +112,7 @@ export class NativeBrowserBackendPool implements NativeBrowserBackend {
     finally{this.draining.delete(accountId);if(!this.pendingReleases.get(accountId)?.size)this.pendingReleases.delete(accountId);}
   }
   async releaseConversation(key: string, preserve = false) {const owner=this.conversationOwners.get(key);for(const accountId of owner?[owner]:this.backends.keys())await this.releaseOn(accountId,key,preserve);}
-  resourceStatus(){return {lifecycle:this.closed?"closed":this.closing?"closing":"active",cachedWorkers:this.backends.size,conversationOwners:this.conversationOwners.size,pendingConversationReleases:[...this.pendingReleases.values()].reduce((sum,entries)=>sum+entries.size,0),drainingAccounts:this.draining.size,limits:{cachedWorkers:MAX_CACHED_WORKERS,conversationOwners:MAX_CONVERSATION_OWNERS,deferredReleasesPerAccount:MAX_PENDING_RELEASES_PER_ACCOUNT}};}
+  resourceStatus(){return {lifecycle:this.closed?"closed":this.closing?"closing":"active",cachedWorkers:this.backends.size,conversationOwners:this.conversationOwners.size,pendingConversationReleases:[...this.pendingReleases.values()].reduce((sum,entries)=>sum+entries.size,0),drainingAccounts:this.draining.size,requestedNodeSemiSpaceMiB:this.nodeSemiSpaceMiB,limits:{cachedWorkers:MAX_CACHED_WORKERS,conversationOwners:MAX_CONVERSATION_OWNERS,deferredReleasesPerAccount:MAX_PENDING_RELEASES_PER_ACCOUNT}};}
   async close() {
     if(!this.shutdown){this.closing=true;this.shutdown=(async()=>{try{const results=await Promise.allSettled([...this.backends.values()].map(async({backend})=>backend.close()));const failure=results.find((result):result is PromiseRejectedResult=>result.status==="rejected");if(failure)throw failure.reason;}finally{this.backends.clear();this.conversationOwners.clear();this.pendingReleases.clear();this.draining.clear();this.closed=true;}})();}
     return this.shutdown;

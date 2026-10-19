@@ -20,3 +20,4 @@ export * from "./transport.js";
 export * from "./routing.js";
 export * from "./native-management.js";
 export * from "./knowledge.js";
+export * from "./node-memory.js";

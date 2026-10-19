@@ -294,6 +294,8 @@ P8a source 36 tái hiện rồi sửa ownership metadata không được giải 
 
 Ngày 19/10 đã commit checkpoint core/P6/P8 hiện tại tại `4e28d7a`; build/typecheck/lint và toàn bộ 406 test PASS. Sau đó đo thêm hai MCP shared-owner, bốn stdio frontend và SQLite thật, mỗi owner 2.180 lượt với browser giả lập. Ba cấu hình đã xác nhận đủ process thoát và xóa đúng temp root; 8 MiB semi-space là ứng viên tiết kiệm RSS, chưa đổi cấu hình production. [Báo cáo process memory](evidence/g4-native-p8c-mcp-process-memory.md). Bước tiếp: policy opt-in có kiểm chứng startup/fingerprint của shared owner, rồi workload Chrome/DOM; không coi fixture này là soak Web thật.
 
+Source 37 / worker 24 đã triển khai policy opt-in `8|16|off`, mặc định off, truyền đến Native frontend và shared owner, fingerprint theo cấu hình, kiểm tra flag trước tạo runtime và status trước Send. 9 kiểm thử mới gồm bootstrap production CLI, Native frontend/owner thật chỉ tra receipt, config conflict giữ worker cũ và missing/forged status không Send; toàn workspace 415 test cùng build/typecheck/lint PASS. [Hướng dẫn](NATIVE_NODE_MEMORY.md), [báo cáo P8d](evidence/g4-native-p8d-node-memory-policy.md). Main health ngày 19/10 không kết nối và PID descriptor đã mất; không restart browser/proxy trong lúc bước xác minh người dùng còn chờ. Workload Chrome/DOM, soak, recovery và các gate P6/P7/core vẫn mở.
+
 Phạm vi:
 
 - Chạy toàn bộ kiểm thử phù hợp với các package thay đổi, build/typecheck/lint; kiểm tra migration schema, backward compatibility và IPC/contracts drift.
