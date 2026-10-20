@@ -160,6 +160,9 @@ test("Closing the original tab cannot lose a completed retained response or prev
   const unrelated = await CdpClient.findTarget(port, target => target.id === created.targetId);
   assert.ok(unrelated?.webSocketDebuggerUrl);
   witness = new CdpClient(unrelated.webSocketDebuggerUrl); await witness.connect();
+  const witnessDriver = new GeminiBrowserDriver({fixtureMode:true,allowedOrigins:[fixture.url]});
+  witnessDriver.cdp = witness;
+  assert.equal(await witnessDriver.waitForComposerReady(),true);
   await witness.evaluate("new Promise(resolve => { const timer = setInterval(() => { const composer = document.querySelector('[contenteditable=true]'); if (composer) { clearInterval(timer); composer.textContent = 'UNRELATED_DRAFT'; resolve(true); } }, 20); setTimeout(() => { clearInterval(timer); resolve(false); }, 3000); })");
   assert.equal((await live.driver.cdp!.send<{ success: boolean }>("Target.closeTarget", { targetId: original.id })).success, true);
   await CdpClient.confirmTargetClosed(port, original.id);

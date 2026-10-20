@@ -23,7 +23,7 @@ import { extensionCredentials } from "@antigravity-gemini-web/gemini-browser";
 import {PROD,DAILY,MAX_BODY,CONTROL_ROUTES,WEB_CATALOG_MODEL,controlTransport,NativeModelIdentity,catalogModelReferences,modelSelectors,type ControlTransport} from "./native-catalog.js";
 export {WEB_CATALOG_MODEL,controlTransport,NativeModelIdentity,type ControlTransport,type UpstreamResult} from "./native-catalog.js";
 export const NATIVE_PROXY_PORT=9236;
-export const NATIVE_RUNTIME_REVISION=45;
+export const NATIVE_RUNTIME_REVISION=46;
 async function readBody(request: http.IncomingMessage): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []; let bytes = 0;

@@ -25,7 +25,7 @@ if (nodeMajor < 22 || nodeMajor === 23 || (nodeMajor === 22 && nodeMinor < 13) |
 try {
   await runSharedStdio({
     scope: `browser:${profile}`, descriptorFile: path.join(profile, "browser-stdio-owner.json"),
-    fingerprint: runtimeFingerprint({ version: 27, profile, state, port, chromePath, transport, connectorIdentity:connector ? createHash("sha256").update(JSON.stringify(connector)).digest("hex") : "", nodeSemiSpaceMiB: nodeSemiSpaceMiB ?? 0 }),
+    fingerprint: runtimeFingerprint({ version: 28, profile, state, port, chromePath, transport, connectorIdentity:connector ? createHash("sha256").update(JSON.stringify(connector)).digest("hex") : "", nodeSemiSpaceMiB: nodeSemiSpaceMiB ?? 0 }),
     nodeSemiSpaceMiB,
     createRuntime: async () => {
       fs.mkdirSync(state, { recursive: true }); fs.mkdirSync(profile, { recursive: true });

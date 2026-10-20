@@ -1,10 +1,12 @@
 import { spawn, type ChildProcess } from "node:child_process";
 import { createHash } from "node:crypto";
+import os from "node:os";
+import path from "node:path";
 import { accountIdentityEmail } from "@antigravity-gemini-web/contracts";
 import type { NativeSnapshotAttachment } from "@antigravity-gemini-web/contracts";
 import { attachmentInspectionScript, uploadNativeSnapshot,type NativeSnapshotFileLease } from "./snapshot-upload.js";
 import { verifyBrowserProfile } from "./profile-identity.js";
-import { CdpClient, type CdpTarget } from "./cdp-client.js";
+import { CdpClient, CdpCommandTimeoutError, type CdpTarget } from "./cdp-client.js";
 import { ProgressDeadline, type BrowserPollOptions, type BrowserModelSelection } from "./progress.js";
 import { selectBrowserModel, inspectBrowserModels } from "./model-controls.js";
 import {
@@ -56,7 +58,7 @@ export class GeminiBrowserDriver {
 
   constructor(options: BrowserDriverOptions = {}) {
     this.debugPort = options.debugPort ?? 9222;
-    this.userDataDir = options.userDataDir ?? "C:\\Users\\vhc\\.gemini\\gemini_web_probe_profile";
+    this.userDataDir = options.userDataDir ?? path.join(os.homedir(), ".gemini", "gemini_web_probe_profile");
     this.chromePath = options.chromePath ?? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe";
     this.headless = options.headless ?? false;
     this.targetUrl = options.targetUrl ?? "https://gemini.google.com/app";
@@ -213,15 +215,25 @@ export class GeminiBrowserDriver {
     } catch (error) { next.close(); throw error; }
   }
 
-  async inspectDom(timeoutMs = 10000): Promise<DomInspectionResult> {
-    if (!this.cdp) {
-      throw new Error("Browser driver is not connected to a CDP target");
+  private async evaluateObservation<T>(snippet: string, timeoutMs: number): Promise<T | undefined> {
+    const cdp = this.cdp;
+    if (!cdp) throw Error("Browser driver is not connected to a CDP target");
+    const deadline = performance.now() + timeoutMs;
+    for (;;) {
+      if (this.cdp !== cdp) throw Error("Browser target changed during observation");
+      try { return await cdp.evaluate<T>(snippet, true, Math.max(1, deadline - performance.now())); }
+      catch (error) {
+        // Navigation can destroy the initial context after CDP attaches. Retry
+        // only this read-only inspection, inside the caller's original budget.
+        if (!(error instanceof Error) || !/Execution context was destroyed|Cannot find context with specified id/.test(error.message) || performance.now() >= deadline) throw error;
+        await new Promise(resolve => setTimeout(resolve, Math.min(50, Math.max(0, deadline - performance.now()))));
+      }
     }
-    const snippet = getDomInspectionSnippet({
-      fixtureMode: this.fixtureMode,
-      allowedOrigins: this.allowedOrigins,
-    });
-    const result = await this.cdp.evaluate<DomInspectionResult>(snippet, true, timeoutMs);
+  }
+
+  async inspectDom(timeoutMs = 10000): Promise<DomInspectionResult> {
+    const snippet = getDomInspectionSnippet({ fixtureMode: this.fixtureMode, allowedOrigins: this.allowedOrigins });
+    const result = await this.evaluateObservation<DomInspectionResult>(snippet, timeoutMs);
     if (!result) {
       throw new Error("DOM inspection returned empty result");
     }
@@ -235,7 +247,7 @@ export class GeminiBrowserDriver {
     let signature = "", stableSince = 0;
     while (performance.now() < deadline) {
       check();
-      const state = await this.cdp.evaluate<{ url: string; allowed: boolean; ready: boolean; signature: string }>(`(() => {
+      const state = await this.evaluateObservation<{ url: string; allowed: boolean; ready: boolean; signature: string }>(`(() => {
         const dom = ${getDomInspectionSnippet({ fixtureMode: this.fixtureMode, allowedOrigins: this.allowedOrigins })};
         const editor = document.querySelector("${GEMINI_SELECTORS.COMPOSER_INPUT}");
         const visible = el => el && el.getBoundingClientRect().height > 0 && getComputedStyle(el).visibility !== 'hidden';
@@ -243,7 +255,7 @@ export class GeminiBrowserDriver {
         const allowed = dom.isAllowedSurface && dom.accountState === 'signed_in';
         const ready = allowed && !dom.isGenerating && visible(editor) && !editor.disabled && !editor.readOnly && !editor.closest('[aria-busy="true"], [inert]') && getComputedStyle(editor).pointerEvents !== 'none' && ${requireSend ? "buttons.length === 1" : "true"};
         return { url: dom.url, allowed, ready: Boolean(ready), signature: JSON.stringify([dom.lastResponseKey, dom.lastUserQueryKey, editor?.outerHTML, buttons.map(el => el.outerHTML)]) };
-      })()`, true, Math.max(1, Math.min(1500, deadline - performance.now())));
+      })()`, Math.max(1, Math.min(1500, deadline - performance.now())));
       check();
       if (!state) return false;
       // Chrome can acknowledge CDP before its initial about:blank target commits
@@ -432,7 +444,15 @@ export class GeminiBrowserDriver {
 
     while (!clock.expired(performance.now())) {
       options?.signal?.throwIfAborted();
-      const dom = await this.inspectDom(Math.max(1, Math.min(10000, clock.remaining(performance.now()))));
+      let dom: DomInspectionResult;
+      try { dom = await this.inspectDom(Math.max(1, Math.min(10000, clock.remaining(performance.now())))); }
+      catch (error) {
+        options?.signal?.throwIfAborted();
+        if (error instanceof CdpCommandTimeoutError && clock.expired(performance.now())) break;
+        throw error;
+      }
+      options?.signal?.throwIfAborted();
+      if (clock.expired(performance.now())) break;
       const hasNewResponse = dom.responseCount > initialCount || !!initialResponseKey && !!dom.lastResponseKey && dom.lastResponseKey !== initialResponseKey;
       const text = hasNewResponse ? dom.lastResponseText : "";
       const codeBlocks = hasNewResponse ? dom.lastResponseCodeBlocks : [];

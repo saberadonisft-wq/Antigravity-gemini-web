@@ -25,6 +25,13 @@ export interface CdpEvaluateResult<T = unknown> {
   };
 }
 
+export class CdpCommandTimeoutError extends Error {
+  constructor(readonly method: string, readonly timeoutMs: number) {
+    super(`CDP command '${method}' timed out after ${timeoutMs}ms`);
+    this.name = "CdpCommandTimeoutError";
+  }
+}
+
 let extensionAuth: { port: number; profileId: string; token: string } | undefined;
 /** Each MCP owner is scoped to one profile. Credentials never enter target URLs. */
 export function configureExtensionCdp(value?: { port: number; profileId: string; token: string }) { extensionAuth = value; }
@@ -130,7 +137,7 @@ export class CdpClient {
     return new Promise<T>((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id);
-        reject(new Error(`CDP command '${method}' timed out after ${timeoutMs}ms`));
+        reject(new CdpCommandTimeoutError(method, timeoutMs));
       }, timeoutMs);
 
       this.pending.set(id, {

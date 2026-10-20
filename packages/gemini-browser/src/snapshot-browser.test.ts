@@ -16,6 +16,7 @@ test("Real CDP snapshot upload reads exact UTF-8, waits for processing, validate
   const browser = new LiveGeminiBrowserAdapter({targetUrl:fixture.url,allowedOrigins:[fixture.url],fixtureMode:true,headless:true,userDataDir:directory,debugPort:port});
   t.after(async()=>{await browser.cleanup();await fixture.stop();await removeFixtureProfile(directory);});
   assert.equal((await browser.openBrowser()).opened,true);
+  assert.equal(await browser.driver.waitForComposerReady(),true);
   const content="START_Việt_😀\n"+"Synthetic reference text. ".repeat(4000)+"\nEND_đúng_😀";
   const sha256=createHash("sha256").update(content).digest("hex"), snapshot={version:1 as const,mediaType:"text/plain" as const,fileName:`ag-native-context-${sha256}.txt`,sha256,content};
   const expectedAccountFingerprint=createHash("sha256").update("testuser@example.com").digest("hex");

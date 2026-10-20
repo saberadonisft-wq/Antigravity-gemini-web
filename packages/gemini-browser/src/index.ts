@@ -362,13 +362,13 @@ export class LiveGeminiBrowserAdapter implements GeminiBrowserAdapter {
       }
 
       // If allowed surface was just loaded, allow a brief grace period for DOM elements to mount
-      if (dom.isAllowedSurface && dom.accountState === "unknown" && !dom.hasComposer) {
+      if (dom.isAllowedSurface && dom.accountState === "unknown") {
         const deadline = Date.now() + 2000;
         while (Date.now() < deadline) {
           await new Promise((r) => setTimeout(r, 100));
           try {
             const interim = await this.driver.inspectDom();
-            if (interim.accountState !== "unknown" || interim.hasComposer) {
+            if (!interim.isAllowedSurface || interim.accountState !== "unknown") {
               dom = interim;
               break;
             }
