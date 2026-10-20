@@ -80,6 +80,7 @@ test("An account changed after input is rejected before the actual Send click; a
   const live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
   t.after(async () => { try { await live.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
   assert.equal((await live.openBrowser()).opened, true);
+  assert.equal(await live.driver.waitForComposerReady(false, () => {}, 10000), true, "Wait for the signed-in fixture before simulating an account change");
   const fingerprint = createHash("sha256").update("testuser@example.com").digest("hex");
   const input = live.driver.inputPrompt.bind(live.driver);
   live.driver.inputPrompt = async (text, check) => {
