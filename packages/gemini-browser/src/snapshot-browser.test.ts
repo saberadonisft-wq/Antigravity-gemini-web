@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import net from "node:net";
 import { createHash } from "node:crypto";
-import { GeminiDomFixtureServer } from "./fixture-server.js";
+import { GeminiDomFixtureServer, openFixtureBrowser } from "./fixture-server.js";
 import { LiveGeminiBrowserAdapter } from "./index.js";
 import { removeFixtureProfile } from "./fixture-cleanup.js";
 
@@ -15,8 +15,7 @@ test("Real CDP snapshot upload reads exact UTF-8, waits for processing, validate
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),"gemini-driver-test-profile-"));
   const browser = new LiveGeminiBrowserAdapter({targetUrl:fixture.url,allowedOrigins:[fixture.url],fixtureMode:true,headless:true,userDataDir:directory,debugPort:port});
   t.after(async()=>{await browser.cleanup();await fixture.stop();await removeFixtureProfile(directory);});
-  assert.equal((await browser.openBrowser()).opened,true);
-  assert.equal(await browser.driver.waitForComposerReady(),true);
+  assert.equal((await openFixtureBrowser(browser)).opened,true);
   const content="START_Việt_😀\n"+"Synthetic reference text. ".repeat(4000)+"\nEND_đúng_😀";
   const sha256=createHash("sha256").update(content).digest("hex"), snapshot={version:1 as const,mediaType:"text/plain" as const,fileName:`ag-native-context-${sha256}.txt`,sha256,content};
   const expectedAccountFingerprint=createHash("sha256").update("testuser@example.com").digest("hex");
@@ -58,7 +57,7 @@ test("Snapshot files survive uncertain/pending browser outcomes and are removed 
   const port=await new Promise<number>(resolve=>{const server=net.createServer();server.listen(0,"127.0.0.1",()=>{const value=(server.address() as net.AddressInfo).port;server.close(()=>resolve(value));});});
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),"gemini-driver-test-profile-"));
   const browser=new LiveGeminiBrowserAdapter({targetUrl:fixture.url,allowedOrigins:[fixture.url],fixtureMode:true,headless:true,userDataDir:directory,debugPort:port});
-  t.after(async()=>{await browser.cleanup();await fixture.stop();await removeFixtureProfile(directory);});assert.equal((await browser.openBrowser()).opened,true);
+  t.after(async()=>{await browser.cleanup();await fixture.stop();await removeFixtureProfile(directory);});assert.equal((await openFixtureBrowser(browser)).opened,true);
   const content="Retained synthetic file Việt 😀",sha256=createHash("sha256").update(content).digest("hex"),snapshot={version:1 as const,mediaType:"text/plain" as const,fileName:`ag-native-context-${sha256}.txt`,sha256,content},expectedAccountFingerprint=createHash("sha256").update("testuser@example.com").digest("hex");
   for(const mode of ["timeout","cancel","unknown_click"] as const){
     const lease=await browser.openFreshConversation();let file="";

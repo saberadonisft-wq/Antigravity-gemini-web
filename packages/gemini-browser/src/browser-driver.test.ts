@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import { removeFixtureProfile } from "./fixture-cleanup.js";
 import net from "node:net";
-import { GeminiDomFixtureServer } from "./fixture-server.js";
+import { GeminiDomFixtureServer, openFixtureBrowser } from "./fixture-server.js";
 import { LiveGeminiBrowserAdapter, GeminiBrowserDriver } from "./index.js";
 import { createHash } from "node:crypto";
 
@@ -79,8 +79,7 @@ test("An account changed after input is rejected before the actual Send click; a
   await fixture.start();
   const live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
   t.after(async () => { try { await live.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
-  assert.equal((await live.openBrowser()).opened, true);
-  assert.equal(await live.driver.waitForComposerReady(false, () => {}, 10000), true, "Wait for the signed-in fixture before simulating an account change");
+  assert.equal((await openFixtureBrowser(live)).opened, true);
   const fingerprint = createHash("sha256").update("testuser@example.com").digest("hex");
   const input = live.driver.inputPrompt.bind(live.driver);
   live.driver.inputPrompt = async (text, check) => {
@@ -105,7 +104,7 @@ test("Account identity uses all visible avatar attributes and fails closed on co
   await fixture.start();
   const live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
   t.after(async () => { try { await live.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
-  assert.equal((await live.openBrowser()).opened, true);
+  assert.equal((await openFixtureBrowser(live)).opened, true);
   const domDeadline = Date.now() + 10000;
   let domReady = false;
   while (Date.now() < domDeadline) {
@@ -149,7 +148,7 @@ test("Browser status waits for the account email to hydrate on a new signed-in t
   await fixture.start();
   const live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
   t.after(async () => { try { await live.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
-  assert.equal((await live.openBrowser()).opened, true);
+  assert.equal((await openFixtureBrowser(live)).opened, true);
   const domDeadline = Date.now() + 10000;
   let domReady = false;
   while (Date.now() < domDeadline) {
@@ -191,7 +190,7 @@ test("Composer readiness waits through a terminal response's editor transition a
   await fixture.start();
   const live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
   t.after(async () => { try { await live.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
-  assert.equal((await live.openBrowser()).opened, true);
+  assert.equal((await openFixtureBrowser(live)).opened, true);
   await live.submitPrompt("ready-first", "first");
   assert.equal((await live.pollResponse("ready-first", { deadlineMs: 5000 })).status, "completed");
   assert.equal(await live.driver.cdp!.evaluate("document.querySelector('[contenteditable]').getAttribute('aria-busy')"), "true");
@@ -238,7 +237,7 @@ test("Browser driver lifecycle on owned DOM fixture: 3 turns (text, markdown, co
   });
 
   // 3. Open browser and attach CDP to DOM fixture
-  const openRes = await adapter.openBrowser();
+  const openRes = await openFixtureBrowser(adapter);
   assert.equal(openRes.opened, true, "Browser should open and connect CDP");
 
   // 4. Inspect status via positive evidence
@@ -292,7 +291,7 @@ test("Response completion waits past missing Stop and partial JSON for the newes
   t.after(async () => { try { await live?.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
   await fixture.start();
   live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
-  await live.openBrowser();
+  await openFixtureBrowser(live);
   assert.equal((await live.checkStatus()).browserState, "ready");
   const cdp = live.driver.cdp!;
   const partial = '{"nonce":"937bdcdd13038b8a3ba0e990705cdb4f';
@@ -334,7 +333,7 @@ test("Trusted editor input updates the editor model exactly and blocks Send afte
   t.after(async () => { try { await live?.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
   await fixture.start();
   live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
-  await live.openBrowser(); assert.equal((await live.checkStatus()).browserState, "ready");
+  await openFixtureBrowser(live); assert.equal((await live.checkStatus()).browserState, "ready");
   const cdp = live.driver.cdp!;
   await cdp.evaluate(`(() => {
     const editor = document.getElementById('composerInput');
@@ -359,7 +358,7 @@ test("A virtualized answer count still acknowledges Send and polls the new respo
   t.after(async () => { try { await live?.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
   await fixture.start();
   live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
-  await live.openBrowser(); assert.equal((await live.checkStatus()).browserState, "ready");
+  await openFixtureBrowser(live); assert.equal((await live.checkStatus()).browserState, "ready");
   await live.driver.cdp!.evaluate(`(() => {
     document.getElementById('conversation').innerHTML = '<div class="model-response" id="old-answer"><div class="model-response-text">OLD ANSWER</div><button aria-label="Good response">Feedback</button></div>';
     document.getElementById('sendBtn').addEventListener('click', () => document.getElementById('old-answer').remove(), { capture: true, once: true });

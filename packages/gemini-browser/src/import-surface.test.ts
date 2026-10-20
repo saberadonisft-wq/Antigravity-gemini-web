@@ -1,4 +1,5 @@
 import test from "node:test";
+import { openFixtureBrowser } from "./fixture-server.js";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -14,7 +15,7 @@ test("Real CDP import observation preserves tabs/drafts and rejects hidden, dupl
   let live:LiveGeminiBrowserAdapter|undefined;const pages:{id:string;page:CdpClient}[]=[];
   t.after(async()=>{try{for(const {id,page} of pages){page.close();await CdpClient.closeOwnedTarget(port,id).catch(()=>{});}await live?.cleanup();}finally{await fixture.stop();await removeFixtureProfile(directory);}});
   await fixture.start();live=new LiveGeminiBrowserAdapter({targetUrl:fixture.url,userDataDir:directory,debugPort:port,headless:true,fixtureMode:true,allowedOrigins:[new URL(fixture.url).origin]});
-  const opened=await live.openBrowser();assert.equal(opened.opened,true,opened.actionReason);const original=live.driver.cdp!,originalWs=original.wsUrl;
+  const opened=await openFixtureBrowser(live);assert.equal(opened.opened,true,opened.actionReason);const original=live.driver.cdp!,originalWs=original.wsUrl;
   const composerReady=await live.driver.waitForComposerReady(),composerProbe=await original.evaluate(`(()=>{const editor=document.querySelector("rich-textarea div[contenteditable='true'], rich-textarea textarea"),rect=editor?.getBoundingClientRect(),style=editor&&getComputedStyle(editor);return {url:location.href,readyState:document.readyState,hasEditor:!!editor,height:rect?.height,disabled:editor?.disabled,readOnly:editor?.readOnly,ariaBusy:!!editor?.closest('[aria-busy="true"]'),inert:!!editor?.closest('[inert]'),pointerEvents:style?.pointerEvents,hasAccount:!!document.querySelector('[data-test-id="user-avatar"]'),stopVisible:[...document.querySelectorAll('button.stop-button')].some(node=>node.getBoundingClientRect().height>0)}})()`);assert.equal(composerReady,true,JSON.stringify({status:await live.checkStatus(),composerProbe}));assert.equal(await live.driver.inputPrompt("PRESERVE_IMPORT_PROBE_DRAFT"),true);
   assert.equal(await original.evaluate("document.querySelector('[contenteditable=true]').textContent"),"PRESERVE_IMPORT_PROBE_DRAFT");
   const fingerprint=createHash("sha256").update("fixture@example.test").digest("hex");

@@ -1,4 +1,16 @@
 import http from "node:http";
+import type { LiveGeminiBrowserAdapter } from "./index.js";
+
+/** CDP attachment is not document readiness. Fixture setup must establish both. */
+export async function openFixtureBrowser(browser: LiveGeminiBrowserAdapter) {
+  if (!browser.driver.fixtureMode) throw Error("Fixture setup cannot open a live Google session");
+  const opened = await browser.openBrowser();
+  if (opened.opened && !await browser.driver.waitForComposerReady(false, () => {}, 10000)) {
+    const dom = await browser.driver.inspectDom();
+    throw Error(JSON.stringify({ fixtureNotReady: true, url: dom.url, accountState: dom.accountState, hasComposer: dom.hasComposer }));
+  }
+  return opened;
+}
 
 export interface FixtureServerOptions {
   port?: number;

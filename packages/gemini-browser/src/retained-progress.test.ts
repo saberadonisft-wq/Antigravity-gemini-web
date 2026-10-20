@@ -4,7 +4,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import net from "node:net";
-import { GeminiDomFixtureServer } from "./fixture-server.js";
+import { GeminiDomFixtureServer, openFixtureBrowser } from "./fixture-server.js";
 import { LiveGeminiBrowserAdapter, ProgressDeadline, inspectBrowserModels } from "./index.js";
 import { GeminiBrowserDriver } from "./gemini-browser-driver.js";
 import { CdpClient } from "./cdp-client.js";
@@ -26,7 +26,7 @@ test("Explicit existing-chat attach preserves history and draft, never creates a
   t.after(async () => { try { await live?.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
   await fixture.start();
   live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: port, headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
-  await live.openBrowser();
+  await openFixtureBrowser(live);
   assert.equal((await live.checkStatus()).browserState, "ready");
   const existingWs = live.driver.cdp!.wsUrl;
   const url = fixture.url + "/saved_conversation";
@@ -63,7 +63,7 @@ test("Real CDP fixture retains one task tab, verifies Argon/effort, streams prog
   t.after(async () => { try { await live?.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
   await fixture.start();
   live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: port, headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
-  assert.equal((await live.openBrowser()).opened, true);
+  assert.equal((await openFixtureBrowser(live)).opened, true);
   assert.equal((await live.checkStatus()).browserState, "ready");
   await live.driver.inputPrompt("KEEP_ORIGINAL_DRAFT"); const original = live.driver.cdp!.wsUrl;
   const lease = await live.openFreshConversation(); const owned = live.driver.cdp!.wsUrl;
@@ -112,7 +112,7 @@ test("Manual edits invalidate a retained target, and a changed Web model blocks 
   t.after(async () => { try { await live?.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
   await fixture.start();
   live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: port, headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
-  await live.openBrowser(); await live.checkStatus();
+  await openFixtureBrowser(live); await live.checkStatus();
   const lease = await live.openFreshConversation();
   await live.selectModel({ model: "4 Argon", effort: "High" });
   await live.driver.cdp!.evaluate("document.querySelector('[data-model-option=\"4 Argon\"]').classList.remove('selected')");
@@ -148,7 +148,7 @@ test("Closing the original tab cannot lose a completed retained response or prev
   t.after(async () => { witness?.close(); try { await live?.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
   await fixture.start();
   live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: port, headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
-  assert.equal((await live.openBrowser()).opened, true);
+  assert.equal((await openFixtureBrowser(live)).opened, true);
   const originalWs = live.driver.cdp!.wsUrl;
   const original = await CdpClient.findTarget(port, target => target.webSocketDebuggerUrl === originalWs);
   assert.ok(original);
@@ -197,7 +197,7 @@ test("An exclusive Thinking submenu stays verifiable with a large composer and c
   t.after(async () => { try { await live?.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
   await fixture.start();
   live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: port, headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
-  await live.openBrowser(); await live.checkStatus();
+  await openFixtureBrowser(live); await live.checkStatus();
   const policy = { model: "4 Argon", effort: "Low" };
   const prompt = "Synthetic native context for model selection. ".repeat(1700);
   const assertClosed = async () => assert.equal(await live!.driver.cdp!.evaluate("document.getElementById('modePicker').getAttribute('aria-expanded') === 'false' && document.getElementById('modeMenu').hidden && document.getElementById('effortMenu').hidden"), true);

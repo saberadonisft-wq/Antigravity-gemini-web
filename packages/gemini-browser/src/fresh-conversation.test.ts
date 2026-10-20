@@ -5,7 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import net from "node:net";
 import { LiveGeminiBrowserAdapter } from "./index.js";
-import { GeminiDomFixtureServer } from "./fixture-server.js";
+import { GeminiDomFixtureServer, openFixtureBrowser } from "./fixture-server.js";
 import { removeFixtureProfile } from "./fixture-cleanup.js";
 
 test("Fresh native conversation owns a new tab and restores the original page and unsent draft", { timeout: 30000 }, async t => {
@@ -22,7 +22,7 @@ test("Fresh native conversation owns a new tab and restores the original page an
   await fixture.start();
   // Fixture origin is only known after binding its ephemeral port.
   live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: port, headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
-  assert.equal((await live.openBrowser()).opened, true);
+  assert.equal((await openFixtureBrowser(live)).opened, true);
   for (let retry = 0; retry < 20 && (await live.checkStatus()).browserState !== "ready"; retry++) await new Promise(resolve => setTimeout(resolve, 50));
   assert.equal(await live.driver.inputPrompt("ORIGINAL_UNSENT_DRAFT"), true);
   const original = live.driver.cdp!.wsUrl;
