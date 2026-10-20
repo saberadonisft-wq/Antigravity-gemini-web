@@ -52,4 +52,4 @@ Contract UI vẫn `schemaVersion=0.1` của workspace chưa phát hành, đượ
 
 Hash khác trong báo cáo G3 cũ không khớp file đo lại. JSON live cũ có `url/title/actionReason` cũng không phải output format của status-only probe hiện tại; không coi là bằng chứng mới của probe sau bản vá.
 
-Có thể tiếp tục **G4-A launcher và IPC với capability gating**. G4-B native/live E2E vẫn phụ thuộc các gate thật. Prompt: [GEMINI_G4_PROMPT.md](../GEMINI_G4_PROMPT.md).
+Có thể tiếp tục **G4-A launcher và IPC với capability gating**. G4-B native/live E2E vẫn phụ thuộc các gate thật. Prompt: [GEMINI_G4_PROMPT.md](../archive/prompts/GEMINI_G4_PROMPT.md).

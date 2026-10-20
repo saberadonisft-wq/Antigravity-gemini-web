@@ -50,4 +50,4 @@ Do not point this fixture at real account state. The probe itself validates base
 
 The prepared baseline's worktree registration was removed after validation. Git's filesystem cleanup left a residual directory with an orphan workspace junction. Automatic approval review rejected the subsequent scoped PowerShell removal with `blocked by policy`, without a more specific reason. The residue remains ignored under `.tmp/p8-baseline-r36-a946b6c`; it is not a running or registered worktree. The earlier failed fixture's recorded writer PID was confirmed absent before its owned temp root was removed.
 
-See the [recovery runbook](../NATIVE_RECOVERY_RUNBOOK.md) and [full upgrade plan](../NATIVE_UPGRADE_PLAN.md). No main proxy/browser restart, push, merge or deployment was performed.
+See the [recovery runbook](../NATIVE_RECOVERY_RUNBOOK.md) and [full upgrade plan](../archive/plans/NATIVE_UPGRADE_PLAN.md). No main proxy/browser restart, push, merge or deployment was performed.

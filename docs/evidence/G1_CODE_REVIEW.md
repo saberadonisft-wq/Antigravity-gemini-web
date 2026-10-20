@@ -119,4 +119,4 @@ Sửa: lint thực sự chạy trên source và fail khi thiếu setup cần thi
 3. Gate browser: user login → model/composer → 3 lượt text/markdown → cancel → status có bằng chứng.
 4. Chỉ sau các gate mới làm G2 live: đọc file → patch → test pass/fail → final reply ở IDE.
 
-Prompt đầy đủ: [GEMINI_G2_PROMPT.md](../GEMINI_G2_PROMPT.md). Review không kết luận native bất khả thi; kết luận hiện chưa đủ điều kiện đi thẳng tới live integration.
+Prompt đầy đủ: [GEMINI_G2_PROMPT.md](../archive/prompts/GEMINI_G2_PROMPT.md). Review không kết luận native bất khả thi; kết luận hiện chưa đủ điều kiện đi thẳng tới live integration.

@@ -48,4 +48,4 @@ There were **0 real Google prompt requests** in these probes. Main owner was rea
 
 P8 still needs actual multi-worker/browser RSS and process limits under sustained load, crash/orphan-file recovery, baseline restore/rollback, Windows restart and open core Web/IDE/account gates. Cached-handle limits are compatibility bounds, not optimized RAM targets. P6 live adapters/chooser selection, P7 and the wider plan remain open. No commit, push, public sharing, merge or deployment was performed.
 
-Recovery: [runbook](../NATIVE_RECOVERY_RUNBOOK.md). Scope: [NATIVE_UPGRADE_PLAN.md](../NATIVE_UPGRADE_PLAN.md).
+Recovery: [runbook](../NATIVE_RECOVERY_RUNBOOK.md). Scope: [NATIVE_UPGRADE_PLAN.md](../archive/plans/NATIVE_UPGRADE_PLAN.md).

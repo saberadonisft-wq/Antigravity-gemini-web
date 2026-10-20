@@ -29,7 +29,7 @@ Watchdogs giữ nguyên: build 60s, tests 90s, static 45s/command; desktop 90s +
 
 ## Chrome thật trên DOM fixture sở hữu
 
-[OwnedBrowserAdapter acceptance test](../../packages/runtime/src/owned-browser.fixture.test.ts) dùng Chrome headless, random CDP port và OS temp profile `g4-owned-browser-*`. Không tài khoản Google hay `gemini.google.com`.
+[OwnedBrowserAdapter acceptance test](../../tools/archive/packages/runtime/src/owned-browser.fixture.test.ts) dùng Chrome headless, random CDP port và OS temp profile `g4-owned-browser-*`. Không tài khoản Google hay `gemini.google.com`.
 
 Open lặp giữ nguyên owned page/marker; `Page.bringToFront` chạy qua adapter thật. Sau một fixture turn hoàn tất, kill đúng spawned root bằng `ChildProcess.kill("SIGKILL")`, quan sát exit/CDP disconnect, rồi mở lại với PID mới. Page marker cũ không tồn tại và số user-query bằng 0 trước prompt mới: không replay prompt cũ.
 
@@ -73,4 +73,4 @@ Trong quá trình kiểm chứng có failure do contrast thật, locator UIA c�
 
 Sau kiểm chứng không quan sát process Electron/Chrome khớp owned fixture/smoke prefixes còn sống; không audit toàn bộ tiến trình trên máy. **Native inference UNRESOLVED / NOT_TESTED**, Google account chưa refresh, host read/patch/test PASS+FAIL/approvals chưa có trace end-to-end. Native capabilities vẫn gated. Không sửa IDE chính, copy cookie, G5/installer hay commit/push.
 
-Để người dùng thử bản hiện tại: [G4 user test guide](../G4_USER_TEST_GUIDE.md).
+Để người dùng thử bản hiện tại: [G4 user test guide](../archive/guides/G4_USER_TEST_GUIDE.md).

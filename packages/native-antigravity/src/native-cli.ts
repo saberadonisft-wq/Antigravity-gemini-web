@@ -10,7 +10,6 @@ import { AccountRegistry } from "./account-registry.js";
 import { startNativeProxy, NATIVE_PROXY_PORT, NATIVE_RUNTIME_REVISION } from "./native-proxy.js";
 import { inspectIde, nativeHome, isolatedIdeProfile, configureIsolatedProfile, atomicPrivateFile, assertNoLinks } from "./installation.js";
 import { NativeRouteError } from "./native-protocol.js";
-import { ChatImportProbeRequestSchema, ChatImportCapabilitySchema } from "@antigravity-gemini-web/contracts";
 import { extensionCredentials } from "@antigravity-gemini-web/gemini-browser";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -23,9 +22,6 @@ function getRegistry(): AccountRegistry {
   fs.mkdirSync(nativeHome, { recursive: true });
   const registryPath = path.join(nativeHome, "accounts.json");
   const registry = new AccountRegistry(registryPath);
-  const defaultProfile = path.join(os.homedir(), ".gemini", "antigravity-gemini-web-live", "app_data", "browser_profile");
-  const defaultState = path.join(os.homedir(), ".gemini", "antigravity-gemini-web-live", "app_data", "mcp");
-  registry.ensureDefault({ profilePath: defaultProfile, statePath: defaultState, debugPort: 9223 });
   return registry;
 }
 
@@ -65,18 +61,7 @@ async function isProxyRunning(): Promise<boolean> {
 }
 
 try {
-  if (command === "imports:inspect") {
-    const { inspectChatImportArchive, chatImportInspectionArguments } = await import("./chat-import.js");
-    const selected = chatImportInspectionArguments(process.argv.slice(3));
-    console.log(JSON.stringify(await inspectChatImportArchive(selected.file, selected.provider), null, 2));
-  } else if (command === "imports:check") {
-    if (process.argv.length !== 4) throw new NativeRouteError("INVALID_ARGUMENT", "Use imports:check ACCOUNT_ID after opening Import memory to Gemini in that account profile.");
-    const live = await health(); if (live.runtimeRevision < 39) throw new NativeRouteError("ACCOUNT_RUNTIME_STALE", "Update Native to revision 39 before inspecting imports.", 412);
-    const status = await ownerControl("manage", { action: "status" }), account = status.accounts.find((value: {accountId:string}) => value.accountId === process.argv[3]);
-    if (!account?.enabled || !account.identityRegistered) throw new NativeRouteError("ACCOUNT_IDENTITY_UNVERIFIED", "Select an enabled account with a registered identity.", 412);
-    const request = ChatImportProbeRequestSchema.parse({ action: "probe", expectedOwnerId: status.ownerId, expectedAccountRevision: status.revision, accountId: account.accountId, identityEpoch: account.identityEpoch });
-    console.log(JSON.stringify(ChatImportCapabilitySchema.parse(await ownerControl("imports", request)), null, 2));
-  } else if (command === "check") {
+  if (command === "check") {
     console.log(JSON.stringify({ ...inspectIde(), endpoint, isolatedIdeProfile, vendorFilesModified: false, nativeInference: "unverified_until_live_acceptance" }, null, 2));
   } else if (command === "setup" || command === "restore") {
     inspectIde();
@@ -94,6 +79,7 @@ try {
       console.log(JSON.stringify(await ownerControl("browser", account ? { accountId: account.accountId } : undefined), null, 2));
     } else {
       if (!account) throw new NativeRouteError("ACCOUNT_NOT_FOUND", "No active or configured account.");
+      if(account.browserTransport!=="extension")throw new NativeRouteError("UNSUPPORTED_OPERATION","Add and pair a Chrome extension account in the launcher. Legacy profiles are kept for manual recovery.",412);
       const cliPath = path.join(root, "packages/mcp-server/dist/cli.js");
       const backend = new McpNativeBrowserBackend(cliPath, {
         AG_MCP_BROWSER_PROFILE: account.profilePath,
@@ -106,23 +92,6 @@ try {
       } finally {
         await backend.close().catch(() => {});
       }
-    }
-  } else if(command==="knowledge"||command.startsWith("knowledge:")){
-    const option=(flag:string)=>{const index=process.argv.indexOf(flag);return index>=0?process.argv[index+1]:undefined;};
-    const repeated=(flag:string)=>process.argv.flatMap((value,index)=>value===flag&&process.argv[index+1]?[process.argv[index+1]]:[]);
-    const status=await ownerControl("knowledge",{action:"status"}),authority={expectedOwnerId:status.ownerId,expectedRevision:status.revision};
-    if(command==="knowledge"||command==="knowledge:status")console.log(JSON.stringify(status,null,2));
-    else{
-      let request:unknown;
-      if(command==="knowledge:import")request={action:"import_code",source:{kind:option("--github")?"github_checkout":"local_folder",label:option("--label"),root:option("--root"),files:repeated("--file"),overlayFiles:repeated("--overlay"),repository:option("--github")},...authority};
-      else if(command==="knowledge:register")request={action:"register_external",kind:process.argv[3],label:option("--label"),url:option("--url"),instructionVersion:option("--instruction-version"),...authority};
-      else if(command==="knowledge:refresh"||command==="knowledge:check"||command==="knowledge:remove")request={action:command==="knowledge:refresh"?"refresh":command==="knowledge:remove"?"remove":"check",sourceId:process.argv[3],...(command==="knowledge:refresh"&&repeated("--overlay").length?{overlayFiles:repeated("--overlay")} :{}),...authority};
-      else if(command==="knowledge:bind"||command==="knowledge:clear"){
-        const target=option("--account"),account=target?getRegistry().find(target):undefined;
-        if(!account||!option("--task"))throw new NativeRouteError("INVALID_ARGUMENT","Choose an explicit --account and --task for project knowledge.");
-        request={action:"bind",taskScope:option("--task"),accountId:account.accountId,identityEpoch:account.identityEpoch,sourceIds:command==="knowledge:clear"?[]:repeated("--source"),...authority};
-      }else throw new NativeRouteError("INVALID_ARGUMENT","Use knowledge, knowledge:import, knowledge:register, knowledge:check, knowledge:refresh, knowledge:remove, knowledge:bind or knowledge:clear.");
-      console.log(JSON.stringify(await ownerControl("knowledge",request),null,2));
     }
   } else if(command==="accounts:status"){
     console.log(JSON.stringify(await ownerControl("manage",{action:"status"}),null,2));
@@ -162,8 +131,8 @@ try {
     const profileIdx = process.argv.indexOf("--profile");
     const stateIdx = process.argv.indexOf("--state");
     const portIdx = process.argv.indexOf("--port");
-    const transportIdx = process.argv.indexOf("--transport"), browserTransport = transportIdx < 0 ? undefined : process.argv[transportIdx + 1];
-    if (browserTransport !== undefined && browserTransport !== "cdp" && browserTransport !== "extension") throw new NativeRouteError("INVALID_ARGUMENT", "Use --transport cdp|extension.");
+    const transportIdx = process.argv.indexOf("--transport"), browserTransport = transportIdx < 0 ? "extension" : process.argv[transportIdx + 1];
+    if (browserTransport !== "extension") throw new NativeRouteError("UNSUPPORTED_OPERATION", "New accounts require the Chrome profile extension transport.");
     if (browserTransport === "extension" && (profileIdx >= 0 || stateIdx >= 0)) throw new NativeRouteError("INVALID_ARGUMENT", "Extension accounts use private bridge metadata directories, not existing Chrome user-data directories.");
     if(await isProxyRunning()){
       if(profileIdx>=0||stateIdx>=0||portIdx>=0)throw new NativeRouteError("UNSUPPORTED_OPERATION","Custom account paths/ports require an offline native owner. Online additions use owner-generated isolated paths.",412);
@@ -277,8 +246,6 @@ try {
     const proxy = await startNativeProxy({
       backend,
       accountRegistry: registry,
-      knowledgeExperimental:process.env.AG_NATIVE_KNOWLEDGE_EXPERIMENTAL==="1",
-      importsExperimental:process.env.AG_NATIVE_IMPORTS_EXPERIMENTAL==="1",
       stateDirectory: nativeHome,
       controlToken,
       contextModelSelection: process.env.AG_NATIVE_CONTEXT_MODEL === "off" ? undefined : { model: process.env.AG_NATIVE_CONTEXT_MODEL ?? "3.8 Flash", ...(process.env.AG_NATIVE_CONTEXT_EFFORT ? { effort: process.env.AG_NATIVE_CONTEXT_EFFORT } : {}) },
@@ -324,15 +291,16 @@ try {
       }
       if (!ready) throw new NativeRouteError("PROXY_START_FAILED", "Proxy did not become ready. Run native:start to inspect its sanitized error.");
     }
-    const browser = await ownerControl("browser");
+    // Extension accounts are connected explicitly in the launcher, never auto-launched.
+    const browser = { browserState: "extension", accountState: "check_in_launcher" };
     // Visible on purpose: the user needs to see this isolated IDE and complete its own login.
     const ideEnvironment = { ...process.env };
     delete ideEnvironment.ELECTRON_RUN_AS_NODE; delete ideEnvironment.NODE_OPTIONS;
     const child = spawn(ide.executable, ["--user-data-dir", isolatedIdeProfile, "--new-window", root], { detached: true, windowsHide: false, stdio: "ignore", env: ideEnvironment });
     await new Promise<void>((resolve, reject) => { child.once("spawn", resolve); child.once("error", reject); });
     child.unref();
-    console.log(JSON.stringify({ launchRequested: true, endpoint, isolatedIdeProfile, selectModel: "Gemini Web (Local)", browserState: browser.browserState, browserAccountState: browser.accountState, accountLogin: "Complete Google sign-in in the isolated IDE if requested.", browserLogin: "The isolated Gemini browser is opened automatically; sign in there if requested. Credentials are never copied." }, null, 2));
-  } else throw new NativeRouteError("INVALID_COMMAND", "Use check, setup, start, launch, browser, status, accounts, accounts:status, account:add, account:use, account:disable, account:enable, account:check, account:verify, account:browser, routing, routing:set, routing:unbind, knowledge, knowledge:import, knowledge:register, knowledge:check, knowledge:refresh, knowledge:remove, knowledge:bind, knowledge:clear, imports:inspect, imports:check, receipt, cancel, stop, resume or restore.");
+    console.log(JSON.stringify({ launchRequested: true, endpoint, isolatedIdeProfile, selectModel: "Gemini Web (Local)", browserState: browser.browserState, browserAccountState: browser.accountState, accountLogin: "Complete Google sign-in in the isolated IDE if requested.", browserLogin: "Pair a Chrome profile in the launcher and verify its Gemini identity." }, null, 2));
+  } else throw new NativeRouteError("INVALID_COMMAND", "Use check, setup, start, launch, browser, status, accounts, accounts:status, account:add, account:use, account:disable, account:enable, account:check, account:verify, account:browser, routing, routing:set, routing:unbind, receipt, cancel, stop, resume or restore.");
 } catch (error) {
   console.error(JSON.stringify({ code: error instanceof NativeRouteError ? error.code : "NATIVE_COMMAND_FAILED", message: error instanceof NativeRouteError ? error.message : "Native route command failed; no credentials or source payload are logged." }));
   process.exitCode = 1;

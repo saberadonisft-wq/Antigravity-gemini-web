@@ -11,7 +11,7 @@ const receiptName = ".tmp/native-recovery-build.json";
 const hash = file => createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 const git = (directory, ...args) => execFileSync("git", ["-C", directory, ...args], { encoding: "utf8", windowsHide: true }).trim();
 const normalize = filename => fs.realpathSync(filename).toLowerCase();
-const workspacePaths = { contracts: "packages/contracts", "gemini-browser": "packages/gemini-browser", "mcp-server": "packages/mcp-server", "model-bridge": "packages/model-bridge", "native-antigravity": "packages/native-antigravity", runtime: "packages/runtime", launcher: "apps/launcher" };
+const workspacePaths = { contracts: "packages/contracts", "gemini-browser": "packages/gemini-browser", "mcp-server": "packages/mcp-server", "native-antigravity": "packages/native-antigravity", launcher: "apps/launcher" };
 const evidenceFiles = ["package-lock.json", "node_modules/.package-lock.json", "packages/contracts/dist/index.js", "packages/native-antigravity/dist/native-proxy.js", "packages/native-antigravity/dist/request-ledger.js", "packages/native-antigravity/dist/native-cli.js", "packages/mcp-server/dist/service.js", "packages/mcp-server/dist/receipt-store.js", "packages/gemini-browser/dist/index.js"];
 
 function checkWorkspace(base, directory, role) {

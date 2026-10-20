@@ -40,6 +40,6 @@ The 3.8 → primary-model Native Web turn, two real accounts switching A ↔ B, 
 
 P6 Web adapters (Gem/Notebook/Drive/GitHub import), actual Windows chooser selection and live freshness/permissions gates remain open. External registrations currently record unverified metadata. P7's four independent branches remain planned. P8 still needs actual MCP/Chrome memory/process measurements, sustained load, crash/orphan recovery, baseline restore/rollback and Windows restart.
 
-Next: continue P8 measurements with actual MCP shared-owner processes before choosing any memory policy. [Synthetic Node benchmark](g4-native-p8b-node-memory-benchmark.md), [full upgrade plan](../NATIVE_UPGRADE_PLAN.md), [recovery runbook](../NATIVE_RECOVERY_RUNBOOK.md).
+Next: continue P8 measurements with actual MCP shared-owner processes before choosing any memory policy. [Synthetic Node benchmark](g4-native-p8b-node-memory-benchmark.md), [full upgrade plan](../archive/plans/NATIVE_UPGRADE_PLAN.md), [recovery runbook](../NATIVE_RECOVERY_RUNBOOK.md).
 
 This checkpoint does not establish remote CI, production readiness or completion of the full upgrade plan. No push, merge or deployment was performed.

@@ -47,4 +47,4 @@ The benchmark checks a three-minute work budget before each tool call, validates
 
 The 8 MiB setting is a candidate for an explicit opt-in policy. Before implementing it, propagate a validated setting to the actual production shared-service owner, include it in the worker fingerprint, verify the applied startup setting before Send and reject incompatible existing workers without restarting them. Benchmark actual Chrome/DOM workloads and repeat trials before choosing a default. No production memory setting changed here.
 
-The broader P8 soak/crash/orphan/Windows restart/restore/rollback gates remain open, as do the real Web/account/IDE and P6/P7 gates. See the [full plan](../NATIVE_UPGRADE_PLAN.md) and [earlier standalone Node experiment](g4-native-p8b-node-memory-benchmark.md).
+The broader P8 soak/crash/orphan/Windows restart/restore/rollback gates remain open, as do the real Web/account/IDE and P6/P7 gates. See the [full plan](../archive/plans/NATIVE_UPGRADE_PLAN.md) and [earlier standalone Node experiment](g4-native-p8b-node-memory-benchmark.md).

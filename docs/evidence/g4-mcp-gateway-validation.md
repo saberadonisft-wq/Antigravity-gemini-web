@@ -48,6 +48,6 @@ Một lần root suite trả **165/166**, do test cũ `owned-browser.fixture.tes
 
 ## Bước còn lại
 
-Trong phạm vi đã chọn, user chạy `npm run test:mcp` để kiểm tra local. Bước deployment sau: chọn URL HTTPS ổn định, cấu hình proxy/tunnel theo [setup](../MCP_GATEWAY_SETUP.md), kiểm tra TLS và metadata bên ngoài; rồi user tự thêm custom app/cấp OAuth trên tài khoản được Google hỗ trợ. Chỉ khi có trace Google connector thật → task/approval/native tool thật → final cùng task mới cập nhật native E2E thành PASS.
+Trong phạm vi đã chọn, user chạy `npm run test:mcp` để kiểm tra local. Bước deployment sau: chọn URL HTTPS ổn định, cấu hình proxy/tunnel theo [setup](../archive/guides/MCP_GATEWAY_SETUP.md), kiểm tra TLS và metadata bên ngoài; rồi user tự thêm custom app/cấp OAuth trên tài khoản được Google hỗ trợ. Chỉ khi có trace Google connector thật → task/approval/native tool thật → final cùng task mới cập nhật native E2E thành PASS.
 
-[ADR 0006](../adr/0006-mcp-oauth-gateway.md), [bằng chứng MCP trước](g4-mcp-validation.md), [prompt host agent](../MCP_HOST_AGENT_PROMPT.md).
+[ADR 0006](../archive/adr/0006-mcp-oauth-gateway.md), [bằng chứng MCP trước](g4-mcp-validation.md), [prompt host agent](../archive/prompts/MCP_HOST_AGENT_PROMPT.md).

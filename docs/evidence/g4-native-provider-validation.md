@@ -57,4 +57,4 @@ Bản cuối đã thêm function policy/schema isolation và Windows fixture cle
 - Mỗi request tạo browser conversation mới và truyền lại đầy đủ native context; có thể tốn thời gian hơn một lượt chat Web đơn giản. Không cắt lịch sử để giả thành công.
 - Computer Use skill cấm điều khiển terminal commands trực tiếp hoặc gián tiếp qua UI. Vì vậy đã gửi prompt sửa file/chạy check cho người dùng tự thực hiện; chưa gọi đó là PASS khi chưa có native receipt thật.
 
-[Cách chạy và rollback](../NATIVE_SETUP.md), [ADR 0008](../adr/0008-native-gemini-web-provider.md), [third-party notices](../../THIRD_PARTY_NOTICES.md).
+[Cách chạy và rollback](../archive/guides/NATIVE_SETUP.md), [ADR 0008](../archive/adr/0008-native-gemini-web-provider.md), [third-party notices](../../THIRD_PARTY_NOTICES.md).

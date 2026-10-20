@@ -1,0 +1,54 @@
+      if (url.pathname === "/__native/imports") {
+        let raw: unknown; try { raw = JSON.parse((await readBody(request)).toString("utf8")); } catch { throw new NativeRouteError("INVALID_ARGUMENT", "Expected one local inspection command."); }
+        const parsed = ChatImportRequestSchema.safeParse(raw); if (!parsed.success) throw new NativeRouteError("INVALID_ARGUMENT", "Invalid local inspection command.");
+        const command = parsed.data, enabled = options.importsExperimental === true && !!options.accountRegistry;
+        const idle = !counters.active && !router?.activeCount && !accountControlActive && !stopping && ![...turns.values()].some(turn => turn.waiters > 0);
+        if (command.action === "status" && !enabled && !chatImports) { json(response, 200, { service: "gemini-native-chat-import", version: 1, ownerId: managementOwnerId, revision: 0, accountRevision: options.accountRegistry?.snapshot().revision ?? 0, experimentalEnabled: false, canInspect: false, inspectionActive: false, jobs: [], googleSubmission: "not_submitted" }); return; }
+        if (!enabled) throw new NativeRouteError("IMPORT_EXPERIMENT_DISABLED", "Local import inspection is disabled in this native owner.", 412);
+        if (command.action === "probe") {
+          if (command.expectedOwnerId !== managementOwnerId) throw new NativeRouteError("STALE_AUTHORITY", "Refresh the Native owner before inspecting imports.", 409);
+          if (!idle) throw new NativeRouteError("BUSY", "Wait for Native operations to finish before inspecting imports.", 409);
+          const registry = options.accountRegistry!.snapshot(), account = registry.accounts.find(value => value.accountId === command.accountId);
+          if (registry.revision !== command.expectedAccountRevision || !account?.enabled || !account.identityFingerprint || account.identityEpoch !== command.identityEpoch) throw new NativeRouteError("STALE_ACCOUNT_SELECTION", "Refresh and select the registered account identity.", 409);
+          if (!options.backend.bindAccount) throw new NativeRouteError("UNSUPPORTED_OPERATION", "Account-bound browser inspection is unavailable.", 412);
+          const backend = options.backend.bindAccount(account.accountId, account);
+          if (!backend.inspectImportSurface) throw new NativeRouteError("UNSUPPORTED_OPERATION", "This browser worker cannot inspect imports.", 412);
+          const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 20000);
+          const disconnected = () => { if (!response.writableEnded) controller.abort(); };
+          controllers.add(controller); response.once("close", disconnected); accountControlActive = true;
+          try {
+            const observation = await backend.inspectImportSurface(controller.signal);
+            controller.signal.throwIfAborted(); backend.assertAuthority?.();
+            if (options.accountRegistry!.snapshot().revision !== registry.revision) throw new NativeRouteError("STALE_ACCOUNT_SELECTION", "Account configuration changed during import inspection.", 409);
+            json(response, 200, ChatImportCapabilitySchema.parse({ service: "gemini-native-chat-import-capability", version: 1, ownerId: managementOwnerId, accountRevision: registry.revision, accountId: account.accountId, identityEpoch: account.identityEpoch, observation }));
+          } finally { clearTimeout(timer); response.off("close", disconnected); controllers.delete(controller); accountControlActive = false; }
+          return;
+        }
+        const store = importJobs();
+        if (command.action === "inspect") { json(response, 200, store.inspect(command, command.file, enabled, idle)); return; }
+        if (command.action !== "status") store.execute(command);
+        json(response, 200, store.snapshot(enabled, idle)); return;
+      }
+      if(url.pathname==="/__native/knowledge"){
+        let raw:unknown;try{raw=JSON.parse((await readBody(request)).toString("utf8"));}catch{throw new NativeRouteError("INVALID_ARGUMENT","Expected one knowledge request.");}
+        const parsed=KnowledgeRequestSchema.safeParse(raw);if(!parsed.success)throw new NativeRouteError("INVALID_ARGUMENT","Invalid knowledge command.");
+        const command=parsed.data,canMutate=!counters.active&&!router?.activeCount&&!accountControlActive&&!stopping&&![...turns.values()].some(turn=>turn.waiters>0);
+        if(command.action==="status"){
+          json(response,200,options.knowledgeExperimental?knowledgeStore().status(managementOwnerId,true,canMutate,lastTaskScope):{service:"gemini-native-knowledge",version:1,ownerId:managementOwnerId,revision:0,experimentalEnabled:false,canMutate:false,lastTaskScope,sources:[],bindings:[]});return;
+        }
+        if(!options.knowledgeExperimental)throw new NativeRouteError("SOURCE_EXPERIMENT_DISABLED","Restart with AG_NATIVE_KNOWLEDGE_EXPERIMENTAL=1 before configuring project sources.",412);
+        if(command.expectedOwnerId!==managementOwnerId)throw new NativeRouteError("STALE_AUTHORITY","The native owner changed; refresh knowledge status.",409);
+        if(!canMutate)throw new NativeRouteError("BUSY","Wait for native turns and browser operations to settle before changing sources.",409);
+        const store=knowledgeStore();if(store.snapshot().revision!==command.expectedRevision)throw new NativeRouteError("SOURCE_CONFIG_CONFLICT","Source selection changed; refresh knowledge status.",409);
+        if(command.action==="import_code")store.importCode(command.source,command.expectedRevision);
+        else if(command.action==="register_external")store.registerExternal({kind:command.kind,label:command.label,url:command.url,instructionVersion:command.instructionVersion},command.expectedRevision);
+        else if(command.action==="refresh")store.refresh(command.sourceId,command.expectedRevision,command.overlayFiles);
+        else if(command.action==="check")store.check(command.sourceId);
+        else if(command.action==="remove")store.remove(command.sourceId,command.expectedRevision);
+        else{
+          const account=options.accountRegistry?.get(command.accountId);
+          if(!account?.enabled||!account.identityFingerprint||account.identityEpoch!==command.identityEpoch)throw new NativeRouteError("STALE_AUTHORITY","Bind sources only to the current registered account identity epoch.",409);
+          store.bind(command.taskScope,command.accountId,command.identityEpoch,command.sourceIds,command.expectedRevision);
+        }
+        json(response,200,store.status(managementOwnerId,true,true,lastTaskScope));return;
+      }

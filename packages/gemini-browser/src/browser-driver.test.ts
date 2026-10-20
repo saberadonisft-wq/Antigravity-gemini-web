@@ -25,6 +25,14 @@ test("Composer readiness waits through the initial about:blank navigation but re
   assert.equal(await driver.waitForComposerReady(), true);
   assert.ok(reads >= 3, "composer must remain stable after navigation commits");
 
+  reads = 0;
+  Object.assign(driver, { cdp: { ...cdp, evaluate: async () => {
+    reads++;
+    return { url: "http://127.0.0.1:4321/app", allowed: reads >= 2, ready: reads >= 2, signature: "stable" };
+  } } });
+  assert.equal(await driver.waitForComposerReady(), true, "a valid Gemini page may need time to hydrate signed-in account state");
+  assert.ok(reads >= 3, "readiness must wait for account hydration and a stable composer");
+
   Object.assign(driver, { cdp: { ...cdp, evaluate: async () => ({ url: "https://accounts.google.com/", allowed: false, ready: false, signature: "" }) } });
   assert.equal(await driver.waitForComposerReady(), false);
 });
@@ -88,6 +96,81 @@ test("An account changed after input is rejected before the actual Send click; a
   assert.deepEqual(accepted.submissionDiagnostic, { inputChars: "Verified synthetic continuation".length, readbackVerified: true, sendClickAttempted: true, acceptanceObserved: true });
   assert.equal((await live.pollResponse("identity-corrected", { deadlineMs: 5000 })).status, "completed");
   assert.equal(await live.driver.cdp!.evaluate("document.querySelectorAll('.user-query').length"), 1);
+});
+
+test("Account identity uses all visible avatar attributes and fails closed on conflicting emails", { timeout: 20000 }, async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-driver-test-profile-"));
+  const fixture = new GeminiDomFixtureServer({ signedIn: true });
+  await fixture.start();
+  const live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
+  t.after(async () => { try { await live.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
+  assert.equal((await live.openBrowser()).opened, true);
+  const domDeadline = Date.now() + 10000;
+  let domReady = false;
+  while (Date.now() < domDeadline) {
+    try {
+      const dom = await live.driver.inspectDom();
+      if (dom.isAllowedSurface && dom.accountState === "signed_in" && dom.hasComposer) { domReady = true; break; }
+    } catch {}
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  assert.equal(domReady, true, "fixture Gemini tab should finish its initial navigation before simulating account hydration");
+
+  await live.driver.cdp!.evaluate(`(() => {
+    const avatar = document.querySelector('[data-test-id="user-avatar"]');
+    avatar.setAttribute('aria-label', 'Google Account');
+    avatar.setAttribute('title', 'testuser@example.com');
+    avatar.setAttribute('alt', 'Profile image');
+    const hidden = document.createElement('img');
+    hidden.setAttribute('data-test-id', 'user-avatar');
+    hidden.setAttribute('aria-label', 'hidden@example.com');
+    hidden.style.display = 'none';
+    document.body.appendChild(hidden);
+  })()`);
+  let inspection = await live.driver.inspectDom();
+  assert.equal(inspection.accountState, "signed_in");
+  assert.equal(inspection.accountIdentity, "testuser@example.com", "generic aria-label must not hide the email in title");
+
+  await live.driver.cdp!.evaluate(`(() => {
+    const second = document.createElement('img');
+    second.setAttribute('data-test-id', 'user-avatar');
+    second.setAttribute('aria-label', 'another@example.com');
+    second.style.cssText = 'position:fixed;width:24px;height:24px;left:0;top:0';
+    document.body.appendChild(second);
+  })()`);
+  inspection = await live.driver.inspectDom();
+  assert.equal(inspection.accountIdentity, undefined, "conflicting visible account emails must not select an identity");
+});
+
+test("Browser status waits for the account email to hydrate on a new signed-in tab", { timeout: 20000 }, async t => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-driver-test-profile-"));
+  const fixture = new GeminiDomFixtureServer({ signedIn: true });
+  await fixture.start();
+  const live = new LiveGeminiBrowserAdapter({ targetUrl: fixture.url, userDataDir: directory, debugPort: await getFreePort(), headless: true, fixtureMode: true, allowedOrigins: [fixture.url] });
+  t.after(async () => { try { await live.cleanup(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
+  assert.equal((await live.openBrowser()).opened, true);
+  const domDeadline = Date.now() + 10000;
+  let domReady = false;
+  while (Date.now() < domDeadline) {
+    try {
+      const dom = await live.driver.inspectDom();
+      if (dom.isAllowedSurface && dom.accountState === "signed_in" && dom.hasComposer) { domReady = true; break; }
+    } catch {}
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  assert.equal(domReady, true, "fixture Gemini tab should finish its initial navigation before simulating account hydration");
+
+  await live.driver.cdp!.evaluate(`(() => {
+    const avatar = document.querySelector('[data-test-id="user-avatar"]');
+    avatar.setAttribute('aria-label', 'Google Account');
+    setTimeout(() => avatar.setAttribute('aria-label', 'Google Account: testuser@example.com'), 350);
+  })()`);
+  const started = performance.now();
+  const status = await live.checkStatus();
+  assert.equal(status.browserState, "ready");
+  assert.equal(status.accountState, "signed_in");
+  assert.equal(status.accountIdentity, "testuser@example.com");
+  assert.ok(performance.now() - started >= 250, "status should wait for the delayed account label");
 });
 
 function getFreePort(): Promise<number> {

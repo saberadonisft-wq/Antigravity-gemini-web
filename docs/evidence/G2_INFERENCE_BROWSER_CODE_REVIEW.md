@@ -135,4 +135,4 @@ README vẫn ghi driver stub và số tests 31/7 (một đoạn còn 29); cần 
 
 Observations của các controlled proofs: [g2-inference-browser-review-observations.json](g2-inference-browser-review-observations.json).
 
-Prompt tiếp tục: [GEMINI_G2_INFERENCE_BROWSER_CONTINUE_PROMPT.md](../GEMINI_G2_INFERENCE_BROWSER_CONTINUE_PROMPT.md).
+Prompt tiếp tục: [GEMINI_G2_INFERENCE_BROWSER_CONTINUE_PROMPT.md](../archive/prompts/GEMINI_G2_INFERENCE_BROWSER_CONTINUE_PROMPT.md).

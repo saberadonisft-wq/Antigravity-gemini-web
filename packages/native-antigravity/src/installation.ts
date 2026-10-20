@@ -17,6 +17,80 @@ export function assertNoLinks(filename: string) {
     catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error; }
   }
 }
+
+type AccountStorage = { profilePath: string; statePath: string };
+type StagedAccountStorageDeletion = { commit(): void; rollback(): void };
+
+/**
+ * Stage deletion only for account directories created by this bridge. Custom paths
+ * (including normal Chrome user profiles) are deliberately left untouched.
+ */
+export function stageManagedAccountStorageDeletion(account: AccountStorage, stateDirectory: string): StagedAccountStorageDeletion {
+  const stateRoot = path.resolve(stateDirectory);
+  const profile = path.resolve(account.profilePath);
+  const state = path.resolve(account.statePath);
+  const equals = (a: string, b: string) => process.platform === "win32" ? a.toLowerCase() === b.toLowerCase() : a === b;
+  const accountsRoot = path.join(stateRoot, "accounts");
+  const profileParent = path.dirname(profile);
+  const stateParent = path.dirname(state);
+  let targets: string[] = [];
+
+  const profileParentRelative = path.relative(accountsRoot, profileParent);
+  const isolatedParent = profileParent === stateParent && !path.isAbsolute(profileParentRelative) &&
+    profileParentRelative !== "" && !profileParentRelative.startsWith(`..${path.sep}`) &&
+    !profileParentRelative.startsWith("..") &&
+    (/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(profileParentRelative) || /^[a-z0-9_-]+$/i.test(profileParentRelative));
+
+  if (isolatedParent && ((path.basename(profile) === "profile" && path.basename(state) === "mcp") ||
+      (path.basename(profile) === "browser_profile" && path.basename(state) === "mcp"))) {
+    targets = [profileParent];
+  } else {
+    // Legacy Default Account paths created by native-cli.ts under app_data.
+    const appData = path.dirname(stateRoot);
+    if (equals(profile, path.join(appData, "browser_profile")) && equals(state, path.join(appData, "mcp"))) {
+      targets = [profile, state];
+    }
+  }
+
+  const staged: Array<{ original: string; quarantine: string }> = [];
+  const rollback = () => {
+    for (const item of [...staged].reverse()) {
+      if (!fs.existsSync(item.quarantine)) continue;
+      if (fs.existsSync(item.original)) throw new NativeRouteError("ACCOUNT_CLEANUP_FAILED", "Account data could not be restored safely after a failed removal.", 500);
+      fs.renameSync(item.quarantine, item.original);
+    }
+    staged.length = 0;
+  };
+
+  try {
+    for (const target of [...new Set(targets)]) {
+      assertNoLinks(target);
+      if (!fs.existsSync(target)) continue;
+      const stat = fs.lstatSync(target);
+      if (!stat.isDirectory() || stat.isSymbolicLink()) throw new NativeRouteError("UNSAFE_PATH", "Bridge account data is not a regular directory; refusing to delete it.", 409);
+      const quarantine = path.join(path.dirname(target), `.ag-account-delete-${randomUUID()}`);
+      assertNoLinks(quarantine);
+      fs.renameSync(target, quarantine);
+      staged.push({ original: target, quarantine });
+    }
+  } catch (error) {
+    rollback();
+    throw error;
+  }
+
+  return {
+    rollback,
+    commit() {
+      try {
+        for (const item of staged) fs.rmSync(item.quarantine, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 });
+        staged.length = 0;
+      } catch {
+        throw new NativeRouteError("ACCOUNT_CLEANUP_FAILED", "The account was removed, but Windows could not finish deleting its local bridge data. Close Chrome windows opened by the bridge and retry cleanup.", 500);
+      }
+    },
+  };
+}
+
 export function atomicPrivateFile(filename: string, bytes: string | Buffer) {
   assertNoLinks(filename); fs.mkdirSync(path.dirname(filename), { recursive: true });
   const temp = filename + "." + randomUUID() + ".tmp";

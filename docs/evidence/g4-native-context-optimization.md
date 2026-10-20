@@ -4,7 +4,7 @@ Ngày 16/10/2026. Phạm vi local/fixture; **chưa nghiệm thu giao thức patc
 
 ## Thay đổi
 
-Giữ cùng owned conversation khi IDE sửa history/system/tools/config. Gửi append hoặc patch có revision thay cho việc tạo tab mới và lặp toàn bộ context. Bootstrap mang hướng dẫn một lần, lượt tiếp theo dùng header ngắn. Trường hợp patch lớn hơn snapshot dùng replace tường minh trong cùng tab. Revision 14 giới hạn mô tả tool/schema dài trên wire; AJV vẫn dùng schema đầy đủ. Snapshot đầy đủ vẫn ở local; không cắt ngầm chỉ thị hay lịch sử. [ADR 0010](../adr/0010-native-context-updates.md).
+Giữ cùng owned conversation khi IDE sửa history/system/tools/config. Gửi append hoặc patch có revision thay cho việc tạo tab mới và lặp toàn bộ context. Bootstrap mang hướng dẫn một lần, lượt tiếp theo dùng header ngắn. Trường hợp patch lớn hơn snapshot dùng replace tường minh trong cùng tab. Revision 14 giới hạn mô tả tool/schema dài trên wire; AJV vẫn dùng schema đầy đủ. Snapshot đầy đủ vẫn ở local; không cắt ngầm chỉ thị hay lịch sử. [ADR 0010](../archive/adr/0010-native-context-updates.md).
 
 Nonce và tool authority lấy từ request hiện tại. Reservation riêng chống callback trễ kể cả hai lượt cùng context hash. Kiểm tra cap trước browser và giải phóng reservation chưa gửi khi lỗi. Diagnostics thêm contextMode/contextReason/patchOperations/savedPromptChars, không ghi prompt thô.
 

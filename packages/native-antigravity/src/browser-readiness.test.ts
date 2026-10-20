@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ensureNativeBrowserReady, type BrowserBrokerCall } from "./browser-readiness.js";
+import { ensureNativeBrowserReady, inspectNativeBrowserIdentity, type BrowserBrokerCall } from "./browser-readiness.js";
 import { NativeRouteError } from "./native-protocol.js";
 
 test("Native readiness opens a closed browser once and waits for the signed-in composer without submitting", async () => {
@@ -13,6 +13,25 @@ test("Native readiness opens a closed browser once and waits for the signed-in c
   };
   assert.equal((await ensureNativeBrowserReady(call, new AbortController().signal, 1000)).browserState, "ready");
   assert.deepEqual(calls, ["gemini_status", "gemini_open_browser", "gemini_status"]);
+});
+
+test("Identity inspection only reads status while model restoration is pending", async () => {
+  const calls: string[] = [];
+  const status = await inspectNativeBrowserIdentity(async name => {
+    calls.push(name);
+    return { browserState: "ready", accountState: "signed_in", accountIdentity: "user@fixture.invalid", modelRestorePending: true, browserOperationActive: true };
+  }, new AbortController().signal);
+  assert.equal(status.accountIdentity, "user@fixture.invalid");
+  assert.deepEqual(calls, ["gemini_status"]);
+});
+
+test("Identity inspection does not open or sign into an unready profile", async () => {
+  const calls: string[] = [];
+  await assert.rejects(inspectNativeBrowserIdentity(async name => {
+    calls.push(name);
+    return { browserState: "closed", accountState: "unknown" };
+  }, new AbortController().signal), { code: "BROWSER_NOT_READY", status: 412 });
+  assert.deepEqual(calls, ["gemini_status"]);
 });
 
 test("Native readiness never opens an already ready or busy browser and never automates sign-in", async () => {

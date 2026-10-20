@@ -28,12 +28,12 @@ Account binding applies to additional bridge references. It does not strip sourc
 
 Total fresh unit/regression tests: **214**, plus the separate integration probes. Unchanged browser/MCP test suites were not rerun to inflate that count; the actual MCP service and SQLite path were exercised in the CLI fixture. Source 34 artifacts remain historical evidence and were preserved.
 
-The new desktop workflow verifies imported selection, relative-path redaction, separate A/B bindings, stale check/refresh, external sources staying unverified, cancellation without import, credential-file exclusion, controls locked during an actual held Native turn, descriptor-unavailable recovery, source removal preserving files, VI/light and EN/dark, 800px/1280px layouts, keyboard focus and minimum 44px control targets. It reported zero renderer errors and no horizontal overflow. Computed contrast for rendered enabled controls/body text was **5.39:1 light** and **5.62:1 dark**. Screenshots were captured with warmed frames and visually inspected.
+The new desktop workflow verifies imported selection, relative-path redaction, separate A/B bindings, stale check/refresh, external sources staying unverified, cancellation without import, credential-file exclusion, controls locked during an actual held Native turn, descriptor-unavailable recovery, source removal preserving files, Vietnamese and English under the light theme, 800px/1280px layouts, keyboard focus and minimum 44px control targets. It reported zero renderer errors and no horizontal overflow. Computed light-theme contrast for rendered enabled controls/body text was checked against 4.5:1. Screenshots were captured with warmed frames and visually inspected.
 
 | State | Screenshot |
 |---|---|
 | Vietnamese/light | [Overview](p6b-native-knowledge-r35/knowledge-light.png), [source list](p6b-native-knowledge-r35/knowledge-sources-light.png) |
-| English/dark | [Overview](p6b-native-knowledge-r35/knowledge-dark.png), [source list](p6b-native-knowledge-r35/knowledge-sources-dark.png) |
+| English/light | [Overview](p6b-native-knowledge-r35/knowledge-english-light.png), [source list](p6b-native-knowledge-r35/knowledge-sources-english-light.png) |
 | 800px width | [Narrow layout](p6b-native-knowledge-r35/knowledge-800px.png) |
 
 ## Acceptance boundary
@@ -46,4 +46,4 @@ Later real-chooser attempt: the Windows dialog opened and returned Cancel, but s
 
 This does not close Web GitHub import, Gem/Notebook/Drive capabilities or per-account permissions, source quality on changing repositories, IDE fresh-read-before-edit, two real accounts, P3 stability, P7 or P8. Metadata/current-local-byte checks do not prove a model used a source correctly. No commit, push, deployment, public share or credential/profile migration was performed.
 
-Usage/rollback: [NATIVE_KNOWLEDGE.md](../NATIVE_KNOWLEDGE.md), [recovery runbook](../NATIVE_RECOVERY_RUNBOOK.md), [ADR 0011](../adr/0011-native-project-knowledge.md). Full scope remains in [NATIVE_UPGRADE_PLAN.md](../NATIVE_UPGRADE_PLAN.md).
+Usage/rollback: [NATIVE_KNOWLEDGE.md](../archive/guides/NATIVE_KNOWLEDGE.md), [recovery runbook](../NATIVE_RECOVERY_RUNBOOK.md), [ADR 0011](../archive/adr/0011-native-project-knowledge.md). Full scope remains in [NATIVE_UPGRADE_PLAN.md](../archive/plans/NATIVE_UPGRADE_PLAN.md).

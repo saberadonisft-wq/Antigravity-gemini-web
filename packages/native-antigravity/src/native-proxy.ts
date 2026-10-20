@@ -1,3 +1,4 @@
+import { observeConnections } from "./connection-status.js";
 import fs from "node:fs";
 import path from "node:path";
 import http from "node:http";
@@ -15,170 +16,14 @@ import { nativeNotSentProof,permitsAccountFailover } from "./failover-policy.js"
 import { NativeManagementRequestSchema } from "@antigravity-gemini-web/contracts";
 import { buildManagementSnapshot } from "./management-snapshot.js";
 import { NativeKnowledgeRegistry,type KnowledgeResolution } from "./knowledge-registry.js";
-import { NativeChatImportJobs } from "./chat-import-jobs.js";
-import { ChatImportRequestSchema, ChatImportCapabilitySchema } from "@antigravity-gemini-web/contracts";
-import { KnowledgeRequestSchema } from "@antigravity-gemini-web/contracts";
+import { stageManagedAccountStorageDeletion } from "./installation.js";
 import { NativeExtensionPairingRequestSchema, NativeExtensionPairingResultSchema } from "@antigravity-gemini-web/contracts";
 import { extensionCredentials } from "@antigravity-gemini-web/gemini-browser";
 
-const PROD = "https://cloudcode-pa.googleapis.com";
-const DAILY = "https://daily-cloudcode-pa.googleapis.com";
-export const NATIVE_PROXY_PORT = 9236;
-export const NATIVE_RUNTIME_REVISION = 42;
-/**
- * The picker identifier is deliberately distinct from WEB_MODEL (the internal
- * bridge route) and from MODEL_PLACEHOLDER_M* (the IDE enum).  Antigravity
- * keeps picker IDs in its model sort/cache, while it serializes the enum in a
- * generation request.  Keeping them separate mirrors the native catalog
- * contract and avoids an external-looking route name being treated as a
- * Google model identifier.
- */
-export const WEB_CATALOG_MODEL = "custom-antigravity-gemini-web";
-export interface UpstreamResult { status: number; body: Buffer; contentType: string }
-export type ControlTransport = (origin: string, route: string, body: Buffer, headers: Record<string, string>, signal: AbortSignal) => Promise<UpstreamResult>;
-const MAX_BODY = 2 * 1024 * 1024;
-const MAX_CONTROL_RESPONSE = 8 * 1024 * 1024;
-const CONTROL_ROUTES = /^\/v1internal:(?:loadCodeAssist|onboardUser|fetchUserInfo|fetchAvailableModels|fetchCredits|retrieveUserQuota|retrieveUserQuotaSummary|fetchAdminControls|recordCodeAssistTelemetry|recordCodeAssistMetrics|fetchUserTier|fetchUserStatus|fetchMcpServerConfigs|listExperiments|fetchExperiments)$/;
-const MODEL_PREFIX = "MODEL_PLACEHOLDER_M";
-
-/**
- * Keep the health endpoint useful when an IDE build changes its catalog wire
- * shape.  This deliberately contains only public catalog identifiers and
- * model enum values: never prompts, account details, or credentials.
- */
-function catalogModelReferences(value: unknown): JsonObject {
-  const references: JsonObject[] = [];
-  if (!object(value)) return { collections: 0, references };
-  let collections = 0;
-  for (const collection of ["models", "availableModels", "available_models"]) {
-    const entries = value[collection];
-    if (!entries || typeof entries !== "object") continue;
-    collections++;
-    if (Array.isArray(entries)) {
-      for (const entry of entries) {
-        if (!object(entry) || references.length >= 128) continue;
-        const name = entry.name;
-        const model = entry.model;
-        if ((typeof name === "string" || typeof name === "number") && (typeof model === "string" || typeof model === "number")) {
-          references.push({ collection, key: String(name), model: String(model) });
-        }
-      }
-    } else {
-      for (const [key, entry] of Object.entries(entries)) {
-        if (!object(entry) || references.length >= 128) continue;
-        const model = entry.model;
-        if (typeof model === "string" || typeof model === "number") references.push({ collection, key, model: String(model) });
-      }
-    }
-  }
-  return { collections, references };
-}
-
-function modelSelectors(value: unknown): JsonObject {
-  if (!object(value)) return {};
-  const selected: JsonObject = {};
-  for (const key of ["model", "modelId", "model_id"]) {
-    const candidate = value[key];
-    if (typeof candidate === "string" || typeof candidate === "number") selected[key] = String(candidate);
-  }
-  return selected;
-}
-
-export const controlTransport: ControlTransport = async (origin, route, body, headers, signal) => {
-  const response = await fetch(new URL(route, origin), { method: "POST", headers, body: new Uint8Array(body), signal, redirect: "manual" });
-  const chunks: Buffer[] = [];
-  let size = 0;
-  if (response.body) for await (const chunk of response.body) {
-    size += chunk.length;
-    if (size > MAX_CONTROL_RESPONSE) { await response.body.cancel().catch(() => {}); throw new NativeRouteError("UPSTREAM_TOO_LARGE", "Cloud Code metadata exceeds its limit.", 502); }
-    chunks.push(Buffer.from(chunk));
-  }
-  return { status: response.status, body: Buffer.concat(chunks), contentType: response.headers.get("content-type") ?? "application/json" };
-};
-
-/** Protocol/catalog shapes researched from antigravity-add-model; see THIRD_PARTY_NOTICES.md. */
-export class NativeModelIdentity {
-  private slot?: number;
-  constructor(private readonly filename: string) {
-    if (fs.existsSync(filename)) {
-      const value: unknown = JSON.parse(fs.readFileSync(filename, "utf8"));
-      if (!object(value) || value.version !== 1 || value.model !== WEB_MODEL || !Number.isInteger(value.slot) || Number(value.slot) < 0 || Number(value.slot) > 650) throw new NativeRouteError("INVALID_IDENTITY", "Native model identity state is invalid.", 503);
-      this.slot = Number(value.slot);
-    }
-  }
-  get symbol() { return this.slot === undefined ? undefined : MODEL_PREFIX + this.slot; }
-  matches(value: unknown): boolean {
-    return value === WEB_MODEL || value === "models/" + WEB_MODEL ||
-      value === WEB_CATALOG_MODEL || value === "models/" + WEB_CATALOG_MODEL ||
-      (this.slot !== undefined && (value === this.symbol || value === "models/" + this.symbol || value === this.slot + 1000));
-  }
-  merge(upstream: unknown): JsonObject {
-    if (!object(upstream)) throw new NativeRouteError("INVALID_CATALOG", "Upstream model catalog is invalid.", 502);
-    const used = new Set<number>();
-    for (const key of ["models", "availableModels", "available_models"]) {
-      const entries = upstream[key];
-      if (!entries || typeof entries !== "object") continue;
-      for (const [name, value] of Object.entries(entries)) if (
-        name !== WEB_MODEL && name !== WEB_CATALOG_MODEL &&
-        (!object(value) || (value.name !== "models/" + WEB_MODEL && value.name !== "models/" + WEB_CATALOG_MODEL))
-      ) {
-        if (!object(value)) continue;
-        const model = value.model;
-        const index = typeof model === "number" ? model - 1000 : typeof model === "string" && /^MODEL_PLACEHOLDER_M\d+$/.test(model) ? Number(model.slice(MODEL_PREFIX.length)) : -1;
-        if (Number.isInteger(index) && index >= 0 && index <= 650) used.add(index);
-      }
-    }
-    if (this.slot !== undefined && used.has(this.slot)) throw new NativeRouteError("MODEL_IDENTITY_CONFLICT", "A native model now occupies the saved Gemini Web identity. Refusing to reassign cached selections.", 503);
-    if (this.slot === undefined) {
-      let slot = 650;
-      while (used.has(slot)) slot--;
-      if (slot < 0) throw new NativeRouteError("MODEL_IDENTITY_CAPACITY", "No native model identity is available.", 503);
-      fs.mkdirSync(path.dirname(this.filename), { recursive: true });
-      fs.writeFileSync(this.filename, JSON.stringify({ version: 1, model: WEB_MODEL, slot }) + "\n", { flag: "wx", mode: 0o600 });
-      this.slot = slot;
-    }
-    const capabilities = { displayName: "Gemini Web (Local)", supportsImages: false, supportsThinking: false, supportsVideo: false, supportedMimeTypes: { "text/plain": true } };
-    // IDE 2.5.5 validates a 50k checkpoint + 40k reserve. This is a catalog compatibility floor,
-    // NOT a measured Gemini Web context window; compileNativeTurn enforces the real local text cap.
-    const entry = { ...capabilities, recommended: true, maxTokens: 100000, maxOutputTokens: 8192,
-      tokenizerType: "LLAMA_WITH_SPECIAL", model: this.symbol, apiProvider: "API_PROVIDER_GOOGLE_GEMINI", modelProvider: "MODEL_PROVIDER_GOOGLE" };
-    // The native checkpoint experiment must only be advertised when a model
-    // has a verified checkpoint configuration.  Supplying a generic one makes
-    // some IDE versions resolve an unrelated cached placeholder (for example
-    // M36) before a user turn reaches this proxy.
-    const listEntry = { ...capabilities, name: "models/" + WEB_CATALOG_MODEL, version: "1.0",
-      description: "Uses the signed-in Gemini Web conversation in this local browser.",
-      inputTokenLimit: 100000, outputTokenLimit: 8192, supportedGenerationMethods: ["generateContent", "countTokens"] };
-    const result = structuredClone(upstream);
-    let merged = false;
-    for (const key of ["models", "availableModels", "available_models"]) {
-      if (Array.isArray(result[key])) {
-        result[key] = [listEntry, ...result[key].filter((value: unknown) => !object(value) || (value.name !== "models/" + WEB_MODEL && value.name !== "models/" + WEB_CATALOG_MODEL))];
-        merged = true;
-      } else if (object(result[key])) {
-        const collection = { ...result[key] };
-        delete collection[WEB_MODEL];
-        collection[WEB_CATALOG_MODEL] = entry;
-        result[key] = collection;
-        merged = true;
-      }
-    }
-    if (!merged) throw new NativeRouteError("INVALID_CATALOG", "Upstream did not provide a recognized native model collection.", 502);
-    const sorts = Array.isArray(result.agentModelSorts) ? result.agentModelSorts : [];
-    let attached = false;
-    result.agentModelSorts = sorts.map(sort => {
-      if (!object(sort) || !Array.isArray(sort.groups)) return sort;
-      return { ...sort, groups: sort.groups.map(group => {
-        if (!object(group) || !Array.isArray(group.modelIds)) return group;
-        attached = true;
-        return { ...group, modelIds: [...new Set([...group.modelIds, WEB_CATALOG_MODEL])] };
-      }) };
-    });
-    if (!attached) (result.agentModelSorts as unknown[]).push({ displayName: "Gemini Web", groups: [{ modelIds: [WEB_CATALOG_MODEL] }] });
-    return result;
-  }
-}
-
+import {PROD,DAILY,MAX_BODY,CONTROL_ROUTES,WEB_CATALOG_MODEL,controlTransport,NativeModelIdentity,catalogModelReferences,modelSelectors,type ControlTransport} from "./native-catalog.js";
+export {WEB_CATALOG_MODEL,controlTransport,NativeModelIdentity,type ControlTransport,type UpstreamResult} from "./native-catalog.js";
+export const NATIVE_PROXY_PORT=9236;
+export const NATIVE_RUNTIME_REVISION=45;
 async function readBody(request: http.IncomingMessage): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []; let bytes = 0;
@@ -213,8 +58,6 @@ export interface NativeProxyOptions {
   snapshotAttachment?: boolean;
   routingExperimental?:boolean;
   accountRegistry?: AccountRegistry;
-  knowledgeExperimental?:boolean;
-  importsExperimental?:boolean;
 }
 export async function startNativeProxy(options: NativeProxyOptions) {
   if (options.contextModelSelection && !WebModelSelectionSchema.safeParse(options.contextModelSelection).success) throw new NativeRouteError("INVALID_MODEL_SELECTION", "The context Web model/effort configuration is invalid.");
@@ -237,14 +80,10 @@ export async function startNativeProxy(options: NativeProxyOptions) {
   const requestLedger = new NativeRequestLedger(path.join(options.stateDirectory, "native-turn-ledger"));
   let knowledgeRegistry:NativeKnowledgeRegistry|undefined;
   const knowledgeStore=()=>knowledgeRegistry??=new NativeKnowledgeRegistry(path.join(options.stateDirectory,"knowledge.json"));
-  const resolveKnowledge=(taskScope:string|undefined,accountId:string,identityEpoch:number):KnowledgeResolution|undefined=>{
-    if(!options.knowledgeExperimental)return;
-    try{return knowledgeStore().resolve(taskScope,accountId,identityEpoch);}catch{return {used:false,issues:["SOURCE_REGISTRY_UNAVAILABLE"],assertCurrent:()=>{}};}
-  };
+  // Project-source injection has been retired; existing replay fences retain their exact identities.
+  const resolveKnowledge=(_taskScope:string|undefined,_accountId:string,_identityEpoch:number):KnowledgeResolution|undefined=>undefined;
   const verifiedAccounts = new Map<string, { epoch: number; observedAt: string }>();
   const managementOwnerId=randomUUID(),accountFailures=new Map<string,{epoch:number;code:string}>();
-  let chatImports: NativeChatImportJobs | undefined;
-  const importJobs = () => chatImports ??= new NativeChatImportJobs(() => options.accountRegistry!.snapshot(), managementOwnerId);
   const observeAccountFailure=(accountId:string,error:unknown)=>{
     const codes=["BROWSER_LOGIN_REQUIRED","ACCOUNT_IDENTITY_CHANGED","ACCOUNT_IDENTITY_UNVERIFIED","BROWSER_USER_ACTION_REQUIRED","MODEL_UNAVAILABLE","MODEL_RESTORE_PENDING","ACCOUNT_RUNTIME_STALE","BROWSER_UI_CHANGED"];
     if(error instanceof NativeRouteError&&codes.includes(error.code)){
@@ -255,6 +94,10 @@ export async function startNativeProxy(options: NativeProxyOptions) {
     pruneTurns();
     if(!options.accountRegistry||!router)throw new NativeRouteError("UNSUPPORTED_OPERATION","Account management requires the native account registry.",503);
     return buildManagementSnapshot({ownerId:managementOwnerId,runtimeRevision:NATIVE_RUNTIME_REVISION,registry:options.accountRegistry.snapshot(),router:router.snapshot(),canMutate:!counters.active&&!router.activeCount&&!accountControlActive&&!stopping,accountControlActive,resumeArmed:!!resumeRequest&&resumeRequest.expiresAt>Date.now(),verified:verifiedAccounts,failures:accountFailures,turns,lastTurn});
+  };
+  const statusSnapshot = async (chatOffset = 0) => {
+    const connections = await observeConnections(options.accountRegistry?.snapshot().accounts ?? []);
+    return { ...managementSnapshot(), connections, chats: conversations.listChats(chatOffset) };
   };
   let accountControlActive = false;
   const modelSelection = options.modelSelection;
@@ -315,7 +158,7 @@ export async function startNativeProxy(options: NativeProxyOptions) {
         identityEpoch: activeAccount.identityEpoch,
       } : undefined;
       json(response, 200, { service: "gemini-native-proxy", version: 1, runtimeRevision: NATIVE_RUNTIME_REVISION, pid: process.pid, model: WEB_MODEL, catalogModel: WEB_CATALOG_MODEL, symbol: identity.symbol, nativeInference: "unverified_until_live_acceptance", mode: "gemini_web", modelSelection: effectiveModelSelection ?? null, modelSelectionMode: effectiveModelSelection ? "proxy_selected" : "user_selected_in_web",
-        contextModelSelection:options.contextModelSelection??null,contextModelScope:"initial_full_context",accountManagementSupported:!!options.accountRegistry,knowledgeExperimental:options.knowledgeExperimental===true,importInspectionExperimental:options.importsExperimental===true,
+        contextModelSelection:options.contextModelSelection??null,contextModelScope:"initial_full_context",accountManagementSupported:!!options.accountRegistry,knowledgeExperimental:false,importInspectionExperimental:false,
         routing:routing?{mode:routing.settings.mode,revision:routing.revision,modelSelection:routing.settings.modelSelection,experimentalEnabled:routing.experimentalEnabled,automaticRoutingEnabled:routing.automaticRoutingEnabled,failoverEnabled:routing.failoverEnabled,failoverPolicy:routing.settings.failover,stickyBindings:routing.bindings.length,activeLeases:routing.activeLeases}:undefined,
         snapshotAttachmentExperimental: options.snapshotAttachment === true, batchToolCallsEnabled: options.batchToolCalls === true, persistentConversationMetadata: true,
         account: accountSummary, accountRevision: options.accountRegistry?.snapshot().revision, accountControlActive, durableLogicalLedger: true,
@@ -324,75 +167,21 @@ export async function startNativeProxy(options: NativeProxyOptions) {
         backendResources:options.backend.resourceStatus?.(),
         resumeArmed: !!resumeRequest && resumeRequest.expiresAt > Date.now(), deadlines: { stallTimeoutMs: idleBudget, maxDurationMs: maximum }, upstreamCatalog, lastTurn, counters, observations, stopping }); return;
     }
-    if (request.method === "POST" && ["/__native/stop", "/__native/browser", "/__native/cancel", "/__native/resume", "/__native/account", "/__native/reconcile", "/__native/router", "/__native/manage", "/__native/pairing", "/__native/knowledge", "/__native/imports"].includes(url.pathname)) {
+    if (request.method === "POST" && ["/__native/stop", "/__native/browser", "/__native/cancel", "/__native/resume", "/__native/account", "/__native/reconcile", "/__native/router", "/__native/manage", "/__native/pairing"].includes(url.pathname)) {
       const token = request.headers["x-native-control-token"];
       const receivedToken=typeof token==="string"?Buffer.from(token):undefined,expectedToken=Buffer.from(options.controlToken??"");
       if (!options.controlToken || !receivedToken || receivedToken.length!==expectedToken.length || !timingSafeEqual(receivedToken,expectedToken)) throw new NativeRouteError("UNAUTHORIZED", "Owner control token required.", 401);
-      if (url.pathname === "/__native/imports") {
-        let raw: unknown; try { raw = JSON.parse((await readBody(request)).toString("utf8")); } catch { throw new NativeRouteError("INVALID_ARGUMENT", "Expected one local inspection command."); }
-        const parsed = ChatImportRequestSchema.safeParse(raw); if (!parsed.success) throw new NativeRouteError("INVALID_ARGUMENT", "Invalid local inspection command.");
-        const command = parsed.data, enabled = options.importsExperimental === true && !!options.accountRegistry;
-        const idle = !counters.active && !router?.activeCount && !accountControlActive && !stopping && ![...turns.values()].some(turn => turn.waiters > 0);
-        if (command.action === "status" && !enabled && !chatImports) { json(response, 200, { service: "gemini-native-chat-import", version: 1, ownerId: managementOwnerId, revision: 0, accountRevision: options.accountRegistry?.snapshot().revision ?? 0, experimentalEnabled: false, canInspect: false, inspectionActive: false, jobs: [], googleSubmission: "not_submitted" }); return; }
-        if (!enabled) throw new NativeRouteError("IMPORT_EXPERIMENT_DISABLED", "Local import inspection is disabled in this native owner.", 412);
-        if (command.action === "probe") {
-          if (command.expectedOwnerId !== managementOwnerId) throw new NativeRouteError("STALE_AUTHORITY", "Refresh the Native owner before inspecting imports.", 409);
-          if (!idle) throw new NativeRouteError("BUSY", "Wait for Native operations to finish before inspecting imports.", 409);
-          const registry = options.accountRegistry!.snapshot(), account = registry.accounts.find(value => value.accountId === command.accountId);
-          if (registry.revision !== command.expectedAccountRevision || !account?.enabled || !account.identityFingerprint || account.identityEpoch !== command.identityEpoch) throw new NativeRouteError("STALE_ACCOUNT_SELECTION", "Refresh and select the registered account identity.", 409);
-          if (!options.backend.bindAccount) throw new NativeRouteError("UNSUPPORTED_OPERATION", "Account-bound browser inspection is unavailable.", 412);
-          const backend = options.backend.bindAccount(account.accountId, account);
-          if (!backend.inspectImportSurface) throw new NativeRouteError("UNSUPPORTED_OPERATION", "This browser worker cannot inspect imports.", 412);
-          const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 20000);
-          const disconnected = () => { if (!response.writableEnded) controller.abort(); };
-          controllers.add(controller); response.once("close", disconnected); accountControlActive = true;
-          try {
-            const observation = await backend.inspectImportSurface(controller.signal);
-            controller.signal.throwIfAborted(); backend.assertAuthority?.();
-            if (options.accountRegistry!.snapshot().revision !== registry.revision) throw new NativeRouteError("STALE_ACCOUNT_SELECTION", "Account configuration changed during import inspection.", 409);
-            json(response, 200, ChatImportCapabilitySchema.parse({ service: "gemini-native-chat-import-capability", version: 1, ownerId: managementOwnerId, accountRevision: registry.revision, accountId: account.accountId, identityEpoch: account.identityEpoch, observation }));
-          } finally { clearTimeout(timer); response.off("close", disconnected); controllers.delete(controller); accountControlActive = false; }
-          return;
-        }
-        const store = importJobs();
-        if (command.action === "inspect") { json(response, 200, store.inspect(command, command.file, enabled, idle)); return; }
-        if (command.action !== "status") store.execute(command);
-        json(response, 200, store.snapshot(enabled, idle)); return;
-      }
-      if(url.pathname==="/__native/knowledge"){
-        let raw:unknown;try{raw=JSON.parse((await readBody(request)).toString("utf8"));}catch{throw new NativeRouteError("INVALID_ARGUMENT","Expected one knowledge request.");}
-        const parsed=KnowledgeRequestSchema.safeParse(raw);if(!parsed.success)throw new NativeRouteError("INVALID_ARGUMENT","Invalid knowledge command.");
-        const command=parsed.data,canMutate=!counters.active&&!router?.activeCount&&!accountControlActive&&!stopping&&![...turns.values()].some(turn=>turn.waiters>0);
-        if(command.action==="status"){
-          json(response,200,options.knowledgeExperimental?knowledgeStore().status(managementOwnerId,true,canMutate,lastTaskScope):{service:"gemini-native-knowledge",version:1,ownerId:managementOwnerId,revision:0,experimentalEnabled:false,canMutate:false,lastTaskScope,sources:[],bindings:[]});return;
-        }
-        if(!options.knowledgeExperimental)throw new NativeRouteError("SOURCE_EXPERIMENT_DISABLED","Restart with AG_NATIVE_KNOWLEDGE_EXPERIMENTAL=1 before configuring project sources.",412);
-        if(command.expectedOwnerId!==managementOwnerId)throw new NativeRouteError("STALE_AUTHORITY","The native owner changed; refresh knowledge status.",409);
-        if(!canMutate)throw new NativeRouteError("BUSY","Wait for native turns and browser operations to settle before changing sources.",409);
-        const store=knowledgeStore();if(store.snapshot().revision!==command.expectedRevision)throw new NativeRouteError("SOURCE_CONFIG_CONFLICT","Source selection changed; refresh knowledge status.",409);
-        if(command.action==="import_code")store.importCode(command.source,command.expectedRevision);
-        else if(command.action==="register_external")store.registerExternal({kind:command.kind,label:command.label,url:command.url,instructionVersion:command.instructionVersion},command.expectedRevision);
-        else if(command.action==="refresh")store.refresh(command.sourceId,command.expectedRevision,command.overlayFiles);
-        else if(command.action==="check")store.check(command.sourceId);
-        else if(command.action==="remove")store.remove(command.sourceId,command.expectedRevision);
-        else{
-          const account=options.accountRegistry?.get(command.accountId);
-          if(!account?.enabled||!account.identityFingerprint||account.identityEpoch!==command.identityEpoch)throw new NativeRouteError("STALE_AUTHORITY","Bind sources only to the current registered account identity epoch.",409);
-          store.bind(command.taskScope,command.accountId,command.identityEpoch,command.sourceIds,command.expectedRevision);
-        }
-        json(response,200,store.status(managementOwnerId,true,true,lastTaskScope));return;
-      }
       if(url.pathname==="/__native/manage"){
         let raw:unknown;try{raw=JSON.parse((await readBody(request)).toString("utf8"));}catch{throw new NativeRouteError("INVALID_ARGUMENT","Expected a native management request.");}
         const parsed=NativeManagementRequestSchema.safeParse(raw);if(!parsed.success)throw new NativeRouteError("INVALID_ARGUMENT","Invalid native management command.");
         const command=parsed.data;
-        if(command.action==="status"){json(response,200,managementSnapshot());return;}
+        if(command.action==="status"){json(response,200,await statusSnapshot(command.chatOffset));return;}
         const snapshot=managementSnapshot();
         if(command.expectedOwnerId!==managementOwnerId)throw new NativeRouteError("STALE_AUTHORITY","The native owner restarted; refresh before another action.",409);
         if(command.expectedRevision!==snapshot.revision)throw new NativeRouteError("CONFIG_CONFLICT","Account settings changed; refresh before another action.",409);
         if(command.action==="cancel"){
           for(const turn of turns.values())if(!turn.settled&&!turn.controller.signal.aborted){turn.cancellationResult??=new Promise<boolean>(resolve=>{turn.resolveCancellationResult=resolve;});turn.controller.abort(new NativeRouteError("CANCELLED","Native generation cancelled by its local owner.",499));}
-          json(response,200,managementSnapshot());return;
+          json(response,200,await statusSnapshot());return;
         }
         if(!snapshot.canMutate)throw new NativeRouteError("BUSY","A native operation is active; wait for it to settle.",409);
         accountControlActive=true;
@@ -400,7 +189,7 @@ export async function startNativeProxy(options: NativeProxyOptions) {
           const registry=options.accountRegistry!;
           if(command.action==="add"){
             const accountRoot=path.join(options.stateDirectory,"accounts",randomUUID());
-            registry.add({displayName:command.displayName,profilePath:path.join(accountRoot,"profile"),statePath:path.join(accountRoot,"mcp"),browserTransport:command.browserTransport},command.expectedRevision);
+            registry.add({displayName:command.displayName,profilePath:path.join(accountRoot,"profile"),statePath:path.join(accountRoot,"mcp"),browserTransport:command.browserTransport??"extension"},command.expectedRevision);
           }else if(command.action==="use")registry.setActive(command.accountId,command.expectedRevision);
           else if(command.action==="enable")registry.enable(command.accountId,command.expectedRevision);
           else if(command.action==="disable"){registry.disable(command.accountId,command.expectedRevision);verifiedAccounts.delete(command.accountId);}
@@ -415,10 +204,21 @@ export async function startNativeProxy(options: NativeProxyOptions) {
           }else if(command.action==="remove"){
             const account=registry.get(command.accountId);if(!account)throw new NativeRouteError("ACCOUNT_NOT_FOUND","Account was not found.",404);
             router!.assertAccountRemovable(account.accountId,command.expectedRoutingRevision);
-            if(knowledgeStore().snapshot().bindings.some(binding=>binding.accountId===account.accountId))throw new NativeRouteError("ACCOUNT_BOUND","Remove this account's project knowledge bindings before removing it.",409);
-            if(conversations.hasAccount(account.accountId))throw new NativeRouteError("ACCOUNT_IN_USE","This account still owns retained Native chat context; keep it registered until that context is retired.",409);
+            const conversationKeys=conversations.accountConversationKeys(account.accountId);
+            if(conversations.hasAccount(account.accountId)&&command.retireNativeConversations!==true)throw new NativeRouteError("ACCOUNT_IN_USE","This account still owns Native chat continuations. Confirm retiring them before removing the account.",409);
+            for(const key of conversationKeys){
+              if(options.backend.releaseAccountConversation)await options.backend.releaseAccountConversation(account.accountId,key,true);
+              else if(options.backend.releaseConversation)await options.backend.releaseConversation(key,true);
+              else throw new NativeRouteError("UNSUPPORTED_OPERATION","The browser worker cannot safely release this account's retained chat.",503);
+            }
+            if(conversations.hasAccount(account.accountId))conversations.retireAccount(account.accountId);
             await options.backend.removeAccount?.(account.accountId);
-            registry.remove(account.accountId,command.expectedRevision);router!.forgetAccount(account.accountId);verifiedAccounts.delete(account.accountId);accountFailures.delete(account.accountId);
+            knowledgeStore().retireAccountBindings(account.accountId);
+            const stagedDeletion=stageManagedAccountStorageDeletion(account,options.stateDirectory);
+            try{registry.remove(account.accountId,command.expectedRevision);}
+            catch(error){stagedDeletion.rollback();throw error;}
+            router!.forgetAccount(account.accountId);verifiedAccounts.delete(account.accountId);accountFailures.delete(account.accountId);
+            stagedDeletion.commit();
           }else if(command.action==="configure_routing")router!.configure(command.settings,command.expectedRoutingRevision);
           else if(command.action==="unbind")router!.unbind(command.taskScope,command.expectedRoutingRevision);
           else if(command.action==="resume"){
@@ -429,7 +229,7 @@ export async function startNativeProxy(options: NativeProxyOptions) {
           if("accountId" in command)observeAccountFailure(command.accountId,error);
           throw error;
         }finally{accountControlActive=false;}
-        json(response,200,managementSnapshot());return;
+        json(response,200,await statusSnapshot());return;
       }
       if(url.pathname==="/__native/pairing"){
         let raw:unknown;try{raw=JSON.parse((await readBody(request)).toString("utf8"));}catch{throw new NativeRouteError("INVALID_ARGUMENT","Expected one extension pairing request.");}
@@ -890,7 +690,7 @@ export async function startNativeProxy(options: NativeProxyOptions) {
     closePromise = (async () => {
       server.closeAllConnections();
       await new Promise<void>(resolve => server.close(() => resolve()));
-      const closed = await Promise.allSettled([async () => options.backend.close(), async () => chatImports?.close()].map(close => close()));
+      const closed = await Promise.allSettled([async () => options.backend.close()].map(close => close()));
       const failure = closed.find((result): result is PromiseRejectedResult => result.status === "rejected"); if (failure) throw failure.reason;
     })();
     return closePromise;

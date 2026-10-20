@@ -51,4 +51,4 @@ Sửa: resync do client quản lý có Promise/epoch, buffer cho đến authorit
 4. Chỉ gọi shim là phương án Gemini Web bridge sau khi có inference interception/mapping phù hợp đã thử, native fixture response và read-only tool round-trip.
 5. Nếu chỉ chứng minh launch hook mà chưa có inference hook, tiếp tục ghi gate unresolved. Chưa kết luận bất khả thi toàn bộ, cũng chưa chuyển G3.
 
-Prompt để người dùng giao việc: [GEMINI_G2_SHIM_SPIKE_PROMPT.md](../GEMINI_G2_SHIM_SPIKE_PROMPT.md).
+Prompt để người dùng giao việc: [GEMINI_G2_SHIM_SPIKE_PROMPT.md](../archive/prompts/GEMINI_G2_SHIM_SPIKE_PROMPT.md).

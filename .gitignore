@@ -11,6 +11,8 @@ __pycache__/
 *.exe
 tmp_ide_user_data/
 .tmp/
+.tmp-native-account-evidence/
+.agents/mcp_config.json.before-simplification.backup
 temp/
 connector.json*
 oauth-clients.json*

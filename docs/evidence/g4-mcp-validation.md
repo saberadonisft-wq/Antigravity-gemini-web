@@ -36,9 +36,9 @@ Probe Google/browser và custom-app đã cleanup owned processes; kiểm tra sau
 
 ## Phần còn thiếu
 
-User cần account có custom apps được Google cung cấp; chọn domain/tunnel để deploy gateway OAuth đã kiểm chứng local và liên kết app thủ công. [Gateway setup](../MCP_GATEWAY_SETUP.md). Sau đó mới chạy [host agent prompt](../MCP_HOST_AGENT_PROMPT.md) với native tool thật. Host-agent pump vẫn dùng model/agent IDE; không tương đương thay native model hoặc chứng minh tiết kiệm quota.
+User cần account có custom apps được Google cung cấp; chọn domain/tunnel để deploy gateway OAuth đã kiểm chứng local và liên kết app thủ công. [Gateway setup](../archive/guides/MCP_GATEWAY_SETUP.md). Sau đó mới chạy [host agent prompt](../archive/prompts/MCP_HOST_AGENT_PROMPT.md) với native tool thật. Host-agent pump vẫn dùng model/agent IDE; không tương đương thay native model hoặc chứng minh tiết kiệm quota.
 
-Không commit/push, không G5. [Setup](../MCP_SETUP.md), [ADR](../adr/0005-mcp-host-task-bridge.md).
+Không commit/push, không G5. [Setup](../archive/guides/MCP_SETUP.md), [ADR](../archive/adr/0005-mcp-host-task-bridge.md).
 
 ## Follow-up đăng ký vào config IDE đang dùng
 
@@ -46,7 +46,7 @@ Người dùng thấy MCP Store không tìm được `gemini-ide-host`; View raw
 
 Đã đăng ký hai entries vào đúng file global, giữ backup byte-for-byte cùng thư mục, dùng Node executable tuyệt đối. Config mới validate PASS với schema trong IDE cài trên máy. Cả hai process MCP thật qua SDK connect/discovery PASS: host 4 tools, browser 5 tools. Không gửi prompt trong lần kiểm tra đăng ký. Đây chưa phải bằng chứng IDE đã Refresh/load hoặc Gemini custom connector đã kết nối.
 
-`npm run mcp:register` có thể chạy lại và giữ config không đổi; xung đột tên server hoặc JSONC được từ chối thay vì ghi đè. User cần Manage MCP Servers → Refresh, không search Store. [Hướng dẫn cập nhật](../MCP_SETUP.md).
+`npm run mcp:register` có thể chạy lại và giữ config không đổi; xung đột tên server hoặc JSONC được từ chối thay vì ghi đè. User cần Manage MCP Servers → Refresh, không search Store. [Hướng dẫn cập nhật](../archive/guides/MCP_SETUP.md).
 
 ## Sau reset và cài lại IDE — actual IDE discovery PASS
 

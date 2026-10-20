@@ -6,16 +6,16 @@ const AccountId=z.string().regex(/^[a-zA-Z0-9_-]{4,64}$/);
 const TaskScope=z.string().regex(/^[a-f0-9]{64}$/);
 const authority={expectedOwnerId:z.string().uuid(),expectedRevision:z.number().int().nonnegative()};
 export const NativeManagementCommandSchema=z.discriminatedUnion("action",[
-  z.object({action:z.literal("add"),displayName:z.string().trim().min(1).max(128),browserTransport:z.enum(["cdp","extension"]).optional(),...authority}).strict(),
+  z.object({action:z.literal("add"),displayName:z.string().trim().min(1).max(128),browserTransport:z.literal("extension").optional(),...authority}).strict(),
   ...(["open","verify","use","enable","disable"] as const).map(action=>z.object({action:z.literal(action),accountId:AccountId,...authority}).strict()),
-  z.object({action:z.literal("remove"),accountId:AccountId,expectedRoutingRevision:z.number().int().nonnegative(),...authority}).strict(),
+  z.object({action:z.literal("remove"),accountId:AccountId,expectedRoutingRevision:z.number().int().nonnegative(),retireNativeConversations:z.boolean().optional(),...authority}).strict(),
   z.object({action:z.literal("configure_routing"),settings:NativeRoutingSettingsSchema,expectedRoutingRevision:z.number().int().nonnegative(),...authority}).strict(),
   z.object({action:z.literal("resume"),url:z.string().regex(/^https:\/\/gemini\.google\.com\/app\/[a-zA-Z0-9_-]{1,128}$/),...authority}).strict(),
   z.object({action:z.literal("unbind"),taskScope:TaskScope,expectedRoutingRevision:z.number().int().nonnegative(),...authority}).strict(),
   ...(["cancel","clear_resume"] as const).map(action=>z.object({action:z.literal(action),...authority}).strict()),
 ]);
 export type NativeManagementCommand=z.infer<typeof NativeManagementCommandSchema>;
-export const NativeManagementRequestSchema=z.union([z.object({action:z.literal("status")}).strict(),NativeManagementCommandSchema]);
+export const NativeManagementRequestSchema=z.union([z.object({action:z.literal("status"),chatOffset:z.number().int().min(0).max(2048).optional()}).strict(),NativeManagementCommandSchema]);
 
 export const NativeExtensionPairingIntentSchema=z.object({accountId:AccountId,expectedOwnerId:z.string().uuid(),expectedRevision:z.number().int().nonnegative()}).strict();
 export type NativeExtensionPairingIntent=z.infer<typeof NativeExtensionPairingIntentSchema>;
@@ -27,6 +27,8 @@ export const NativeManagementPhaseSchema=z.enum(["restoring","loading_context","
 export const NativeManagementSnapshotSchema=z.object({
   service:z.literal("gemini-native-management"),version:z.literal(1),ownerId:z.string().uuid(),pid:z.number().int().positive(),runtimeRevision:z.number().int().positive(),
   observedAt:z.string().datetime(),revision:z.number().int().nonnegative(),selectedAccountId:AccountId.optional(),canMutate:z.boolean(),accountControlActive:z.boolean(),resumeArmed:z.boolean(),
+  connections:z.array(z.object({accountId:AccountId,state:z.enum(["not_started","connected","disconnected","legacy"]),geminiTabs:z.number().int().min(0).max(256).optional(),observedAt:z.string().datetime()}).strict()).max(32).default([]),
+  chats:z.object({offset:z.number().int().nonnegative(),total:z.number().int().nonnegative(),nextOffset:z.number().int().nonnegative().optional(),entries:z.array(z.object({taskScope:TaskScope,accountId:AccountId,identityEpoch:z.number().int().nonnegative(),url:z.string().regex(/^https:\/\/gemini\.google\.com\/app\/[a-zA-Z0-9_-]{1,128}$/).optional(),state:z.enum(["active","saved","outcome_unknown"]),updatedAt:z.string().datetime()}).strict()).max(50)}).strict().default({offset:0,total:0,entries:[]}),
   routing:z.object({mode:z.enum(["manual","sticky","priority","round_robin"]),revision:z.number().int().nonnegative(),automaticEnabled:z.boolean(),experimentalEnabled:z.boolean(),failoverEnabled:z.boolean(),modelSelection:WebModelSelectionSchema.optional(),bindingsCount:z.number().int().nonnegative(),bindings:z.array(z.object({taskScope:TaskScope,accountId:AccountId,identityEpoch:z.number().int().nonnegative()}).strict()).max(128)}).strict(),
   accounts:z.array(z.object({
     accountId:AccountId,displayName:z.string().min(1).max(128),browserTransport:z.enum(["cdp","extension"]).optional(),enabled:z.boolean(),selected:z.boolean(),identityRegistered:z.boolean(),identityVerified:z.boolean(),identityEpoch:z.number().int().nonnegative(),lastVerifiedAt:z.string().datetime().optional(),
@@ -39,7 +41,7 @@ export const NativeManagementSnapshotSchema=z.object({
 }).strict();
 export type NativeManagementSnapshot=z.infer<typeof NativeManagementSnapshotSchema>;
 export interface NativeManagementClient {
-  getNativeAccounts():Promise<NativeManagementSnapshot>;
+  getNativeAccounts(chatOffset?:number):Promise<NativeManagementSnapshot>;
   executeNativeAccount(command:NativeManagementCommand):Promise<NativeManagementSnapshot>;
 }
 /** The renderer requests a copy; the pairing secret stays in the main process and OS clipboard. */

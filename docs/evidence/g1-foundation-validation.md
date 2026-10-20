@@ -19,7 +19,7 @@
 | **G0 (Native Feasibility Gate)** | **UNRESOLVED / NOT MET** | Control-plane route (`POST /v1internal:fetchUserInfo`) đã quan sát được qua `JETSKI_SERVICE_ENDPOINT_URL`. Tuy nhiên, inference route (`StreamGenerateContent` / `StartCascade`) **chưa được chứng minh**. Khả năng MCP trên Gemini Web chưa được thử nghiệm trên tài khoản cá nhân người dùng (dừng trước login). IDE chưa mở extension point cho custom model trong chat native. |
 | **G1 Foundation (Scaffold, Contracts, Fake Runtime)** | **REMEDIATED & VALIDATED (G1 foundation complete; G0/native gate unresolved)** | Đã hoàn thành 5 packages monorepo, Zod contracts v0.1 strict boundaries, FakeRuntimeEngine với deduplication chuẩn hóa fingerprint (type + canonical payload), fan-out event distribution, settings revision checks, event sequence resync, live stubs không fake success. Đã xử lý toàn bộ 9 findings (F1–F9). 22/22 tests TypeScript & 6/6 tests Python pass. |
 
-Chi tiết xử lý 9 findings và các kịch bản regression xem tại: [`docs/evidence/g1-review-remediation.md`](./g1-review-remediation.md).
+Chi tiết xử lý 9 findings và các kịch bản regression xem tại: [`docs/evidence/g1-review-remediation.md`](g1-review-remediation.md).
 
 ---
 

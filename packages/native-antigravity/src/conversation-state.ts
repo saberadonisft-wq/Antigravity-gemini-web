@@ -81,7 +81,31 @@ export class NativeConversationState {
       this.persist();
     } else if (expired) this.persist();
   }
-  hasAccount(accountId:string){return [...this.states.values()].some(state=>state.accountId===accountId);}
+  hasAccount(accountId: string) { return [...this.states.values()].some(state => state.accountId === accountId && !state.retired); }
+  /** Metadata only: no prompt, context, nonce or retired replay fence leaves the owner. */
+  listChats(offset = 0) {
+    const entries = [...this.states.values()].filter(state => !state.retired)
+      .sort((a, b) => (b.updatedAt ?? "").localeCompare(a.updatedAt ?? "") || a.key.localeCompare(b.key));
+    return { offset, total: entries.length, nextOffset: offset + 50 < entries.length ? offset + 50 : undefined,
+      entries: entries.slice(offset, offset + 50).map(state => ({ taskScope: state.taskKey, accountId: state.accountId,
+        identityEpoch: state.identityEpoch, url: state.resumeUrl, state: state.pending ? "active" as const : state.outcomeUnknown ? "outcome_unknown" as const : "saved" as const,
+        updatedAt: state.updatedAt ?? new Date(0).toISOString() })) };
+  }
+  accountConversationKeys(accountId: string) {
+    // Retired records are replay fences, not live browser resources to release again.
+    const states=[...this.states.values()].filter(state=>state.accountId===accountId&&!state.retired);
+    if(states.some(state=>state.pending))throw new NativeRouteError("ACCOUNT_IN_USE","This account still has an active Native chat turn.",409);
+    return states.map(state=>state.key);
+  }
+  retireAccount(accountId: string) {
+    const states=[...this.states.values()].filter(state=>state.accountId===accountId&&!state.retired);
+    if(states.some(state=>state.pending))throw new NativeRouteError("ACCOUNT_IN_USE","This account still has an active Native chat turn.",409);
+    const previous=states.map(state=>({state,retired:state.retired,context:state.context,resumeUrl:state.resumeUrl,updatedAt:state.updatedAt}));
+    for(const {state} of previous){state.retired=true;state.context=undefined;state.resumeUrl=undefined;state.updatedAt=new Date().toISOString();}
+    try{this.persist();}
+    catch(error){for(const row of previous){row.state.retired=row.retired;row.state.context=row.context;row.state.resumeUrl=row.resumeUrl;row.state.updatedAt=row.updatedAt;}throw error;}
+    return states.map(state=>state.key);
+  }
   private persist() {
     if (!this.filename) return;
     const entries: PersistedEntry[] = [...this.states.values()].flatMap(state => state.retired || state.outcomeUnknown || state.pendingRevision || state.resumeUrl ? [{
@@ -137,8 +161,10 @@ export class NativeConversationState {
     state!.pending = reservation; state!.pendingRevision = revision; state!.updatedAt = new Date().toISOString();
     try { this.persist(); }
     catch { state!.pending = undefined; state!.pendingRevision = undefined; throw new NativeRouteError("CONVERSATION_CACHE_UNAVAILABLE", "Could not durably reserve the native turn; no browser request was started.", 503); }
-    return { accountId, identityEpoch, surface, key: state!.key, reservation, revision, expectedRevision: state!.revision, ...(canResume ? { baseRevision: state!.revision } : {}), appendFrom: canAppend ? previous!.contents.length : 0, context: structuredClone(context), retiredKeys, mode, patches,
-      ...((canRebindRetained || rebind && explicitResumeUrl) ? { resumeUrl: state!.resumeUrl } : {}) };
+    return {
+      accountId, identityEpoch, surface, key: state!.key, reservation, revision, expectedRevision: state!.revision, ...(canResume ? { baseRevision: state!.revision } : {}), appendFrom: canAppend ? previous!.contents.length : 0, context: structuredClone(context), retiredKeys, mode, patches,
+      ...((canRebindRetained || rebind && explicitResumeUrl) ? { resumeUrl: state!.resumeUrl } : {})
+    };
   }
   complete(plan: NativeConversationPlan, conversationUrl?: string) {
     const state = [...this.states.values()].find(value => value.key === plan.key);

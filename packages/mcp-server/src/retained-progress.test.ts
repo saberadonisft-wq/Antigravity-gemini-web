@@ -26,6 +26,28 @@ function controlled() {
 }
 const tick = () => new Promise<void>(resolve => setImmediate(resolve));
 
+test("A terminal persistence failure still allows owned cleanup without reopening submission", async t => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-mcp-test-")), browser = controlled();
+  const service = new GeminiMcpService(browser.adapter, path.join(root, "ledger.json"));
+  t.after(async () => { await service.close(); removeOwnedFixture(root); });
+  browser.adapter.openFreshConversation = async () => ({
+    close: async () => { browser.events.push("close"); }, suspend: async () => {}, resume: async () => {},
+    preserve: async () => { browser.events.push("preserve"); },
+  });
+  const receipts = (service as unknown as { receipts: { transition(...args: unknown[]): void } }).receipts;
+  const transition = receipts.transition.bind(receipts);
+  receipts.transition = (...args) => { if (args[1] === "terminal") throw Error("Synthetic terminal write failure"); transition(...args); };
+  await service.submit("request_faulted_cleanup", "synthetic", { conversation: { key: "faulted_cleanup_key", revision: revision("a") } });
+  await tick(); browser.finish();
+  assert.equal((await service.result("request_faulted_cleanup", 1000)).error?.code, "LEDGER_UNAVAILABLE");
+  await assert.rejects(service.status(), { code: "SERVICE_UNAVAILABLE" });
+  assert.deepEqual(await service.releaseConversation("faulted_cleanup_key", true), { released: true, preserved: true });
+  assert.deepEqual(await service.releaseConversation("faulted_cleanup_key", true), { released: false });
+  await assert.rejects(service.submit("request_faulted_resend", "must stay fenced"), { code: "SERVICE_UNAVAILABLE" });
+  assert.equal(browser.events.filter(event => event === "send").length, 1);
+  assert.equal(browser.events.filter(event => event === "preserve").length, 1);
+});
+
 test("A busy profile ignores cleanup of an unknown conversation and exposes actual release work as busy",async t=>{
   const root=fs.mkdtempSync(path.join(os.tmpdir(),"gemini-mcp-test-")),browser=controlled();
   let finishClose!:()=>void;const closing=new Promise<void>(resolve=>{finishClose=resolve;});

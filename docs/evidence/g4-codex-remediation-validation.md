@@ -6,5 +6,5 @@ Cập nhật 15/10/2026. Báo cáo 133 tests đã được review lại; finding
 
 Lịch sử: 119 tests sau bản vá đầu G4, 133 trước review continuation, 146 sau 13 regressions mới. Python không rerun trong đợt này.
 
-[Prompt tiếp tục G4](../GEMINI_G4_CONTINUE_PROMPT.md). Dừng G4, chưa G5.
+[Prompt tiếp tục G4](../archive/prompts/GEMINI_G4_CONTINUE_PROMPT.md). Dừng G4, chưa G5.
 

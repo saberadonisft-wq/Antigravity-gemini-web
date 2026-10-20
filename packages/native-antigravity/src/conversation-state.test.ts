@@ -32,6 +32,24 @@ test("Retained Native context keeps its account registered until the context is 
   states.complete(plan);assert.equal(states.hasAccount("acc_fixture_B"),true);assert.equal(states.hasAccount("acc_fixture_A"),false);
 });
 
+test("Retiring an account releases completed chat continuations but preserves uncertain-turn fences",t=>{
+  const filename=path.join(fs.mkdtempSync(path.join(os.tmpdir(),"ag-retire-account-")),"cache.json");
+  t.after(()=>fs.rmSync(path.dirname(filename),{recursive:true,force:true}));
+  const completedTask=sha256("task-complete"),uncertainTask=sha256("task-uncertain"),states=new NativeConversationState(5,filename),completed=states.prepare(completedTask,context(),false,undefined,"acc_fixture_B",0)!;
+  states.complete(completed,"https://gemini.google.com/app/conversation_1");
+  const uncertain=states.prepare(uncertainTask,context(),false,undefined,"acc_fixture_B",0)!;states.markOutcomeUnknown(uncertain);
+  assert.deepEqual(states.accountConversationKeys("acc_fixture_B"),[completed.key,uncertain.key]);
+  assert.equal(states.hasAccount("acc_fixture_B"),true);
+  states.retireAccount("acc_fixture_B");
+  assert.equal(states.hasAccount("acc_fixture_B"),false);
+  assert.deepEqual(states.accountConversationKeys("acc_fixture_B"),[]);
+  const reloaded=new NativeConversationState(5,filename);
+  assert.equal(reloaded.hasAccount("acc_fixture_B"),false);
+  assert.throws(()=>reloaded.prepare(uncertainTask,context(),false,undefined,"acc_fixture_B",0),{code:"OUTCOME_UNKNOWN"});
+  assert.deepEqual(reloaded.accountConversationKeys("acc_fixture_B"),[]);
+  assert.equal(JSON.parse(fs.readFileSync(filename,"utf8")).entries.length,2);
+});
+
 test("Stale completion and failure cannot disturb a newer reservation even for identical revisions", () => {
   const states = new NativeConversationState();
   const first = states.prepare("task", context())!; states.complete(first);
@@ -152,4 +170,16 @@ test("Failed task fences survive restart without exhausting live conversation sl
   const replacement = states.prepare(sha256("another-task"), context())!;
   assert.deepEqual(replacement.retiredKeys, [fresh.key]);
   assert.throws(() => states.prepare(sha256("failed-0"), context()), { code: "OUTCOME_UNKNOWN" });
+});
+
+test("Chat listing is paginated metadata and excludes retired replay fences",()=>{
+ const state=new NativeConversationState(64);
+ for(let i=0;i<52;i++){
+  const plan=state.prepare(sha256("listing"+i),{contents:[{role:"user",parts:[{text:"PRIVATE_PROMPT"}]}],tools:[]},false,undefined,"acc_listing",1)!;
+  state.complete(plan,"https://gemini.google.com/app/fixture_"+i);
+ }
+ const first=state.listChats();assert.equal(first.total,52);assert.equal(first.entries.length,50);assert.equal(first.nextOffset,50);
+ const next=state.listChats(50);assert.equal(next.entries.length,2);assert.equal(next.nextOffset,undefined);
+ assert.equal(new Set([...first.entries,...next.entries].map(row=>row.taskScope)).size,52);
+ assert.ok(!JSON.stringify(first).includes("PRIVATE_PROMPT"));state.retireAccount("acc_listing");assert.equal(state.listChats().total,0);
 });

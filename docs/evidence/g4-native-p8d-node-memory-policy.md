@@ -42,4 +42,4 @@ Read-only main health failed twice on 19/10; the descriptor's PID was confirmed 
 
 The [source 36 process benchmark](g4-native-p8c-mcp-process-memory.md) remains the evidence for the candidate setting; it used synthetic browsers. This patch proves propagation/startup/config guards, not production RAM, Google latency or an optimal default. Actual Chrome/DOM measurements, repeated soak, crash/orphan recovery, baseline restore/rollback and Windows restart remain open, along with 3.8-to-primary Web acceptance, real A/B accounts, the complete IDE executor and P6/P7.
 
-Operation and rollback: [Node memory guide](../NATIVE_NODE_MEMORY.md), [recovery runbook](../NATIVE_RECOVERY_RUNBOOK.md). No push, merge, public sharing or deployment was performed.
+Operation and rollback: [Node memory guide](../archive/guides/NATIVE_NODE_MEMORY.md), [recovery runbook](../NATIVE_RECOVERY_RUNBOOK.md). No push, merge, public sharing or deployment was performed.

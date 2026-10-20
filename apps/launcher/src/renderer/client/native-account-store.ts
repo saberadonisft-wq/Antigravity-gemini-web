@@ -8,8 +8,8 @@ export interface NativeAccountViewState {snapshot?:NativeManagementSnapshot;fres
 export class NativeAccountStore {
   private state:NativeAccountViewState={fresh:false,loading:true};
   private listeners=new Set<(state:NativeAccountViewState)=>void>();
-  private generation=0;private disposed=false;private timer?:ReturnType<typeof setInterval>;private reading=false;
-  constructor(private readonly client:LauncherClient){}
+  private generation=0;private disposed=false;private timer?:ReturnType<typeof setInterval>;private reading=false;private chatOffset=0;
+  constructor(private readonly client:Pick<LauncherClient,"getNativeAccounts"|"executeNativeAccount"|"copyNativeExtensionPairingCode">){}
   get current(){return structuredClone(this.state);}
   listen(listener:(state:NativeAccountViewState)=>void){this.listeners.add(listener);listener(this.current);return ()=>{this.listeners.delete(listener);};}
   private update(patch:Partial<NativeAccountViewState>){if(this.disposed)return;this.state={...this.state,...patch};for(const listener of this.listeners)listener(this.current);}
@@ -19,7 +19,7 @@ export class NativeAccountStore {
     const generation=this.generation;this.reading=true;
     try{
       if(!this.client.getNativeAccounts)throw {code:"UNSUPPORTED_OPERATION"};
-      const snapshot=await this.client.getNativeAccounts();
+      const snapshot=await this.client.getNativeAccounts(this.chatOffset);
       if(generation===this.generation){
         const previous=this.state.snapshot,sameTurn=snapshot.lastOutcome?.requestId===previous?.lastOutcome?.requestId;
         const changed=snapshot.ownerId!==previous?.ownerId||snapshot.revision!==previous?.revision||!sameTurn||snapshot.lastOutcome?.phase!==previous?.lastOutcome?.phase;
@@ -39,7 +39,7 @@ export class NativeAccountStore {
       if(!this.client.executeNativeAccount)throw {code:"UNSUPPORTED_OPERATION"};
       const command=NativeManagementCommandSchema.parse({...intent,expectedOwnerId:snapshot.ownerId,expectedRevision:snapshot.revision,...(intent.action==="unbind"||intent.action==="remove"||intent.action==="configure_routing"?{expectedRoutingRevision:snapshot.routing.revision}:{})});
       const result=await this.client.executeNativeAccount(command);
-      this.update({snapshot:result,fresh:true,pendingAction:undefined,notice:intent.action,loading:false});return true;
+      this.chatOffset=0;this.update({snapshot:result,fresh:true,pendingAction:undefined,notice:intent.action,loading:false});return true;
     }catch(error){this.update({fresh:false,pendingAction:undefined,error:safeUiError(error),loading:false});return false;}
   }
   async copyPairingCode(accountId:string):Promise<boolean>{
@@ -56,5 +56,6 @@ export class NativeAccountStore {
       this.update({fresh:true,pendingAction:undefined,notice:"pair",loading:false});return true;
     }catch(error){this.update({fresh:false,pendingAction:undefined,error:safeUiError(error),loading:false});return false;}
   }
+  async page(offset:number){if(this.reading||this.state.pendingAction||!Number.isInteger(offset)||offset<0||offset>2048)return;this.chatOffset=offset;++this.generation;await this.refresh();}
   dispose(){this.disposed=true;++this.generation;clearInterval(this.timer);this.listeners.clear();}
 }

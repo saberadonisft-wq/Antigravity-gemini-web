@@ -9,7 +9,7 @@ Ngày 19/10/2026, connector cho phép một hồ sơ Chrome thông thường đ�
 - `npm run lint` — PASS.
 - `npm test` — PASS, **449/449** tests trên bảy workspace: contracts 14, gemini-browser 54, mcp-server 53, model-bridge 4, native-antigravity 190, runtime 80, launcher 54.
 - Connector tests bao gồm extension worker fixture, broker/WebSocket authentication, tách routing theo profile, chặn lệnh/tab không hỗ trợ, disconnect không replay, worker MCP được spawn thật trong fixture Native và xác minh account đổi trước thao tác input.
-- Electron launcher smoke — PASS, runtime revision 41; account transport `extension` được tạo trong UI và hiện nút **Start connector**. Chụp giao diện ở 1280px và 800px; không tràn ngang, target tối thiểu 44px, không có lỗi renderer. Owner HTTP và preload IPC là tiến trình thật; browser/Google được giả lập; `realGoogleRequests=0`, executor IDE chưa kiểm tra. Kết quả và ảnh nằm trong [thư mục evidence](chrome-profile-connector-r41/).
+- Electron launcher smoke — PASS, runtime revision 41; account transport `extension` được tạo trong UI và hiện nút **Start connector**. Chụp giao diện ở 1280px và 800px; không tràn ngang, target tối thiểu 44px, không có lỗi renderer. Owner HTTP và preload IPC là tiến trình thật; browser/Google được giả lập; `realGoogleRequests=0`, executor IDE chưa kiểm tra. Kết quả và ảnh nằm trong [thư mục evidence](chrome-profile-connector-r41).
 - `node --check` cho `background.js`/`popup.js`, `git diff --check` — PASS.
 
 Lượt chạy workspace đầu tiên có một lỗi chập chờn ở test CDP import (`browser_unavailable`) khi test khác còn hoạt động. Test đó PASS khi chạy riêng và PASS trong lượt full suite cuối; lượt full suite cuối không có test lỗi.

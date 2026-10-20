@@ -68,12 +68,12 @@ test("Traversal names in an otherwise readable ZIP are refused and never materia
   await assert.rejects(inspectChatImportArchive(file, "chatgpt"), { code: "IMPORT_ARCHIVE_INVALID" });
   assert.deepEqual(fs.readdirSync(root), ["export.zip"]);
 });
-test("The offline production CLI inspects a selected ZIP without fetching or creating Native account state", async t => {
+test("The retired ZIP command is rejected without network access or Native account creation", async t => {
   const root = fixtures(t), file = await archive(root), guard = path.join(root, "offline-guard.mjs"), emptyHome = path.join(root, "uncreated-home");
   fs.writeFileSync(guard, "import os from 'node:os';os.homedir=()=>process.env.AG_IMPORT_FIXTURE_HOME;globalThis.fetch=()=>{throw Error('Network forbidden in local inspection')};\n");
   const cli = fileURLToPath(new URL("native-cli.js", import.meta.url));
-  const result = await promisify(execFile)(process.execPath, ["--import", pathToFileURL(guard).href, cli, "imports:inspect", "--provider", "chatgpt", "--file", file], { env: { ...process.env, AG_IMPORT_FIXTURE_HOME: emptyHome }, windowsHide: true, timeout: 10000 });
-  assert.equal(JSON.parse(result.stdout).googleSubmission, "not_submitted"); assert.equal(fs.existsSync(emptyHome), false);
+  await assert.rejects(promisify(execFile)(process.execPath, ["--import", pathToFileURL(guard).href, cli, "imports:inspect", "--provider", "chatgpt", "--file", file], { env: { ...process.env, AG_IMPORT_FIXTURE_HOME: emptyHome }, windowsHide: true, timeout: 10000 }), (error:any)=>error.code===1&&JSON.parse(error.stderr).code==="INVALID_COMMAND");
+  assert.equal(fs.existsSync(emptyHome), false);
   assert.throws(() => chatImportInspectionArguments(["--provider", "chatgpt", "--file", file, "--file", file]), { code: "IMPORT_ARGUMENTS_INVALID" });
   assert.throws(() => chatImportInspectionArguments(["--provider", "chatgpt"]), { code: "IMPORT_ARGUMENTS_INVALID" });
 });

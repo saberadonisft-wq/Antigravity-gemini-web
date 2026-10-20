@@ -1,6 +1,6 @@
 # G4: Giữ phiên, stream và hủy native generation
 
-Ngày 15–16/10/2026. Tiếp tục G4 theo yêu cầu triển khai 5 cơ chế và sửa lỗi Cancel không kết thúc Working. Chưa G5, chưa installer, chưa commit/push đợt thay đổi này. Thiết kế: [ADR 0009](../adr/0009-native-conversation-streaming-cancellation.md).
+Ngày 15–16/10/2026. Tiếp tục G4 theo yêu cầu triển khai 5 cơ chế và sửa lỗi Cancel không kết thúc Working. Chưa G5, chưa installer, chưa commit/push đợt thay đổi này. Thiết kế: [ADR 0009](../archive/adr/0009-native-conversation-streaming-cancellation.md).
 
 ## Kiểm thử local
 

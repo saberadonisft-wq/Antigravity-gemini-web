@@ -23,6 +23,7 @@ export class NativeBrowserBackendPool implements NativeBrowserBackend {
     const account = accountId ? this.registry.get(accountId) : this.registry.getActive();
     if (!account) throw new NativeRouteError("ACCOUNT_NOT_FOUND", "No selected account was found.", 404);
     if (!account.enabled) throw new NativeRouteError("ACCOUNT_DISABLED", "Selected account is disabled.", 409);
+    if(!this.backendFactory && account.browserTransport!=="extension")throw new NativeRouteError("UNSUPPORTED_OPERATION","Legacy bridge Chrome is retired. Add and pair an extension account in the launcher; the old profile is preserved for deletion or manual recovery.",412);
     const config = workerConfig(account);
     let entry = this.backends.get(account.accountId);
     if (entry && entry.config !== config) throw new NativeRouteError("ACCOUNT_RUNTIME_STALE", "Account identity or worker configuration changed. Restart the native runtime before sending.", 412);
@@ -114,6 +115,15 @@ export class NativeBrowserBackendPool implements NativeBrowserBackend {
     finally{this.draining.delete(accountId);if(!this.pendingReleases.get(accountId)?.size)this.pendingReleases.delete(accountId);}
   }
   async releaseConversation(key: string, preserve = false) {const owner=this.conversationOwners.get(key);for(const accountId of owner?[owner]:this.backends.keys())await this.releaseOn(accountId,key,preserve);}
+  async releaseAccountConversation(accountId:string,key:string,preserve=false){
+    if(this.closing)throw new NativeRouteError("SERVICE_UNAVAILABLE","The account pool is shutting down.",503);
+    const entry=this.backends.get(accountId);if(!entry)return;
+    const owner=this.conversationOwners.get(key);if(owner&&owner!==accountId)throw new NativeRouteError("CONVERSATION_CHANGED","Cleanup belongs to a different account; no worker was called.",409);
+    if(this.draining.has(accountId))throw new NativeRouteError("BUSY","Account cleanup is already running.",409);
+    await entry.backend.releaseConversation?.(key,preserve);
+    if(owner===accountId)this.conversationOwners.delete(key);
+    this.pendingReleases.get(accountId)?.delete(key);if(!this.pendingReleases.get(accountId)?.size)this.pendingReleases.delete(accountId);
+  }
   resourceStatus(){return {lifecycle:this.closed?"closed":this.closing?"closing":"active",cachedWorkers:this.backends.size,conversationOwners:this.conversationOwners.size,pendingConversationReleases:[...this.pendingReleases.values()].reduce((sum,entries)=>sum+entries.size,0),drainingAccounts:this.draining.size,requestedNodeSemiSpaceMiB:this.nodeSemiSpaceMiB,limits:{cachedWorkers:MAX_CACHED_WORKERS,conversationOwners:MAX_CONVERSATION_OWNERS,deferredReleasesPerAccount:MAX_PENDING_RELEASES_PER_ACCOUNT}};}
   async removeAccount(accountId:string){
     if(this.closing)throw new NativeRouteError("SERVICE_UNAVAILABLE","The account pool is shutting down.",503);

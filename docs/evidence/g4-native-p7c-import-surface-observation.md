@@ -1,6 +1,6 @@
 # P7c: account-bound import surface observation
 
-Date: 19/10/2026. Baseline `3f42313`. Source Native **39 / browser worker 25**. This adds an existing-tab inspection command, not an uploader or proof of account entitlement. [Quick user test](../NATIVE_TEST_QUICKSTART.md).
+Date: 19/10/2026. Baseline `3f42313`. Source Native **39 / browser worker 25**. This adds an existing-tab inspection command, not an uploader or proof of account entitlement. [Quick user test](../archive/guides/NATIVE_TEST_QUICKSTART.md).
 
 ## Implementation
 
@@ -32,4 +32,4 @@ The [Electron preview regression](p7c-native-imports-r39/native-chat-import-desk
 
 No actual Google prompt/upload/import, real OS chooser selection, two-account handoff, full IDE executor or real eligibility result is added by these tests. The default 3.8 Flash staging/primary restoration flow still needs live acceptance. P7 upload revalidation/review/receipt/partial handling, memory-text flow, Share/Continue, Custom apps and Deep Research/Canvas remain in the plan. P6 adapters and P8 soak/Windows/browser/release gates also remain open. The prior 36/38 recovery result belongs to `2804560`; it does not certify arbitrary future builds.
 
-No push, merge or deployment. A proposed local `Start-Process` startup of Native 39 was rejected before execution by automatic approval review with only `blocked by policy` supplied. No fallback startup was attempted. Main health was unavailable and the descriptor PID was absent at the preceding read-only observation; this report does not claim a running main owner. The user can follow the quick test guide in their terminal. [Full plan](../NATIVE_UPGRADE_PLAN.md), [import guide and official Google source](../NATIVE_CHAT_IMPORT.md).
+No push, merge or deployment. A proposed local `Start-Process` startup of Native 39 was rejected before execution by automatic approval review with only `blocked by policy` supplied. No fallback startup was attempted. Main health was unavailable and the descriptor PID was absent at the preceding read-only observation; this report does not claim a running main owner. The user can follow the quick test guide in their terminal. [Full plan](../archive/plans/NATIVE_UPGRADE_PLAN.md), [import guide and official Google source](../archive/guides/NATIVE_CHAT_IMPORT.md).

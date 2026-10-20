@@ -20,7 +20,7 @@ Runtime có 9 tests G3 ban đầu, thêm 20 regressions cho context/journal/coor
 - Authority đủ runtime/workspace/session/turn/request/nonce/epoch; host inventory copy và deny-by-default. Disconnect retire epoch và dừng queue.
 - Resync coalesce, watermark filtering/duplicate filtering, giữ waiter qua restart, báo lỗi ở caller. Tối đa 1000 buffered events, 3 fetch attempts và 1.5s/fetch; callback wait 0.5s.
 
-Source: [g3-resilience.test.ts](../../packages/runtime/src/g3-resilience.test.ts), [g3-regressions.test.ts](../../packages/runtime/src/g3-regressions.test.ts), [g3-resync.test.ts](../../packages/runtime/src/g3-resync.test.ts).
+Source: [g3-resilience.test.ts](../../tools/archive/packages/runtime/src/g3-resilience.test.ts), [g3-regressions.test.ts](../../tools/archive/packages/runtime/src/g3-regressions.test.ts), [g3-resync.test.ts](../../tools/archive/packages/runtime/src/g3-resync.test.ts).
 
 ## Phạm vi
 

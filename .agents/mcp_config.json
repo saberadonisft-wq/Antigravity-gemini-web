@@ -10,7 +10,7 @@
         "AG_MCP_HOST_HTTP_PORT": "9234",
         "AG_MCP_TARGET_CLIENT": "antigravity_ide"
       },
-      "disabled": false
+      "disabled": true
     },
     "gemini-web-browser": {
       "command": "node",
@@ -22,7 +22,7 @@
         "AG_MCP_DEBUG_PORT": "9223",
         "AG_MCP_TARGET_CLIENT": "antigravity_ide"
       },
-      "disabled": false
+      "disabled": true
     }
   }
 }

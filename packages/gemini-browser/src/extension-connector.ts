@@ -32,7 +32,7 @@ export async function startExtensionConnector(credentials: ExtensionCredentials,
     if (request.headers.origin || request.headers.host !== `127.0.0.1:${actualPort}` || !safeEqual(request.headers.authorization, "Bearer " + credentials.token)) { response.writeHead(403).end(); return; }
     if (request.method !== "GET") { response.writeHead(405).end(); return; }
     try {
-      const value = request.url === "/json/list" ? await targetList() : request.url === "/json/version" ? { webSocketDebuggerUrl: `ws://127.0.0.1:${actualPort}/devtools/browser/connector` } : undefined;
+      const value = request.url === "/connector/status" ? { connected: extension?.readyState === WebSocket.OPEN, geminiTabs: extension?.readyState === WebSocket.OPEN ? (await targetList()).length : 0 } : request.url === "/json/list" ? await targetList() : request.url === "/json/version" ? { webSocketDebuggerUrl: `ws://127.0.0.1:${actualPort}/devtools/browser/connector` } : undefined;
       if (!value) { response.writeHead(404).end(); return; }
       response.setHeader("Content-Type", "application/json"); response.end(JSON.stringify(value));
     } catch { response.writeHead(503).end(JSON.stringify({ error: "CONNECTOR_OFFLINE" })); }

@@ -22,9 +22,9 @@ Ngày: 14/10/2026. Đối chiếu báo cáo Gemini với source, entry points v�
 
 ## Source và proof
 
-- [Main entry](../../apps/launcher/src/main/index.ts), [IPC bridge](../../apps/launcher/src/main/ipc-bridge.ts), [preload client](../../apps/launcher/src/preload/client.ts).
-- [Runtime facade](../../packages/runtime/src/runtime-facade.ts), [local store](../../packages/runtime/src/local-store.ts), [owned browser](../../packages/runtime/src/owned-browser.ts).
-- [G4 runtime regressions](../../packages/runtime/src/g4-remediation.test.ts), [IPC boundaries](../../apps/launcher/src/main/g4-boundaries.test.ts), [renderer behaviors](../../apps/launcher/src/renderer/g4-behavior.test.ts).
+- [Main entry](../../apps/launcher/src/main/index.ts), [IPC bridge](../../tools/archive/launcher-r44/main/ipc-bridge.ts), [preload client](../../tools/archive/launcher-r44/preload-client.ts).
+- [Runtime facade](../../tools/archive/packages/runtime/src/runtime-facade.ts), [local store](../../tools/archive/packages/runtime/src/local-store.ts), [owned browser](../../tools/archive/packages/runtime/src/owned-browser.ts).
+- [G4 runtime regressions](../../tools/archive/packages/runtime/src/g4-remediation.test.ts), [IPC boundaries](../../tools/archive/launcher-r44/main/g4-boundaries.test.ts), [renderer behaviors](../../tools/archive/launcher-r44/renderer/g4-behavior.test.ts).
 - [Kiểm chứng sau bản vá](g4-codex-remediation-validation.md), [desktop evidence](g4-desktop-smoke/desktop-smoke.json).
 
 ## G4 còn chưa hoàn tất

@@ -38,4 +38,4 @@ Local freshness is not model answer quality or proof that a native file was read
 
 P6 still needs launcher source-selection UI, actual Web GitHub import, per-provider Gem/Notebook/Drive capability and permissions, real A/B source access, model-quality tests on a changing repo and IDE fresh-read-before-edit acceptance. P3 stability, P5 real accounts/IDE, P7 and P8 gates remain open. No commit, push, release, production restart or deployment was performed.
 
-Usage and config rollback: [NATIVE_KNOWLEDGE.md](../NATIVE_KNOWLEDGE.md). Design: [ADR 0011](../adr/0011-native-project-knowledge.md). Official provider behavior and its limits are linked in the usage document; metadata registration is not permission or sync evidence.
+Usage and config rollback: [NATIVE_KNOWLEDGE.md](../archive/guides/NATIVE_KNOWLEDGE.md). Design: [ADR 0011](../archive/adr/0011-native-project-knowledge.md). Official provider behavior and its limits are linked in the usage document; metadata registration is not permission or sync evidence.

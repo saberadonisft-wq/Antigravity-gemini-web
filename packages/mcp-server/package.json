@@ -7,7 +7,6 @@
   "scripts": {
     "build": "tsc -b",
     "typecheck": "tsc --noEmit",
-    "lint": "tsc --noEmit",
     "test": "node --test --test-timeout=30000 dist/*.test.js",
     "start": "node dist/host-cli.js",
     "start:browser": "node dist/cli.js"

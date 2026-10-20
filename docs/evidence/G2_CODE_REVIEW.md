@@ -13,7 +13,7 @@ Ngày: 14/10/2026. Review source hiện tại, chạy build/checks và reproduct
 - Không có `docs/evidence/g2-native-browser-gates.md` và `docs/evidence/g2-end-to-end-validation.md` tại thời điểm review.
 - Báo cáo `g1-review-remediation.md` có phần sửa tốt, nhưng “khắc phục triệt để F1–F9” chưa phù hợp với reproductions dưới đây.
 
-Prompt giao tiếp: [GEMINI_G2_CONTINUE_PROMPT.md](../GEMINI_G2_CONTINUE_PROMPT.md). Người dùng yêu cầu tiếp tục G2, chưa giao G3.
+Prompt giao tiếp: [GEMINI_G2_CONTINUE_PROMPT.md](../archive/prompts/GEMINI_G2_CONTINUE_PROMPT.md). Người dùng yêu cầu tiếp tục G2, chưa giao G3.
 
 ## Kiểm tra đã chạy
 

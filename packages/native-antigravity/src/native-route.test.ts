@@ -556,6 +556,7 @@ test("Real HTTP control forwarding preserves account routing and leaves native c
   const catalog = await (await f.post("/v1internal:fetchAvailableModels", {}, { cookie: "must-not-forward" })).json();
   assert.equal(catalog.models.native.model, "MODEL_PLACEHOLDER_M650");
   assert.equal(catalog.models[WEB_CATALOG_MODEL].model, "MODEL_PLACEHOLDER_M649");
+  assert.equal(catalog.defaultAgentModelId, WEB_CATALOG_MODEL);
   assert.equal(catalog.models[WEB_CATALOG_MODEL].supportsImages, false);
   assert.equal(catalog.models[WEB_CATALOG_MODEL].modelExperiments, undefined);
   assert.equal(catalog.models[WEB_MODEL], undefined);

@@ -10,6 +10,23 @@ export function observedAccountFingerprint(identity: unknown): string | undefine
   return email ? sha256(email) : undefined;
 }
 
+/** Identity verification is observational: it must never open a browser or recover model state. */
+export async function inspectNativeBrowserIdentity(call: BrowserBrokerCall, signal: AbortSignal): Promise<JsonObject> {
+  signal.throwIfAborted();
+  const status = await call("gemini_status", {}, signal);
+  signal.throwIfAborted();
+  if (status.browserActionRequired === "google_traffic_verification") {
+    throw new NativeRouteError("BROWSER_USER_ACTION_REQUIRED", "Complete Google's traffic verification in the open browser, then check the account again. No prompt was submitted.", 412);
+  }
+  if (status.browserState !== "ready") {
+    throw new NativeRouteError("BROWSER_NOT_READY", "Open the selected Gemini Chrome profile and sign in before checking its identity. No prompt was submitted.", 412);
+  }
+  if (status.accountState !== "signed_in") {
+    throw new NativeRouteError("BROWSER_LOGIN_REQUIRED", "Sign into the selected Google account in the open browser profile, then return to Gemini. No prompt was submitted.", 412);
+  }
+  return status;
+}
+
 /** Opening is an authorized generation action; gemini_status itself stays read-only. */
 export async function ensureNativeBrowserReady(call: BrowserBrokerCall, signal: AbortSignal, startupMs = 20000, expectedIdentityFingerprint?: string): Promise<JsonObject> {
   const deadline = performance.now() + startupMs;

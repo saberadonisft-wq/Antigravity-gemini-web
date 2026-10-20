@@ -91,8 +91,11 @@ export function getDomInspectionSnippet(options?: DomInspectionOptions): string 
   // Surface check: strictly require exact allowed origin
   const isAllowedSurface = (${isAllowedSurfaceUrl.toString()})(url, { fixtureMode, allowedOrigins });
 
-  // Account state positive evidence
-  const avatar = document.querySelector("${GEMINI_SELECTORS.ACCOUNT_AVATAR}");
+  const visible = el => Boolean(el && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden' && getComputedStyle(el).display !== 'none' && el.getAttribute('aria-hidden') !== 'true');
+
+  // Account state and identity use visible indicators only. Gemini may put its
+  // email in title/alt while aria-label contains only a generic account label.
+  const avatars = Array.from(document.querySelectorAll("${GEMINI_SELECTORS.ACCOUNT_AVATAR}")).filter(visible);
   let signInBtn = document.querySelector("${GEMINI_SELECTORS.SIGN_IN_BUTTON}");
   if (!signInBtn) {
     signInBtn = Array.from(document.querySelectorAll("button, a")).find(el => (el.textContent || '').trim().toLowerCase() === "sign in");
@@ -101,21 +104,25 @@ export function getDomInspectionSnippet(options?: DomInspectionOptions): string 
   let accountState = "unknown";
   if (origin === "https://accounts.google.com" || signInBtn) {
     accountState = "needs_user_action";
-  } else if (isAllowedSurface && avatar) {
+  } else if (isAllowedSurface && avatars.length > 0) {
     accountState = "signed_in";
   } else {
     accountState = "unknown";
   }
-  let accountIdentity = undefined;
-  if (avatar) {
-    const raw = avatar.getAttribute("aria-label") || avatar.getAttribute("title") || avatar.getAttribute("alt") || "";
-    if (raw.trim()) accountIdentity = raw.trim();
+  const accountEmails = new Set();
+  for (const avatar of avatars) {
+    for (const attribute of ["aria-label", "title", "alt", "data-email"]) {
+      const raw = avatar.getAttribute(attribute) || "";
+      for (const email of raw.match(/[a-zA-Z0-9.!#$%&'*+/=?^_\\x60{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]+)+/g) || []) {
+        accountEmails.add(email.toLowerCase());
+      }
+    }
   }
+  const accountIdentity = accountEmails.size === 1 ? [...accountEmails][0] : undefined;
 
   // Composer and controls are only valid on allowed surface
   const composer = isAllowedSurface ? document.querySelector("${GEMINI_SELECTORS.COMPOSER}") : null;
   const sendBtn = isAllowedSurface ? document.querySelector("${GEMINI_SELECTORS.SEND_BUTTON}") : null;
-  const visible = el => Boolean(el && el.getBoundingClientRect().width > 0 && el.getBoundingClientRect().height > 0 && getComputedStyle(el).visibility !== 'hidden');
   const isGenerating = isAllowedSurface && Array.from(document.querySelectorAll("${GEMINI_SELECTORS.STOP_BUTTON}")).some(visible);
   const hasComposer = Boolean(composer);
   const hasSendButton = Boolean(sendBtn);

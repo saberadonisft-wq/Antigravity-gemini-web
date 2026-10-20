@@ -37,4 +37,4 @@ Silent-child scenario budget 3s, cleanup budget 2s; elapsed khoảng 3,07s. Npm 
 - Generation chưa xác định đã dừng giữ BUSY; cần cleanup/reconciliation trước lượt mới. Recovery G3 không được resend accepted/unknown prompt.
 - Không thay IDE chính, patch binary/trust store, commit/push hoặc triển khai G4–G5.
 
-Prompt: [GEMINI_G3_PROMPT.md](../GEMINI_G3_PROMPT.md).
+Prompt: [GEMINI_G3_PROMPT.md](../archive/prompts/GEMINI_G3_PROMPT.md).

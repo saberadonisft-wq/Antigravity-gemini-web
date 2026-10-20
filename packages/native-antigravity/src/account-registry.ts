@@ -124,9 +124,8 @@ export class AccountRegistry {
   remove(idOrName:string,expectedRevision:number):AccountRecord {
     return this.mutate(data=>{
       const account=this.findIn(data,idOrName);
-      if(data.accounts.length<=1)throw new NativeRouteError("LAST_ACCOUNT","Add another account before removing the last bridge account.",409);
-      if(data.activeAccountId===account.accountId)throw new NativeRouteError("ACCOUNT_SELECTED","Select a different account before removing this one.",409);
       data.accounts=data.accounts.filter(row=>row.accountId!==account.accountId);
+      this.selectEnabled(data);
       return account;
     },expectedRevision);
   }

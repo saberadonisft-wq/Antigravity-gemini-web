@@ -21,7 +21,7 @@ Ngày 15/10/2026. Review snapshot báo cáo “G4-A hoàn tất, 133 tests”. C
 
 ## Bằng chứng
 
-[Validation mới](g4-codex-followup-validation.md), [runtime followup tests](../../packages/runtime/src/g4-followup.test.ts), [cleanup tests](../../packages/gemini-browser/src/fixture-cleanup.test.ts), [renderer tests](../../apps/launcher/src/renderer/g4-behavior.test.ts), [desktop smoke](../../apps/launcher/src/main/desktop-smoke.ts).
+[Validation mới](g4-codex-followup-validation.md), [runtime followup tests](../../tools/archive/packages/runtime/src/g4-followup.test.ts), [cleanup tests](../../packages/gemini-browser/src/fixture-cleanup.test.ts), [renderer tests](../../tools/archive/launcher-r44/renderer/g4-behavior.test.ts), [desktop smoke](../../tools/archive/launcher-r44/main/desktop-smoke.ts).
 
 13 behavioral tests mới: runtime 9, browser cleanup 2, renderer 2. Không skip, không đổi deadline để che failure.
 

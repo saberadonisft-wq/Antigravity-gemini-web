@@ -40,4 +40,4 @@ This is the first implementation step of P7's import branch. OS chooser/preview,
 
 The previous P8 baseline recovery artifact belongs to `51d2542` and its then-matching lockfiles. Dependencies changed here; the checkpoint's exact-lock recovery probe must not be treated as freshly rerun for this tree. Before release, repeat rollback acceptance against independently installed baseline/current lockfiles and the final runtime. No current recovery/production gate is closed by the new inspection tests.
 
-No real Google prompts, browser/profile actions, main runtime restart, public sharing, push, merge or deployment were performed. [User guide and official Google source](../NATIVE_CHAT_IMPORT.md), [full upgrade plan](../NATIVE_UPGRADE_PLAN.md).
+No real Google prompts, browser/profile actions, main runtime restart, public sharing, push, merge or deployment were performed. [User guide and official Google source](../archive/guides/NATIVE_CHAT_IMPORT.md), [full upgrade plan](../archive/plans/NATIVE_UPGRADE_PLAN.md).

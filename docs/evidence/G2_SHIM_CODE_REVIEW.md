@@ -6,7 +6,7 @@ Ngày: 14/10/2026. Review source C#, Python tests và báo cáo mới. Chỉ ch�
 
 Shim có thể khởi chạy child và suite hiện tại đạt, nhưng **chưa nghiệm thu tính trong suốt hoặc native IDE launch hook**. Các khẳng định “100% args”, “bảo toàn byte stream”, “token không bị log” và “không còn child mồ côi” cần sửa/giới hạn bằng chứng.
 
-Inference và browser/live E2E vẫn unresolved/not tested như báo cáo. Không chuyển G3. Prompt tiếp tục: [GEMINI_G2_SHIM_HARDENING_PROMPT.md](../GEMINI_G2_SHIM_HARDENING_PROMPT.md).
+Inference và browser/live E2E vẫn unresolved/not tested như báo cáo. Không chuyển G3. Prompt tiếp tục: [GEMINI_G2_SHIM_HARDENING_PROMPT.md](../archive/prompts/GEMINI_G2_SHIM_HARDENING_PROMPT.md).
 
 ## Bằng chứng đã chạy
 

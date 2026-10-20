@@ -245,10 +245,12 @@ export class GeminiBrowserDriver {
         return { url: dom.url, allowed, ready: Boolean(ready), signature: JSON.stringify([dom.lastResponseKey, dom.lastUserQueryKey, editor?.outerHTML, buttons.map(el => el.outerHTML)]) };
       })()`, true, Math.max(1, Math.min(1500, deadline - performance.now())));
       check();
+      if (!state) return false;
       // Chrome can acknowledge CDP before its initial about:blank target commits
-      // the requested Gemini URL. Wait through that transient only; an actual
-      // unsupported or sign-in URL still fails immediately.
-      if (!state?.allowed && state?.url !== "about:blank") return false;
+      // the requested Gemini URL. The Gemini page can also render before its
+      // signed-in account indicator hydrates. Wait for both startup transitions,
+      // while still rejecting sign-in/challenge pages and every other origin.
+      if (state.url !== "about:blank" && !isAllowedSurfaceUrl(state.url, { fixtureMode: this.fixtureMode, allowedOrigins: this.allowedOrigins })) return false;
       if (!state.allowed) {
         await new Promise(resolve => setTimeout(resolve, 100));
         continue;

@@ -44,4 +44,4 @@ Smoke dùng app data temp và controlled closed browser; không account Google, 
 
 Desktop control verified trong phạm vi trên. **G4-A toàn bộ PARTIAL**, còn acceptance cases trong review. **G4-B BLOCKED/NOT_TESTED**; missing IDE handshake là giả thuyết, live account chưa refresh. Dừng G4, không G5.
 
-[Prompt tiếp tục G4](../GEMINI_G4_CONTINUE_PROMPT.md).
+[Prompt tiếp tục G4](../archive/prompts/GEMINI_G4_CONTINUE_PROMPT.md).

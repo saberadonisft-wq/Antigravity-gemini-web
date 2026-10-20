@@ -314,10 +314,14 @@ export class GeminiMcpService {
     await lease.close(); return false;
   }
   async releaseConversation(key: string, preserve = false) {
-    this.available(); RequestId.parse(key);
+    RequestId.parse(key);
     const conversation = this.conversations.get(key);
     if (!conversation) return { released: false };
-    if (this.busy || this.cancelPending || this.openingBrowser || this.inspectingImport) throw new BridgeError("BUSY", "Conversation release requires an idle browser.");
+    // A faulted broker must still be able to dispose its owned resources. This
+    // does not re-enable submission or bypass an operation still in progress.
+    if (this.stopped) this.available();
+    const busy = this.busy && (!this.faulted || !this.turns.get(this.busy)?.settled);
+    if (busy || this.cancelPending || this.openingBrowser || this.inspectingImport) throw new BridgeError("BUSY", "Conversation release requires an idle browser.");
     const pending = Promise.resolve().then(async () => { const preserved = conversation.lease ? await this.retireLease(conversation.lease, preserve) : false; this.conversations.delete(key); return { released: true, preserved }; });
     this.cancelPending = pending;
     try { return await pending; } finally { if (this.cancelPending === pending) this.cancelPending = undefined; }

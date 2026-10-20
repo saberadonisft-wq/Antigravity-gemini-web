@@ -1,7 +1,7 @@
 # Báo cáo Khắc phục Review G1 (G1 Review Remediation)
 
 - **Ngày:** 14/10/2026.
-- **Phạm vi:** 9 findings (F1–F9) từ [`docs/evidence/G1_CODE_REVIEW.md`](./G1_CODE_REVIEW.md).
+- **Phạm vi:** 9 findings (F1–F9) từ [`docs/evidence/G1_CODE_REVIEW.md`](G1_CODE_REVIEW.md).
 - **Mục tiêu:** Củng cố nền tảng G1 đạt chuẩn contract, loại bỏ thành công giả trên live path, sửa lỗi dedupe/subscribers/schema/probes trước khi bước vào G2.
 
 ---

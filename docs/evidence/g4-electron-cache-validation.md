@@ -33,6 +33,6 @@ Cache probe dùng helper production với home giả trong owned OS temp, không
 
 Thư mục từ lần probe lỗi `launcher-cache-check-HTLJnh` được giữ lại: automatic approval review chặn thao tác xóa với thông báo `blocked by policy`, không có lý do chi tiết. Không thử cách xóa khác. Các lần probe thành công mới cleanup riêng của chúng; không quan sát process fixture/smoke còn chạy. Instance launcher cũ của người dùng không bị dừng tự động.
 
-Source: [storage helper](../../apps/launcher/src/main/electron-storage.ts), [bootstrap](../../apps/launcher/src/main/index.ts), [cache fixture](../../apps/launcher/src/main/cache-smoke-main.ts), [probe runner](../../apps/launcher/scripts/cache-smoke.mjs).
+Source: [storage helper](../../apps/launcher/src/main/electron-storage.ts), [bootstrap](../../apps/launcher/src/main/index.ts), [cache fixture](../../tools/archive/launcher-r44/main/cache-smoke-main.ts), [probe runner](../../tools/archive/retired-entrypoints/apps/launcher/scripts/cache-smoke.mjs).
 
-Để áp dụng trên instance người dùng đang chạy: đóng launcher cũ, `Ctrl+C` terminal cũ, chạy lại `npm run launcher`. Cần đóng bản cũ trước vì profile/single-instance key đã đổi; không chạy đồng thời bản cũ và mới trên cùng runtime data. [Hướng dẫn test](../G4_USER_TEST_GUIDE.md). Native/live G4-B vẫn chưa nghiệm thu.
+Để áp dụng trên instance người dùng đang chạy: đóng launcher cũ, `Ctrl+C` terminal cũ, chạy lại `npm run launcher`. Cần đóng bản cũ trước vì profile/single-instance key đã đổi; không chạy đồng thời bản cũ và mới trên cùng runtime data. [Hướng dẫn test](../archive/guides/G4_USER_TEST_GUIDE.md). Native/live G4-B vẫn chưa nghiệm thu.

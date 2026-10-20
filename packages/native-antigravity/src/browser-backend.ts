@@ -2,7 +2,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { NativeRouteError, object, sha256, type JsonObject } from "./native-protocol.js";
 import { nativeBrowserTransport, nativeSnapshotTransport, MAX_WEB_MESSAGE_CHARS, transportReplyCategory } from "./browser-transport.js";
-import { ensureNativeBrowserReady } from "./browser-readiness.js";
+import { ensureNativeBrowserReady, inspectNativeBrowserIdentity } from "./browser-readiness.js";
 import { ModelSelectionDiagnosticSchema, BrowserSubmissionDiagnosticSchema, NativeTransportTraceSchema, WebModelSelectionSchema, type NativeTransportTrace, type NativeReceiptOwner,type AccountRecord } from "@antigravity-gemini-web/contracts";
 import { parseMcpNodeSemiSpace, mcpNodeMemoryArgs, McpNodeMemoryStatusSchema, type McpNodeSemiSpace } from "@antigravity-gemini-web/contracts";
 import { ChatImportSurfaceObservationSchema, type ChatImportSurfaceObservation } from "@antigravity-gemini-web/contracts";
@@ -42,6 +42,7 @@ export interface NativeBrowserBackend {
   assertAuthority?(): void;
   prepare?(signal: AbortSignal): Promise<void>;
   releaseConversation?(key: string, preserve?: boolean): Promise<void>;
+  releaseAccountConversation?(accountId:string,key:string,preserve?:boolean):Promise<void>;
   removeAccount?(accountId:string):Promise<void>;
   resourceStatus?(): JsonObject;
 }
@@ -110,7 +111,7 @@ export class McpNativeBrowserBackend implements NativeBrowserBackend {
   }
   async inspectIdentity(signal: AbortSignal) {
     await this.connect(); signal.throwIfAborted();
-    return ensureNativeBrowserReady((name, args, bounded) => this.call(name, args, bounded), signal);
+    return inspectNativeBrowserIdentity((name, args, bounded) => this.call(name, args, bounded), signal);
   }
   async inspectImportSurface(signal: AbortSignal) {
     await this.connect(); signal.throwIfAborted();

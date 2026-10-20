@@ -54,4 +54,4 @@ Browser runtime vẫn contract/stub. User login profile riêng chỉ mở bướ
 
 Sửa H1/H2, rồi ưu tiên inference/provider gate và browser driver. Không cần lặp lại toàn bộ scaffold/happy-path tests để thay việc kiểm chứng native. Chưa chuyển G3 hoặc gọi Gemini Web integrated từ launch smoke.
 
-Prompt tiếp tục: [GEMINI_G2_INFERENCE_BROWSER_PROMPT.md](../GEMINI_G2_INFERENCE_BROWSER_PROMPT.md).
+Prompt tiếp tục: [GEMINI_G2_INFERENCE_BROWSER_PROMPT.md](../archive/prompts/GEMINI_G2_INFERENCE_BROWSER_PROMPT.md).

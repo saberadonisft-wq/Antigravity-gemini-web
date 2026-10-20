@@ -22,7 +22,7 @@ Tái hiện trước bản vá bằng compiled code: `FINGERPRINT_COLLISION true
 
 ## Kiểm thử
 
-- Thêm 20 tests trong [g3-regressions.test.ts](../../packages/runtime/src/g3-regressions.test.ts), 5 tests trong [g3-resync.test.ts](../../packages/runtime/src/g3-resync.test.ts).
+- Thêm 20 tests trong [g3-regressions.test.ts](../../tools/archive/packages/runtime/src/g3-regressions.test.ts), 5 tests trong [g3-resync.test.ts](../../tools/archive/packages/runtime/src/g3-resync.test.ts).
 - 9 tests G3 ban đầu được giữ, cập nhật dữ liệu hash và lời gọi authority theo API chặt hơn.
 - Sửa assertion A2 cũ: event đã nằm trong snapshot phải bị bỏ, không phát lại. Có tests riêng kiểm tra replay các event mới hơn, duplicate, restart, lỗi và timeout.
 - 13 browser concurrency regressions của Codex cùng các browser tests khác vẫn pass; không sửa source browser trong đợt này.

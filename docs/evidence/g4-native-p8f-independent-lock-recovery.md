@@ -38,4 +38,4 @@ Preparation retains isolated builds and does not clean old worktrees or delete p
 
 This tests the exact listed commits and dependency trees, not arbitrary future releases. It uses a current synthetic harness against pinned production modules, not the old CLI startup or actual stdio/shared-owner binaries. Real Chrome/profile restore, active browser uploads, a Windows restart, a crash between replacement of multiple state directories and damaged production-state repair remain unverified. The cold restore guard refuses to drop/rewind metadata; it is not a merge/repair implementation.
 
-No main proxy/browser restart, account action, Google request, public share, push, merge or deployment was performed. P6/P7 live adapters, two real accounts, full IDE executor and soak/release gates remain in the [complete plan](../NATIVE_UPGRADE_PLAN.md).
+No main proxy/browser restart, account action, Google request, public share, push, merge or deployment was performed. P6/P7 live adapters, two real accounts, full IDE executor and soak/release gates remain in the [complete plan](../archive/plans/NATIVE_UPGRADE_PLAN.md).

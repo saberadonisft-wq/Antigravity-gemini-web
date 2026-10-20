@@ -52,6 +52,12 @@ export class NativeKnowledgeRegistry {
       if(!same)knowledgeError("SOURCE_REGISTRY_UNAVAILABLE");fs.unlinkSync(lock);
     }
   }
+  retireAccountBindings(accountId:string){
+    const snapshot=this.snapshot();if(!snapshot.bindings.some(binding=>binding.accountId===accountId))return;
+    const backup=this.filename+".before-account-removal.backup";assertNoLinks(backup);
+    if(!fs.existsSync(backup))atomicPrivateFile(backup,JSON.stringify(snapshot)+"\n");
+    this.mutate(snapshot.revision,state=>{state.bindings=state.bindings.filter(binding=>binding.accountId!==accountId);});
+  }
   importCode(params:KnowledgeCodeImport,expectedRevision:number){
     const source=importKnowledgeCode(params);
     this.mutate(expectedRevision,state=>{if(state.sources.length>=64)knowledgeError("SOURCE_CAPACITY_FULL");state.sources.push(source);});return source;

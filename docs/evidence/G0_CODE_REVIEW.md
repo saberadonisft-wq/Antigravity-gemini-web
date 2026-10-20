@@ -90,6 +90,6 @@ Không chạy live probe trong review vì code hiện ghi dữ liệu thô và c
 
 ## Yêu cầu bàn giao G1
 
-Prompt chi tiết: [GEMINI_G1_PROMPT.md](../GEMINI_G1_PROMPT.md).
+Prompt chi tiết: [GEMINI_G1_PROMPT.md](../archive/prompts/GEMINI_G1_PROMPT.md).
 
 Thứ tự: sửa R1–R6 và bổ sung evidence → chốt schema/contracts → dựng runtime fake có lifecycle/dedupe → transport kiểm tra hai đầu → renderer harness tối thiểu nếu cần để chứng minh contract. Giữ native capability unverified và không apply route thật khi G0 chưa đạt. Không đổi Gemini Web thành Gemini API hoặc mục tiêu native thành agent riêng.

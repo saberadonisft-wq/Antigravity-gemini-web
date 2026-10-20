@@ -82,3 +82,12 @@ test("An offline extension never launches a replacement Chrome process", async t
   const driver = new GeminiBrowserDriver({debugPort:f.broker.port,connectorProfileId:f.auth.profileId,requireProfileIdentity:true,chromePath:"must-not-launch.exe"});
   assert.equal(await driver.launchOrAttach(100),false); assert.equal(driver.isOwnedProcess,false); assert.equal(driver.isProcessAlive,false); await driver.close();
 });
+
+test("Connector status is authenticated and reports a real connection without creating a tab",async t=>{
+ const f=await fakeProfile(t,"status");await f.attach();
+ const url=`http://127.0.0.1:${f.broker.port}/connector/status`;
+ assert.equal((await fetch(url)).status,403);
+ const response=await fetch(url,{headers:{authorization:"Bearer "+f.auth.token}});const status=await response.json() as any;
+ assert.equal(status.connected,true);assert.ok(Number.isInteger(status.geminiTabs));assert.ok(!JSON.stringify(status).includes(f.auth.token));
+ assert.ok(!f.calls.includes("Target.createTarget"));
+});

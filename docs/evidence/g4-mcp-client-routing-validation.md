@@ -1,6 +1,6 @@
 # G4 — Sửa MCP ownership/EOF khi mở cả agy và Antigravity IDE
 
-**Follow-up cùng ngày:** báo cáo này là snapshot trước shared runtime. Client hợp lệ hiện chia sẻ một owner; xem [ADR 0007](../adr/0007-shared-mcp-runtime.md). Native chat/read-file acceptance mới và số tests hiện tại được ghi tại [native provider validation](g4-native-provider-validation.md); không diễn giải lại các kết quả lịch sử dưới đây thành nghiệm thu provider mới.
+**Follow-up cùng ngày:** báo cáo này là snapshot trước shared runtime. Client hợp lệ hiện chia sẻ một owner; xem [ADR 0007](../archive/adr/0007-shared-mcp-runtime.md). Native chat/read-file acceptance mới và số tests hiện tại được ghi tại [native provider validation](g4-native-provider-validation.md); không diễn giải lại các kết quả lịch sử dưới đây thành nghiệm thu provider mới.
 
 Ngày 15/10/2026. User gửi ảnh hai MCP báo `owned by another process` và `initialize ... EOF` trong Antigravity IDE.
 

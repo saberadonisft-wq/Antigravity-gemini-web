@@ -19,4 +19,4 @@ Build/typecheck/lint PASS. `npm test`: **226/226 PASS**, 0 fail/skip/cancelled (
 - Real CDP trên DOM fixture: có sẵn một lượt chat → adopt cùng target → gửi follow-up → responseCount từ 1 thành 2; tổng tab vẫn là 1. Draft nguyên vẹn khi bị từ chối, duplicate URL bị từ chối, lease đã đóng không xóa tab chỉ định.
 - Không dùng Gemini account hoặc gửi prompt thật trong kiểm thử. Không coi fixture là nghiệm thu model Web nhớ context đúng.
 
-Hướng dẫn tại [NATIVE_SETUP](../NATIVE_SETUP.md#tiếp-tục-cuộc-trò-chuyện-web-đang-có). Bản proxy quan sát trước reload vẫn là revision 9; chưa thay tiến trình cũ để tránh cleanup của nó đóng chat đang có. Người dùng cần lưu URL, reload native/MCP rồi mở lại cùng URL và đăng ký tiếp tục. Không commit/push, chưa G5.
+Hướng dẫn tại [NATIVE_SETUP](../archive/guides/NATIVE_SETUP.md#tiếp-tục-cuộc-trò-chuyện-web-đang-có). Bản proxy quan sát trước reload vẫn là revision 9; chưa thay tiến trình cũ để tránh cleanup của nó đóng chat đang có. Người dùng cần lưu URL, reload native/MCP rồi mở lại cùng URL và đăng ký tiếp tục. Không commit/push, chưa G5.

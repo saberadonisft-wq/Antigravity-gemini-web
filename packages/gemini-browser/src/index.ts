@@ -376,6 +376,22 @@ export class LiveGeminiBrowserAdapter implements GeminiBrowserAdapter {
         }
       }
 
+      // A newly opened Gemini tab can mount its signed-in avatar and composer
+      // before the account email is hydrated into the avatar's accessible
+      // label. Native account checks must wait for that stable identity signal
+      // instead of rejecting a valid profile during this short startup race.
+      if (dom.isAllowedSurface && dom.accountState === "signed_in" && !dom.accountIdentity) {
+        const deadline = Date.now() + 2000;
+        while (Date.now() < deadline) {
+          await new Promise((r) => setTimeout(r, 100));
+          try {
+            const interim = await this.driver.inspectDom();
+            dom = interim;
+            if (!dom.isAllowedSurface || dom.accountState !== "signed_in" || dom.accountIdentity) break;
+          } catch {}
+        }
+      }
+
       if (/^https:\/\/www\.google\.com\/sorry\/(?:index)?(?:[?#]|$)/.test(dom.url)) {
         return { browserState: "needs_user_action", accountState: "needs_user_action", checkedAt,
           error: { code: "BROWSER_USER_ACTION_REQUIRED", message: "Complete Google's traffic verification in the open browser, then return to Gemini. No prompt was submitted.", retryable: false, suggestedAction: "open_browser", detail: "google_traffic_verification" } };
