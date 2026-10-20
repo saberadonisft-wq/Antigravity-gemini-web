@@ -49,13 +49,13 @@ test("Google traffic verification is an explicit user action without allowing th
   assert.equal((await adapter.checkStatus()).browserState, "closed");
 });
 
-test("Strict profile identity rejects an occupied CDP port belonging to another profile without changing its tabs", { timeout: 20000 }, async t => {
+test("Strict profile identity rejects an occupied CDP port belonging to another profile without changing its tabs", { timeout: 40000 }, async t => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "gemini-driver-test-profile-"));
   const fixture = new GeminiDomFixtureServer({ signedIn: true }); await fixture.start();
   const port = await getFreePort(), options = { targetUrl: fixture.url, userDataDir: directory, debugPort: port, headless: true, fixtureMode: true, allowedOrigins: [fixture.url], requireProfileIdentity: true };
   const owner = new GeminiBrowserDriver(options), wrong = new GeminiBrowserDriver({ ...options, userDataDir: directory + "-another" }), joining = new GeminiBrowserDriver(options);
   t.after(async () => { try { await wrong.close(); await joining.close(); await owner.close(); } finally { await fixture.stop(); await removeFixtureProfile(directory); } });
-  assert.equal(await owner.launchOrAttach(), true);
+  assert.equal(await owner.launchOrAttach(25000), true, "A fresh CI Chrome process must expose its fixture target before identity checks");
   const loadedUntil = performance.now() + 5000;
   while (performance.now() < loadedUntil) {
     const dom = await owner.inspectDom();
@@ -168,7 +168,7 @@ test("Browser status waits for the account email to hydrate on a new signed-in t
   })()`);
   const started = performance.now();
   const status = await live.checkStatus();
-  assert.equal(status.browserState, "ready");
+  assert.equal(status.browserState, "ready", JSON.stringify(status));
   assert.equal(status.accountState, "signed_in");
   assert.equal(status.accountIdentity, "testuser@example.com");
   assert.ok(performance.now() - started >= 250, "status should wait for the delayed account label");
@@ -243,7 +243,7 @@ test("Browser driver lifecycle on owned DOM fixture: 3 turns (text, markdown, co
 
   // 4. Inspect status via positive evidence
   const status = await adapter.checkStatus();
-  assert.equal(status.browserState, "ready");
+  assert.equal(status.browserState, "ready", JSON.stringify(status));
   assert.equal(status.accountState, "signed_in");
   assert.equal(status.displayLabel, "Gemini 1.5 Pro");
 

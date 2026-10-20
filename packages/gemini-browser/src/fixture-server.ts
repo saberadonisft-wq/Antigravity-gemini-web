@@ -74,7 +74,7 @@ export class GeminiDomFixtureServer {
 
   private renderHtml(): string {
     const avatarHtml = this.signedIn
-      ? '<img data-test-id="user-avatar" class="user-avatar" aria-label="Google Account: testuser@example.com" src="avatar.png" />'
+      ? '<img data-test-id="user-avatar" class="user-avatar" aria-label="Google Account: testuser@example.com" width="32" height="32" src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22%3E%3Crect width=%2232%22 height=%2232%22 fill=%22%234285f4%22/%3E%3C/svg%3E" />'
       : '<a data-test-id="sign-in-button" href="https://accounts.google.com/signin">Sign in</a>';
 
     const scriptLines = [

@@ -9,7 +9,7 @@ Mốc tài liệu: 20/10/2026, **native revision 46 / browser worker 28**.
 - Xóa được tài khoản đang chọn và cuối cùng; giữ dấu chống gửi trùng.
 - Runtime demo và giao diện cũ đã rời bản sản phẩm. Knowledge/ZIP không còn API hoặc màn hình vận hành.
 
-## Kiểm thử chuẩn bị bản 0.1.0-beta.2
+## Kiểm thử chuẩn bị bản 0.1.0-beta.3
 
 - Build và typecheck: PASS.
 - Bộ kiểm thử **334 test**; gồm runtime đi kèm, lỗi sát deadline, trang đang chuyển hướng và danh tính tải chậm. Kết quả theo từng commit nằm trong GitHub Actions bên dưới.
