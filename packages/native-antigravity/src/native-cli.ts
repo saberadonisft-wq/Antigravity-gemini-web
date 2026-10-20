@@ -276,7 +276,12 @@ try {
       activeAccount: registry.getActive()?.displayName,
       nativeInference: "unverified_until_live_acceptance",
     }));
-  } else if (command === "launch") {
+  } else if (command === "launch" || command === "ensure") {
+    const workspaceIndex = process.argv.indexOf("--workspace");
+    const workspaceValue = workspaceIndex >= 0 ? process.argv[workspaceIndex + 1] : undefined;
+    if (workspaceIndex >= 0 && (!workspaceValue || workspaceValue.startsWith("--"))) throw new NativeRouteError("INVALID_ARGUMENT", "A workspace directory is required after --workspace.");
+    const workspace = workspaceValue ? path.resolve(workspaceValue) : root;
+    if (command === "launch" && (!fs.existsSync(workspace) || !fs.statSync(workspace).isDirectory())) throw new NativeRouteError("INVALID_ARGUMENT", "The workspace must be an existing directory.");
     const ide = inspectIde();
     configureIsolatedProfile(isolatedIdeProfile, endpoint);
     try { const status = await health(); if (status.runtimeRevision !== NATIVE_RUNTIME_REVISION) throw new NativeRouteError("RUNTIME_UPDATE_REQUIRED", "An older proxy is running. When idle, run npm run native:stop, then npm run native:launch."); }
@@ -291,16 +296,20 @@ try {
       }
       if (!ready) throw new NativeRouteError("PROXY_START_FAILED", "Proxy did not become ready. Run native:start to inspect its sanitized error.");
     }
+    if (command === "ensure") {
+      console.log(JSON.stringify({ ready: true, endpoint, runtimeRevision: NATIVE_RUNTIME_REVISION }));
+    } else {
     // Extension accounts are connected explicitly in the launcher, never auto-launched.
     const browser = { browserState: "extension", accountState: "check_in_launcher" };
     // Visible on purpose: the user needs to see this isolated IDE and complete its own login.
     const ideEnvironment = { ...process.env };
     delete ideEnvironment.ELECTRON_RUN_AS_NODE; delete ideEnvironment.NODE_OPTIONS;
-    const child = spawn(ide.executable, ["--user-data-dir", isolatedIdeProfile, "--new-window", root], { detached: true, windowsHide: false, stdio: "ignore", env: ideEnvironment });
+    const child = spawn(ide.executable, ["--user-data-dir", isolatedIdeProfile, "--new-window", workspace], { detached: true, windowsHide: false, stdio: "ignore", env: ideEnvironment });
     await new Promise<void>((resolve, reject) => { child.once("spawn", resolve); child.once("error", reject); });
     child.unref();
     console.log(JSON.stringify({ launchRequested: true, endpoint, isolatedIdeProfile, selectModel: "Gemini Web (Local)", browserState: browser.browserState, browserAccountState: browser.accountState, accountLogin: "Complete Google sign-in in the isolated IDE if requested.", browserLogin: "Pair a Chrome profile in the launcher and verify its Gemini identity." }, null, 2));
-  } else throw new NativeRouteError("INVALID_COMMAND", "Use check, setup, start, launch, browser, status, accounts, accounts:status, account:add, account:use, account:disable, account:enable, account:check, account:verify, account:browser, routing, routing:set, routing:unbind, receipt, cancel, stop, resume or restore.");
+    }
+  } else throw new NativeRouteError("INVALID_COMMAND", "Use check, setup, start, ensure, launch [--workspace <directory>], browser, status, accounts, accounts:status, account:add, account:use, account:disable, account:enable, account:check, account:verify, account:browser, routing, routing:set, routing:unbind, receipt, cancel, stop, resume or restore.");
 } catch (error) {
   console.error(JSON.stringify({ code: error instanceof NativeRouteError ? error.code : "NATIVE_COMMAND_FAILED", message: error instanceof NativeRouteError ? error.message : "Native route command failed; no credentials or source payload are logged." }));
   process.exitCode = 1;

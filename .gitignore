@@ -2,6 +2,7 @@ node_modules/
 dist/
 dist-renderer/
 dist-acceptance/
+/release/
 *.tsbuildinfo
 __pycache__/
 *.pyc

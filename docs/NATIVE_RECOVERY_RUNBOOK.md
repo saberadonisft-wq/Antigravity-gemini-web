@@ -2,7 +2,7 @@
 
 ## Kiểm tra nhanh
 
-Mở **Kết nối** trong launcher hoặc chạy:
+Mở **Kết nối** trong launcher. Với bản ZIP, dùng menu **Tệp → Khởi động kết nối** hoặc **Dừng kết nối**. Các lệnh npm bên dưới dành cho bản chạy từ mã nguồn:
 
 ```powershell
 npm run native:status
@@ -11,8 +11,8 @@ npm run native:accounts
 
 | Tình trạng | Cách xử lý |
 |---|---|
-| Native owner không chạy | Chạy `npm run native:launch`, rồi làm mới launcher. |
-| Source và runtime khác phiên bản | Đợi lượt hiện tại kết thúc, chạy `npm run native:stop`, rồi `npm run native:launch`. |
+| Native owner không chạy | Bản ZIP: **Tệp → Khởi động kết nối**, rồi làm mới. Mã nguồn: `npm run native:launch`. |
+| Source và runtime khác phiên bản | Đợi lượt kết thúc, **Dừng kết nối** ở bản cũ rồi mở bản mới. Mã nguồn: `native:stop` rồi `native:launch`. |
 | Connector mất kết nối | Khởi động connector ở launcher; mở Chrome đúng hồ sơ và bấm **Kết nối** trong extension. |
 | Cần đăng nhập/xác minh Google | Hoàn thành trực tiếp trong Chrome, rồi **Kiểm tra danh tính** ở launcher. |
 | `ACCOUNT_IDENTITY_UNVERIFIED` hoặc sai danh tính | Kiểm tra tài khoản Google đang mở trong đúng hồ sơ. Nếu dùng tài khoản khác, tạo mục ghép riêng. |

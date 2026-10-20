@@ -31,7 +31,9 @@ chats.complete(saved,"https://gemini.google.com/app/owned_fixture");
 const token=randomBytes(32).toString("hex"),proxy=await startNativeProxy({backend:pool,accountRegistry:registry,stateDirectory:path.join(temporary,"native"),port:0,controlToken:token,control:async()=>{throw Error("No external requests allowed");}});
 fs.writeFileSync(path.join(temporary,"native-owner.json"),JSON.stringify({version:1,pid:process.pid,endpoint:"http://127.0.0.1:"+proxy.port,controlToken:token}));
 const require=createRequire(import.meta.url),environment={...process.env,AG_LAUNCHER_SMOKE:"1",AG_NATIVE_ACCOUNTS_SMOKE:"1",AG_LAUNCHER_DATA_DIR:temporary,ELECTRON_ENABLE_LOGGING:"0"};delete environment.ELECTRON_RUN_AS_NODE;delete environment.NODE_OPTIONS;
-const child=spawn(require("electron"),[root],{cwd:root,env:environment,windowsHide:true,stdio:["ignore","pipe","pipe"]});let output="",timer;child.stdout.on("data",chunk=>{output+=chunk;});child.stderr.on("data",chunk=>{output+=chunk;});
+const packaged=process.argv.find(value=>value.startsWith("--packaged="))?.slice("--packaged=".length);
+if(packaged&&!fs.existsSync(path.resolve(packaged)))throw Error("Packaged executable missing");
+const child=spawn(packaged?path.resolve(packaged):require("electron"),packaged?[]:[root],{cwd:packaged?path.dirname(path.resolve(packaged)):root,env:environment,windowsHide:true,stdio:["ignore","pipe","pipe"]});let output="",timer;child.stdout.on("data",chunk=>{output+=chunk;});child.stderr.on("data",chunk=>{output+=chunk;});
 try{
   const code=await Promise.race([new Promise((resolve,reject)=>{child.once("exit",resolve);child.once("error",reject);}),new Promise((_resolve,reject)=>{timer=setTimeout(()=>reject(Error("Native account desktop deadline")),55000);})]);
   const file=path.join(temporary,"native-accounts-desktop.json");if(code!==0||!fs.existsSync(file)){console.error(output.slice(-12000));throw Error("Native account desktop failed: "+code);}

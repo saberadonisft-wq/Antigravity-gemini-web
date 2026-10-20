@@ -34,7 +34,7 @@ export async function runDesktopAcceptance(window: BrowserWindow, directory: str
   assert.equal(await evaluate("document.body.textContent.includes('Gate G0')"),false);
   // All views share the same owner store; losing its descriptor invalidates them together.
   const descriptor=path.join(directory,"native-owner.json");fs.renameSync(descriptor,descriptor+".held");
-  try { await click('.overview-view .page-header button');await wait("document.body.textContent.includes('Không đọc được native owner')");await click('[data-view="accounts"]');assert.equal(await evaluate("document.querySelector('[data-native-action=add]').disabled"),true); }
+  try { await click('.overview-view .page-header button');await wait("document.body.textContent.includes('Chưa kết nối được runtime')");await click('[data-view="accounts"]');assert.equal(await evaluate("document.querySelector('[data-native-action=add]').disabled"),true); }
   finally { fs.renameSync(descriptor+".held",descriptor); }
   await click('[data-native-action=refresh]');await wait("!document.querySelector('[data-native-action=add]').disabled || !document.querySelector('[data-native-action=verify]').disabled");
   await fill("native-account-name","Added extension");await click('[data-native-action=add]');

@@ -1,0 +1,107 @@
+name: CI and Windows release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  validate:
+    name: Windows / Node ${{ matrix.node }}
+    runs-on: windows-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ['22', '24']
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Audit dependencies
+        run: npm audit --audit-level=high
+      - name: Build from clean outputs
+        run: npm run build
+      - name: Typecheck all workspaces
+        run: npm run typecheck
+      - name: Test all workspaces
+        run: npm test
+      - name: Test desktop, accounts, chats and connections
+        run: npm run test:desktop
+      - name: Build Windows portable ZIP
+        if: matrix.node == '24'
+        run: npm run release:windows
+      - name: Verify the extracted download
+        if: matrix.node == '24'
+        run: npm run test:package
+      - name: Upload desktop evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: desktop-node-${{ matrix.node }}
+          path: |
+            .tmp/desktop-simplification/
+            .tmp/release-smoke/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Upload validated download
+        if: matrix.node == '24'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-x64-download
+          path: |
+            release/*.zip
+            release/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Publish GitHub release
+    needs: validate
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: windows-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: windows-x64-download
+          path: release
+      - name: Publish the tested ZIP and checksum
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($env:RELEASE_TAG -ne "v$version") { throw 'Tag/version mismatch' }
+          $archive = Get-Item "release/Antigravity-Gemini-Web-$version-windows-x64.zip"
+          $expected = (Get-Content release/SHA256SUMS.txt -Raw).Trim()
+          $actual = (Get-FileHash -LiteralPath $archive.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($expected -ne "$actual  $($archive.Name)") { throw 'Release checksum mismatch' }
+          $assets = @($archive.FullName, (Resolve-Path release/SHA256SUMS.txt).Path)
+          gh release create $env:RELEASE_TAG @assets --verify-tag --draft --title "Antigravity Gemini Web $version" --notes-file docs/RELEASE_NOTES.md
+          if ($LASTEXITCODE -ne 0) { throw 'Could not create complete draft release' }
+          $releaseOptions = @('--draft=false')
+          if ($version.Contains('-')) { $releaseOptions += '--prerelease' }
+          gh release edit $env:RELEASE_TAG @releaseOptions
+          if ($LASTEXITCODE -ne 0) { throw 'Could not publish release' }

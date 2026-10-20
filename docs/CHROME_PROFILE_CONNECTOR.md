@@ -9,7 +9,7 @@ Thực hiện trong **từng hồ sơ Chrome** muốn dùng:
 1. Mở `chrome://extensions`.
 2. Bật **Chế độ dành cho nhà phát triển / Developer mode** ở góc trên bên phải.
 3. Bấm **Tải tiện ích đã giải nén / Load unpacked**.
-4. Chọn thư mục `D:\Antigravity-gemini-web\extensions\chrome-profile-connector`.
+4. Chọn thư mục extension: trong bản tải về, dùng **Tệp → Mở thư mục extension** rồi chọn đúng thư mục đó ở hộp thoại Chrome (`resources/app/extensions/chrome-profile-connector`). Nếu chạy mã nguồn, chọn `extensions/chrome-profile-connector` trong thư mục dự án.
 5. Mở Gemini và đăng nhập tài khoản muốn dùng trong hồ sơ đó.
 
 ## 2. Ghép với launcher

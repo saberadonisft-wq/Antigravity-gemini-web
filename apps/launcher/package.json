@@ -28,5 +28,6 @@
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "^5.7.3",
     "vite": "^6.0.7"
-  }
+  },
+  "license": "Apache-2.0"
 }

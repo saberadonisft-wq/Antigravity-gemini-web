@@ -27,4 +27,4 @@ npm run test:desktop
 
 Build tạo lại output trước khi chạy test. Desktop smoke dùng Electron thật và browser giả lập; cần kiểm tra riêng chat và tool loop trên IDE + Gemini thật.
 
-[Lịch sử và thiết kế cũ](archive/README.md) dành cho tra cứu, không phải hướng dẫn vận hành hiện tại.
+[Lịch sử và thiết kế cũ](https://github.com/saberadonisft-wq/Antigravity-gemini-web/tree/main/docs/archive) dành cho tra cứu, không phải hướng dẫn vận hành hiện tại.
